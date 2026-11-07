@@ -1,0 +1,21 @@
+name: Replace logo file
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace logo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mv games-logo-transparent.png logo.png
+          git add -A
+          git commit -m "Replace logo.png with transparent version"
+          git push
