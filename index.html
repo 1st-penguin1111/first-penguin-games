@@ -25,6 +25,9 @@
   }
   .wrap { max-width: 560px; margin: 0 auto; padding: 28px 16px 40px; text-align: center; }
   .logo { width: min(100%, 460px); height: auto; display: block; margin: 0 auto; }
+  .photo { position: relative; margin: 18px 0 0; }
+  .photo img { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: 0 6px 18px rgba(70, 130, 180, 0.3); }
+  .photo-text { position: absolute; left: 0; right: 0; bottom: 16px; margin: 0; text-align: center; font-size: 1.7em; font-weight: 900; letter-spacing: 0.06em; color: #fff; text-shadow: 2px 0 0 #ff5e8a, -2px 0 0 #ff5e8a, 0 2px 0 #ff5e8a, 0 -2px 0 #ff5e8a, 2px 2px 0 #ff5e8a, -2px -2px 0 #ff5e8a, 2px -2px 0 #ff5e8a, -2px 2px 0 #ff5e8a, 0 4px 12px rgba(0, 0, 0, 0.4); }
   .subtitle { margin: 10px 0 2px; font-size: 1.05em; font-weight: 700; color: #2f6d96; }
   .menu { display: flex; flex-direction: column; gap: 16px; margin-top: 28px; text-align: left; }
   .card { display: block; text-decoration: none; color: #333; background: #fff; border-radius: 20px; padding: 20px 22px; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.3); border-left: 10px solid #ff8fab; }
@@ -49,6 +52,10 @@
 <body>
 <div class="wrap">
   <img class="logo" src="logo.png" alt="ファーストペンギン ゲーム集">
+  <figure class="photo">
+    <img src="members.jpg" alt="ファーストペンギンのメンバー8人の集合写真">
+    <figcaption class="photo-text">たくさん遊んでね</figcaption>
+  </figure>
   <p class="subtitle">あそびたいゲームをえらんでね！</p>
   <nav class="menu">
     <a class="card card-1" href="8ren-sheng-tiba-kikadogemu.html"><h2>ファスペンと対決！</h2><p>8人とカードで勝負！合計が大きい方が勝ち</p></a>
