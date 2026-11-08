@@ -1,0 +1,18 @@
+name: Rename koronda file
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v
+
+      - name: Rename file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git mv penginsangakoronda.html koronda.html
+          git commit -m "Rename penginsangakoronda.html to koronda.html"
+          git push
