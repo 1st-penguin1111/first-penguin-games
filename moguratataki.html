@@ -343,7 +343,7 @@
         <li><span class="ic">⏱️</span><span><b>30秒スコアアタック</b>：制限時間は <b>30秒</b>。9つの穴からメンバーがランダムに顔を出すよ。</span></li>
         <li><span class="ic">🏁</span><span><b>2000点タイムアタック</b>：時間制限なし！ <b>2000点</b> に届くまでの <b>タイム</b> を競うよ。早く2000点に届くほどすごい称号がもらえるよ。</span></li>
         <li><span class="ic">🎁</span><span>タイムアタックでは、時間ボーナスは <b>タイム短縮</b> になるよ（カットイン／ルーレットの+5秒ぶんは記録から <b>−5秒</b>）。逆にペンギンをたたくと <b>+2秒</b> のペナルティ！</span></li>
-        <li><span class="ic">👆</span><span>メンバーをタップすると <b>10点</b>！ 連続で当てるとコンボがつながってボーナス点が入るよ。</span></li>
+        <li><span class="ic">👆</span><span>メンバーをタップすると <b>10点</b>！ 次を <b>2秒以内</b> にたたくとコンボがつながってボーナス点が入るよ。<b>2秒たつとコンボ終了</b> だから急いでたたこう！</span></li>
         <li><span class="ic">👑</span><span>金のリングのメンバーはレア！ <b>30点</b> の大チャンス。</span></li>
         <li><span class="ic">🔥</span><span>10コンボで <b>フィーバータイム</b>！ 5秒間、点数が2倍になるよ。</span></li>
         <li><span class="ic">💥</span><span>同じメンバーを <b>5回</b> たたくとカットイン！「まだまだこれからー！」で <b>時間が+5秒</b> 回復するよ。</span></li>
@@ -371,7 +371,7 @@
     <div class="hud">
       <div class="hud-box" id="hud-time"><div class="label" id="hud-time-label">のこり時間</div><div class="value blue" id="hud-time-v">30</div></div>
       <div class="hud-box"><div class="label" id="hud-score-label">スコア</div><div class="value pink" id="hud-score-v">0</div></div>
-      <div class="hud-box"><div class="label">コンボ</div><div class="value orange" id="hud-combo-v">0</div></div>
+      <div class="hud-box" id="hud-combo"><div class="label">コンボ</div><div class="value orange" id="hud-combo-v">0</div></div>
     </div>
     <div class="timebar" id="timebar"><div id="timebar-fill"></div></div>
     <div class="progress-label" id="progress-label"></div>
@@ -561,6 +561,7 @@
   }
   var hitCounts = {};
   var feverRemain = 0; // ms remaining; counts down only while playing (frozen during cut-in / roulette)
+  var comboRemain = 0; // ms left to land the next hit before the combo ends (2秒ルール); also frozen while paused
   var paused = false; // true during cut-in / roulette
   // Roulette effects: each effect keeps its own remaining time, so different
   // effects run side by side (stack). Drawing the same effect again replaces
@@ -590,6 +591,7 @@
   function updateHUD(){
     $("hud-score-v").textContent = score;
     $("hud-combo-v").textContent = combo;
+    $("hud-combo").classList.toggle("danger", playing && combo > 0 && comboRemain <= 1000);
     var mc = $("mode-current");
     mc.className = "mode-current on" + (isRace() ? " race" : "");
     $("mode-current-label").textContent = isRace() ? "🏁 2000点 タイムアタック" : "▶ 30秒 スコアアタック";
@@ -730,6 +732,7 @@
     if(h.type === "member"){
       var base = h.gold ? 30 : 10;
       combo++; if(combo > maxCombo) maxCombo = combo;
+      comboRemain = 2000; // 次の1回を2秒以内にたたかないとコンボ終了
       var pts = base + Math.min(20, Math.floor(combo/5)*5);
       var mult = 1;
       if(isFever()) mult *= 2;
@@ -769,6 +772,7 @@
       score = Math.max(0, score - 30);
       if(isRace()){ elapsedTime += 2; } else { timeLeft = Math.max(0.1, timeLeft - 2); }
       combo = 0;
+      comboRemain = 0;
       feverRemain = 0;
       floatText(x, y, isRace() ? "-30 / +2秒" : "-30", "bad");
       $("game-msg").textContent = isRace() ? "💥 邪悪なペンギンをたたいちゃった！ −30点＆タイム+2秒" : "💥 邪悪なペンギンをたたいちゃった！ −30点＆−2秒";
@@ -974,6 +978,14 @@
       feverRemain = Math.max(0, feverRemain - 100);
       if(feverRemain === 0) $("game-msg").textContent = "フィーバー終了！ また10コンボをねらおう";
     }
+    // コンボ判定：メンバーをたたいてから2秒以内に次をたたかないとコンボ終了
+    if(combo > 0){
+      comboRemain = Math.max(0, comboRemain - 100);
+      if(comboRemain === 0){
+        combo = 0;
+        $("game-msg").textContent = "コンボ終了… 次は2秒以内にたたこう！";
+      }
+    }
     updateHUD();
     if(!isRace() && timeLeft <= 0){ endGame(); return; }
     if(isRace() && score >= TARGET_SCORE){ endGame(); return; }
@@ -985,7 +997,7 @@
     audio();
     score = 0; combo = 0; maxCombo = 0; hits = 0; goldHits = 0;
     ended = false;
-    timeLeft = GAME_TIME; elapsedTime = 0; clearTime = 0; feverRemain = 0; hitCounts = {};
+    timeLeft = GAME_TIME; elapsedTime = 0; clearTime = 0; feverRemain = 0; comboRemain = 0; hitCounts = {};
     paused = false; doubleRemain = 0; spawnBoostRemain = 0; bossBoostRemain = 0;
     $("cutin").classList.remove("on");
     $("roulette").classList.remove("on");
@@ -1079,6 +1091,7 @@
   function quitGame(){
     ended = true;
     playing = false; paused = false;
+    comboRemain = 0;
     doubleRemain = 0; spawnBoostRemain = 0; bossBoostRemain = 0;
     $("cutin").classList.remove("on");
     $("roulette").classList.remove("on");
