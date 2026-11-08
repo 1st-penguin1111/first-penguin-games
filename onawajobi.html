@@ -116,6 +116,17 @@
         color: #e62117; text-decoration: none;
       }
       @media (prefers-color-scheme: dark) { .yt-text-link { color: #ff6b63; } }
+      /* Game list link (bottom of start screen) */
+      .list-link {
+        display: block; margin-top: 20px;
+        font-family: "Mochiy Pop One", sans-serif;
+        font-size: 18px; padding: 13px 10px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #5cc4ec, var(--sky-btn));
+        color: #fff; text-align: center; text-decoration: none;
+        box-shadow: 0 5px 0 #1d6f96;
+      }
+      .list-link:active { transform: translateY(3px); box-shadow: 0 2px 0 #1d6f96; }
       /* HUD */
       .hud { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
       .hud-count { font-family: "Mochiy Pop One", sans-serif; font-size: 20px; color: var(--accent-dark); }
@@ -276,6 +287,7 @@
           </a>
           <a class="yt-text-link" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">YouTube ▶ @1st-penguin1111</a>
         </div>
+        <a class="list-link" href="https://1st-penguin1111.github.io/first-penguin-games/" target="_blank" rel="noopener">🎮 ゲーム一覧へもどる</a>
       </section>
 
       <!-- ===== GAME SCREEN ===== -->
