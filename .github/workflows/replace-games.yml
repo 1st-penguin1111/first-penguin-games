@@ -1,0 +1,22 @@
+name: Replace game files
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace game files
+        run: |
+          mv -f fasupen-upload.html 8ren-sheng-tiba-kikadogemu.html
+          mv -f atutixiang-itehoi-upload.html atutixiang-itehoi.html
+          mv -f ziyankenrpg-upload.html ziyankenrpg.html
+          mv -f shinkeisuijaku-upload.html shinkeisuijaku.html
+          mv -f onawajobi-upload.html onawajobi.html
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Replace 5 game files with latest versions"
+          git push
