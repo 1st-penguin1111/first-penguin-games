@@ -1,0 +1,21 @@
+name: Replace moguratataki.html
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace moguratataki.html with uploaded file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git rm moguratataki.html
+          git mv moguratataki-upload.html moguratataki.html
+          git commit -m "Replace moguratataki.html with new version"
+          git push
