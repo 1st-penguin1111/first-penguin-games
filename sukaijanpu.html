@@ -316,9 +316,9 @@
           <div>🚀 <b>ブースト</b>：2秒間 使った高さで そのまま キープ</div>
           <div>💪 <b>パワーアップ</b>：いっきに スピードアップ</div>
           <div>🪽 <b>空中ジャンプ</b>：そらで もう1回 ジャンプ</div>
-          <div>🧊 <b>氷のおなか</b>：ちゃくちで ツルツル すべる</div>
+          <div>🧊 <b>氷のおなか</b>：ちゃくちで ツルツル すべる（何個も 使うと すべりやすさが どんどん アップ！）</div>
           <div>🎈 <b>風船おなか</b>：ちゃくちで 1回だけ ポーンと 高く はねる</div>
-          <div>✈️ <b>飛行機キャッチ</b>：起動時の 高さのまま 5秒間 すすむ</div>
+          <div>✈️ <b>飛行機キャッチ</b>：起動時の 高さのまま 5秒間 高速で すすむ</div>
           <div>🛝 <b>トランポリン</b>：ちゃくちで 特大ジャンプ</div>
           <div>🐧 <b>腕力アップ</b>：はばたいて 高く のぼる</div>
         </div>
@@ -441,9 +441,9 @@ var ITEMS = {
   boost:      { emoji:"🚀", name:"ブースト",     desc:"2秒間 その高さで キープ！" },
   power:      { emoji:"💪", name:"パワーアップ", desc:"いっきに加速！" },
   airjump:    { emoji:"🪽", name:"空中ジャンプ", desc:"そらで もう1回！" },
-  ice:        { emoji:"🧊", name:"氷のおなか",   desc:"着地で ツルツル すべる" },
+  ice:        { emoji:"🧊", name:"氷のおなか",   desc:"着地で ツルツル すべる（重ねがけで もっと すべる！）" },
   balloon:    { emoji:"🎈", name:"風船おなか",   desc:"着地で 1回だけ ポーンと 高く はねる" },
-  plane:      { emoji:"✈️", name:"飛行機キャッチ", desc:"起動時の高さで 5秒間 前進！" },
+  plane:      { emoji:"✈️", name:"飛行機キャッチ", desc:"起動時の高さで 5秒間 高速で 前進！" },
   trampoline: { emoji:"🛝", name:"トランポリン", desc:"着地で 特大ジャンプ！" },
   flap:       { emoji:"🐧", name:"腕力アップ",   desc:"はばたいて のぼる" }
 };
@@ -492,7 +492,7 @@ function newRun(){
     maxAlt:0, camX:-30, camY:0,
     inv:{},            // itemKey -> count (flap: charges)
     gotLog:[],
-    iceBelly:false, balloonBelly:false, trampArmed:false,
+    iceBelly:false, iceUses:0, balloonBelly:false, trampArmed:false,
     boostFuel:0, boosting:false, boostKeepT:0, boostKeepY:0,
     plane:null,        // {t, keepY} while carried at the activation altitude
     trampFx:null,      // {x,t}
@@ -672,8 +672,13 @@ function useItem(key){
     pop("🪽 空中ジャンプ！");
   }else if(key==="ice"){
     consume(key);
+    G.iceUses++;
     G.iceBelly=true;
-    pop("🧊 おなかが 氷に！");
+    if(G.iceUses>1){
+      pop("🧊 氷のおなか 重ねがけ！すべりやすさ ×" + parseFloat(iceSlipMul().toFixed(2)) + "！");
+    }else{
+      pop("🧊 おなかが 氷に！");
+    }
   }else if(key==="balloon"){
     consume(key);
     G.balloonBelly=true;
@@ -697,6 +702,17 @@ function useItem(key){
 
 /* ================= physics ================= */
 var GRAV=5.6;
+/* ice belly stacking: each extra ice used multiplies the slipperiness —
+   2nd use x1.25, 3rd x1.15, 4th and beyond x1.10 each (the cap) */
+var ICE_STACK=[1.25, 1.15];
+function iceSlipMul(){
+  var m=1;
+  for(var i=1;i<G.iceUses;i++){
+    m *= (i-1 < ICE_STACK.length) ? ICE_STACK[i-1] : 1.10;
+  }
+  return m;
+}
+function iceFric(){ return 0.55 / iceSlipMul(); }
 var DIST_SCALE=5; // 1 world unit = 5 m, so flights are recorded in km
 var SEA_END=200;   // world units: the first 1 km (200u x 5m) past the ice is sea; land starts beyond it
 function fmtDist(units){
@@ -737,18 +753,19 @@ function step(dt){
      switching over instead of crawling */
   G.bgPx += G.vx * scale() * dt * 1.6;
 
-  /* --- plane carry: holds the altitude it was caught at for 5 seconds --- */
+  /* --- plane carry: holds the altitude it was caught at for 5 seconds,
+     flying fast so the distance piles up quickly --- */
   if(G.plane){
     var pl=G.plane;
     pl.t-=dt;
     pl.px += (G.x-40 - pl.px) * Math.min(1, dt*2.2); // plane catches up visually
-    G.vx=31;
+    G.vx=52;
     G.y=pl.keepY;   // altitude locked: no climb, no fall while carried
     G.vy=0;
     G.x += G.vx*dt;
     if(pl.t<=0){
       G.plane=null;
-      G.vy=7; G.vx=30;
+      G.vy=8; G.vx=48; // released still carrying the plane's speed
       pop("✈️ バイバイ！");
     }
     afterMove(dt);
@@ -817,7 +834,7 @@ function step(dt){
       }
     }
     if(G.groundContact){
-      var fric=G.iceBelly?0.55:6.5;
+      var fric=G.iceBelly?iceFric():6.5;
       G.vx-=fric*dt;
       if(G.vx<=0.15){
         G.vx=0; G.stopped=true;
