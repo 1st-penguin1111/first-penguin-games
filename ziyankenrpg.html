@@ -1232,6 +1232,9 @@ filter:drop-shadow(0 0 14px rgba(230,230,238,.85)) drop-shadow(0 0 5px rgba(255,
 
 <div class="start-area">
 <button class="btn" id="btn-retry">▶ もう一度あそぶ</button>
+<div style="margin-top:12px;">
+<button class="btn sub" id="btn-menu">メニューにもどる</button>
+</div>
 </div>
 </section>
 </div>
@@ -2615,6 +2618,10 @@ roster.appendChild(f);
 $("btn-start").addEventListener("click", startGame);
 $("btn-boss-mode").addEventListener("click", startBossMode);
 $("btn-retry").addEventListener("click", function(){ if (bossMode) startBossMode(); else startGame(); });
+$("btn-menu").addEventListener("click", function(){
+bossMode = false; inBattle = false; busy = false; currentFoe = null;
+show("screen-start");
+});
 $("cmd-janken").addEventListener("click", function(){ if (!busy) showPanel("hands");});
 $("cmd-item").addEventListener("click", function(){ if (!busy) showPanel("items");});
 $("cmd-special").addEventListener("click", playSpecial);
