@@ -180,7 +180,25 @@
       .card.matched-solo .front { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
       .card.just-matched { animation: pop 0.5s ease; }
       @keyframes pop { 0% { scale: 1; } 40% { scale: 1.12; } 100% { scale: 1; } }
-      @media (prefers-reduced-motion: reduce) { .card.just-matched { animation: none; } .card { transition: none; } }
+      .card.shuffling { animation: wiggle 0.55s ease; }
+      @keyframes wiggle {
+        0%, 100% { transform: rotate(0deg); }
+        20% { transform: rotate(-4deg) translateY(-3px); }
+        40% { transform: rotate(4deg); }
+        60% { transform: rotate(-3deg) translateY(-2px); }
+        80% { transform: rotate(3deg); }
+      }
+      .card.returning { animation: pop 0.5s ease; }
+      @media (prefers-reduced-motion: reduce) { .card.just-matched { animation: none; } .card { transition: none; } .card.shuffling { animation: none; } }
+
+      /* ---------- special cards ---------- */
+      .special-panel { border-color: var(--gold); }
+      .special-panel h2 { color: #b8860b; }
+      @media (prefers-color-scheme: dark) { .special-panel h2 { color: var(--gold); } }
+      .special-panel ul { list-style: none; padding-left: 0; }
+      .special-panel li { margin-bottom: 6px; }
+      .special-panel li:last-child { margin-bottom: 0; }
+      .tag .sp { color: #b8860b; font-weight: 800; }
 
       .game-actions { display: flex; gap: 10px; margin-top: 16px; }
       .game-actions.end-actions { flex-direction: column; }
@@ -214,6 +232,26 @@
       .toast .t-get { font-size: 14px; font-weight: 800; color: var(--ink-soft); }
       .toast .t-name { font-size: 24px; margin: 2px 0; }
       .toast .t-mark { font-size: 26px; }
+      .toast .t-special {
+        display: none; margin-top: 8px; padding: 7px 10px; border-radius: 999px;
+        background: #fff3c4; color: #7a5b00; font-size: 14px; font-weight: 800; line-height: 1.4;
+      }
+      .toast .t-special.show { display: block; }
+      @media (prefers-color-scheme: dark) { .toast .t-special { background: #4a3d12; color: #ffe58a; } }
+
+      /* ---------- event banner (shuffle / return) ---------- */
+      .event-banner {
+        position: fixed; left: 50%; top: 30%; transform: translate(-50%, -50%) scale(0.8);
+        z-index: 60; pointer-events: none; opacity: 0;
+        background: var(--panel); border: 3px solid var(--blue); border-radius: 20px;
+        padding: 18px 22px; text-align: center; box-shadow: 0 12px 32px rgba(0,0,0,0.28);
+        max-width: 88vw; width: max-content;
+      }
+      .event-banner.show { animation: toastIn 2.1s ease forwards; }
+      .event-banner .e-icon { font-size: 40px; line-height: 1.1; }
+      .event-banner .e-title { font-size: 22px; margin: 4px 0 2px; color: var(--blue-deep); }
+      @media (prefers-color-scheme: dark) { .event-banner .e-title { color: #6fc3f7; } }
+      .event-banner .e-desc { font-size: 13.5px; font-weight: 700; color: var(--ink-soft); line-height: 1.5; white-space: pre-line; }
 
       /* ---------- end screen ---------- */
       .result-title { text-align: center; font-size: clamp(28px, 8vw, 38px); margin: 12px 0 4px; }
@@ -249,29 +287,39 @@
       <!-- ============ START ============ -->
       <section id="screen-start" class="screen active">
         <h1 class="game-title pop">ファスペン神経衰弱</h1>
-        <p class="game-sub">ファーストペンギン8人の写真で神経衰弱！<br />同じメンバーのペアをそろえよう 🐧</p>
+        <p class="game-sub">ファーストペンギン8人の写真で神経衰弱！<br />同じメンバーのペアをそろえよう 🐧<br />今度は特殊カード入りで難易度アップ！</p>
 
         <div class="mode-buttons">
           <button class="mode-btn vs" id="btn-vs" type="button">
             <span class="emoji">⚔️</span>
             <span><span class="t pop">対戦モード</span>
-            <span class="d">CPUと交互にめくって、ペアを多く取った方の勝ち！</span></span>
+            <span class="d">CPUと対戦。スターペアは3pt！シャッフル＆「もどす」マークで大逆転も！？</span></span>
           </button>
           <button class="mode-btn ta" id="btn-ta" type="button">
             <span class="emoji">⏱️</span>
             <span><span class="t pop">タイムアタック</span>
-            <span class="d">1人用。全ペアそろえるまでのタイムに挑戦！</span></span>
+            <span class="d">1人用。シャッフルに負けず全ペアそろえるまでのタイムに挑戦！</span></span>
           </button>
         </div>
 
         <div class="panel">
           <h2 class="pop">📖 あそびかた</h2>
           <ul>
-            <li>カードは全部で16枚（8人のペア×2）。裏向きのカードを2枚めくって、同じメンバーならペアゲット！</li>
-            <li><b>対戦モード</b>：あなたとCPUが交互にめくります。ペアがそろったら、続けてまた2枚めくれます。外したら相手の番。最後にペアが多い方の勝ち！</li>
+            <li>カードは全部で16枚（8人のペア×2）。メンバーは今まで通り8種類のまま。裏向きのカードを2枚めくって、同じメンバーならペアゲット！</li>
+            <li><b>対戦モード</b>：あなたとCPUが交互にめくります。ペアがそろったら、続けてまた2枚めくれます。外したら相手の番。ペア1組で1pt、⭐スターペアは3pt。最後にポイントが多い方の勝ち！</li>
             <li><b>タイムアタック</b>：1人で全8ペアをそろえるまでのタイムと、めくった回数を計ります。</li>
           </ul>
           <div class="members" id="member-roster"></div>
+        </div>
+
+        <div class="panel special-panel">
+          <h2 class="pop">✨ 特殊カード（毎回ランダム）</h2>
+          <ul>
+            <li>🔀 <b>シャッフルカード</b>：ある1人のメンバーのカードは、めくるとそのターンの終わりに、残っている裏向きカード全部の場所がシャッフルされちゃう！覚えた場所がリセットされるよ。</li>
+            <li>⭐ <b>スターカード</b>：ある1人のペアには星がついてるよ。カードをめくっただけでは分からなくて、<b>ペアを取ったときに初めて発覚</b>するよ！<b>対戦モードでは、このペアを取ると通常1ptのところ3pt</b>入るよ（タイムアタックにはポイントなし）。</li>
+            <li>↩️ <b>もどすカード（対戦モードのみ）</b>：ある1人のペアには特殊マークつき。そのペアを取ると、相手がすでに取ったペアの中からランダムで1組が場に裏向きでもどっちゃう！（相手がまだ何も取ってないときは効果なし）</li>
+          </ul>
+          <p style="margin:8px 0 0;font-size:13px;font-weight:700;color:var(--ink-soft)">どのメンバーがどの特殊カードかは、ゲームごとにランダムで秘密だよ。</p>
         </div>
 
         <div class="yt-banner">
@@ -289,13 +337,13 @@
       <section id="screen-game" class="screen">
         <div class="hud" id="hud-vs">
           <div class="hud-card" id="hud-you">
-            <div class="label">あなた</div>
-            <div class="value pop"><span id="score-you">0</span><span style="font-size:14px"> ペア</span></div>
+            <div class="label">あなた（スコア）</div>
+            <div class="value pop"><span id="score-you">0</span><span style="font-size:14px"> pt</span></div>
             <div class="pairs-icons" id="icons-you"></div>
           </div>
           <div class="hud-card" id="hud-cpu">
-            <div class="label">CPU</div>
-            <div class="value pop"><span id="score-cpu">0</span><span style="font-size:14px"> ペア</span></div>
+            <div class="label">CPU（スコア）</div>
+            <div class="value pop"><span id="score-cpu">0</span><span style="font-size:14px"> pt</span></div>
             <div class="pairs-icons" id="icons-cpu"></div>
           </div>
         </div>
@@ -332,14 +380,17 @@
             <div class="score-box">
               <div class="who">あなた</div>
               <div class="num pop" id="end-score-you">0</div>
-              <div class="unit">ペア</div>
+              <div class="unit">pt</div>
+              <div class="who" id="end-pairs-you" style="margin-top:2px"></div>
             </div>
             <div class="score-box">
               <div class="who">CPU</div>
               <div class="num pop" id="end-score-cpu">0</div>
-              <div class="unit">ペア</div>
+              <div class="unit">pt</div>
+              <div class="who" id="end-pairs-cpu" style="margin-top:2px"></div>
             </div>
           </div>
+          <p class="result-sub" id="end-score-note" style="margin-bottom:14px">⭐ スターペアは3pt、その他のペアは1ptだよ</p>
           <div class="panel">
             <h2 class="pop">🎴 ゲットしたペア</h2>
             <div class="got-list" id="got-list"></div>
@@ -351,6 +402,7 @@
             <p class="stat-line">タイム　<span id="end-ta-time">0:00</span></p>
             <p class="stat-line">めくり回数　<span id="end-ta-flips">0</span> 回</p>
             <p class="stat-line">全8ペア コンプリート！🎉</p>
+            <p class="stat-line" id="end-ta-star" style="font-size:14px"></p>
           </div>
         </div>
 
@@ -375,6 +427,13 @@
       <div class="t-get" id="toast-get">ペア ゲット！</div>
       <div class="t-name pop" id="toast-name"></div>
       <div class="t-mark" id="toast-mark"></div>
+      <div class="t-special" id="toast-special"></div>
+    </div>
+
+    <div class="event-banner" id="event-banner">
+      <div class="e-icon" id="event-icon">🔀</div>
+      <div class="e-title pop" id="event-title"></div>
+      <div class="e-desc" id="event-desc"></div>
     </div>
 
     <script>
@@ -436,6 +495,45 @@
       var cpuMemory = {};            // pos -> memberId (what CPU remembers)
       var flips = 0;                 // ta mode: individual card flips
       var timerId = null, startAt = 0, elapsed = 0, timerRunning = false;
+      /* special cards: member ids secretly assigned each game (card types stay the same 8) */
+      var special = { shuffle: null, star: null, back: null };
+      var starFoundBy = null;        // "you" | "cpu" | "solo" once the star pair is acquired
+
+      function assignSpecials() {
+        var ids = shuffle(MEMBERS.map(function (m) { return m.id; }));
+        special.shuffle = ids[0];
+        special.star = ids[1];
+        special.back = mode === "vs" ? ids[2] : null;
+        starFoundBy = null;
+      }
+      /* kind of special attached to a member id: "shuffle" | "star" | "back" | null */
+      function specialKind(id) {
+        if (id === special.shuffle) return "shuffle";
+        if (id === special.star) return "star";
+        if (special.back && id === special.back) return "back";
+        return null;
+      }
+      function specialBadge(id) {
+        var k = specialKind(id);
+        if (k === "shuffle") return "🔀シャッフル";
+        if (k === "star") return "⭐スター";
+        if (k === "back") return "↩️もどす";
+        return "";
+      }
+      /* points a pair is worth in versus mode: star pair = 3pt, others = 1pt */
+      function pointsForPair(id) { return id === special.star ? 3 : 1; }
+      /* (re)draw a card's face from its current memberId; the special badge is
+         only written into the tag once the card is matched, so flipping a card
+         face-up never leaks its star / back mark */
+      function refreshCardFace(card) {
+        var m = memberById[card.memberId];
+        var img = card.el.querySelector("img.photo");
+        var tag = card.el.querySelector(".tag");
+        img.src = m.img;
+        img.alt = m.name;
+        var badge = card.state === "matched" ? specialBadge(card.memberId) : "";
+        tag.innerHTML = m.name + "<br />" + m.mark + (badge ? ' <span class="sp">' + badge + "</span>" : "");
+      }
 
       function buildBoard() {
         var ids = [];
@@ -491,6 +589,7 @@
         $("hud-vs").style.display = mode === "vs" ? "flex" : "none";
         $("hud-ta").style.display = mode === "ta" ? "flex" : "none";
         $("ta-time").textContent = "0:00";
+        assignSpecials();
         buildBoard();
         updateHud();
         setStatus(mode === "vs"
@@ -525,16 +624,79 @@
         c.el.classList.remove("flipped");
       }
 
-      function showToast(member, who) {
+      function showToast(member, who, specialText) {
         var t = $("toast");
         $("toast-get").textContent = mode === "vs"
           ? (who === "you" ? "あなたがペア ゲット！" : "CPUがペア ゲット！")
           : "ペア ゲット！";
         $("toast-name").textContent = member.name;
         $("toast-mark").textContent = acquireMark(member);
+        var sp = $("toast-special");
+        if (specialText) { sp.textContent = specialText; sp.classList.add("show"); }
+        else { sp.textContent = ""; sp.classList.remove("show"); }
         t.classList.remove("show");
         void t.offsetWidth;
         t.classList.add("show");
+      }
+
+      function showEvent(icon, title, desc) {
+        var b = $("event-banner");
+        $("event-icon").textContent = icon;
+        $("event-title").textContent = title;
+        $("event-desc").textContent = desc;
+        b.classList.remove("show");
+        void b.offsetWidth;
+        b.classList.add("show");
+      }
+
+      /* 🔀 shuffle every face-down unmatched card still on the board.
+         Positions (memberIds) are permuted; matched pairs stay put.
+         Memory — the player's and the CPU's — no longer matches the board. */
+      function doShuffleRemaining(done) {
+        var downIdx = [];
+        deck.forEach(function (c, i) { if (c.state === "down") downIdx.push(i); });
+        if (downIdx.length < 2) { done(); return; }
+        showEvent("🔀", "シャッフル！", "シャッフルカードをめくった！\n残りのカードの場所がシャッフルされたよ");
+        setStatus("🔀 シャッフルカード！　残りのカードの場所が変わったよ…！");
+        downIdx.forEach(function (i) { deck[i].el.classList.add("shuffling"); });
+        setTimeout(function () {
+          var idsNow = downIdx.map(function (i) { return deck[i].memberId; });
+          shuffle(idsNow);
+          downIdx.forEach(function (i, k) {
+            deck[i].memberId = idsNow[k];
+            refreshCardFace(deck[i]);
+            deck[i].el.classList.remove("shuffling");
+          });
+          cpuMemory = {};
+          done();
+        }, 650);
+      }
+
+      /* ↩️ (vs only) send one of the opponent's acquired pairs back to the
+         board, face-down in its original two spots. Returns a description
+         of what happened, or "" when the opponent had nothing to send back. */
+      function doReturnOpponentPair(who) {
+        var opp = who === "you" ? "cpu" : "you";
+        if (!gotBy[opp].length) return "";
+        var pick = Math.floor(Math.random() * gotBy[opp].length);
+        var backId = gotBy[opp][pick];
+        gotBy[opp].splice(pick, 1);
+        scores[opp] -= pointsForPair(backId);
+        if (backId === special.star) starFoundBy = null;
+        matchedCount--;
+        deck.forEach(function (c, i) {
+          if (c.memberId === backId && c.state === "matched") {
+            c.state = "down";
+            c.owner = null;
+            c.el.classList.remove("flipped", "matched", "matched-by-you", "matched-by-cpu", "matched-solo");
+            refreshCardFace(c);
+            c.el.classList.add("returning");
+            setTimeout(function () { c.el.classList.remove("returning"); }, 550);
+            delete cpuMemory[i];
+          }
+        });
+        /* the returned pair may be remembered again when it is next seen */
+        return memberById[backId].name;
       }
 
       function onCardTap(i) {
@@ -554,6 +716,8 @@
         var a = openCards[0], b = openCards[1];
         openCards = [];
         var ca = deck[a], cb = deck[b];
+        /* did this turn touch the shuffle card? (either flipped card) */
+        var touchedShuffle = ca.memberId === special.shuffle || cb.memberId === special.shuffle;
         if (ca.memberId === cb.memberId) {
           setTimeout(function () {
             ca.state = "matched"; cb.state = "matched";
@@ -561,43 +725,81 @@
             var cls = mode === "ta" ? "matched-solo" : (who === "you" ? "matched-by-you" : "matched-by-cpu");
             [ca, cb].forEach(function (c) {
               c.el.classList.add("matched", cls, "just-matched");
+              refreshCardFace(c);
               setTimeout(function () { c.el.classList.remove("just-matched"); }, 550);
             });
             matchedCount++;
-            if (mode === "vs") { scores[who]++; gotBy[who].push(ca.memberId); }
+            if (mode === "vs") { scores[who] += pointsForPair(ca.memberId); gotBy[who].push(ca.memberId); }
             delete cpuMemory[a]; delete cpuMemory[b];
-            showToast(memberById[ca.memberId], who);
+
+            /* specials revealed only now, at acquisition time */
+            var kind = specialKind(ca.memberId);
+            var specialText = "";
+            var returnedName = "";
+            if (kind === "star") {
+              starFoundBy = mode === "vs" ? who : "solo";
+              specialText = mode === "vs"
+                ? "⭐ このペアがスターカードだった！ 3ptゲット！（通常は1pt）"
+                : "⭐ このペアがスターカードだった！";
+            } else if (kind === "back" && mode === "vs") {
+              returnedName = doReturnOpponentPair(who);
+              specialText = returnedName
+                ? "↩️ もどすマーク発動！　相手の「" + returnedName + "」が場にもどった！"
+                : "↩️ もどすマークのペアだった！（相手はまだ何も取ってないので効果なし）";
+            } else if (kind === "shuffle") {
+              specialText = "🔀 このペアがシャッフルカードだった！";
+            }
+            showToast(memberById[ca.memberId], who, specialText);
             updateHud();
-            busy = false;
-            if (matchedCount === 8) { finishGame(); return; }
-            if (mode === "vs") {
-              if (who === "you") {
-                setStatus('<span class="who-you">ペア成立！</span>　続けてあなたの番です');
-              } else {
-                setStatus('<span class="who-cpu">CPUがペア成立！</span>　CPUが続けます…');
-                setTimeout(cpuPlay, 1100);
+
+            var afterMatch = function () {
+              busy = false;
+              if (matchedCount === 8) { finishGame(); return; }
+              if (returnedName) {
+                showEvent("↩️", "もどされた！", "「" + returnedName + "」のペアが場にもどったよ");
               }
+              if (mode === "vs") {
+                if (who === "you") {
+                  setStatus('<span class="who-you">ペア成立！</span>　続けてあなたの番です');
+                } else {
+                  setStatus('<span class="who-cpu">CPUがペア成立！</span>　CPUが続けます…');
+                  setTimeout(cpuPlay, 1100);
+                }
+              } else {
+                setStatus("ペア成立！　あと " + (8 - matchedCount) + " ペア");
+              }
+            };
+            /* a matched shuffle pair still shuffles what remains */
+            if (touchedShuffle && matchedCount < 8) {
+              setTimeout(function () { doShuffleRemaining(afterMatch); }, 500);
             } else {
-              setStatus("ペア成立！　あと " + (8 - matchedCount) + " ペア");
+              afterMatch();
             }
           }, 480);
         } else {
           setTimeout(function () {
             flipDown(a); flipDown(b);
-            busy = false;
-            if (mode === "vs") {
-              if (who === "you") {
-                turn = "cpu";
-                updateHud();
-                setStatus('<span class="who-cpu">CPUの番</span>です…');
-                setTimeout(cpuPlay, 900);
+            var afterMiss = function () {
+              busy = false;
+              if (mode === "vs") {
+                if (who === "you") {
+                  turn = "cpu";
+                  updateHud();
+                  setStatus('<span class="who-cpu">CPUの番</span>です…');
+                  setTimeout(cpuPlay, 900);
+                } else {
+                  turn = "you";
+                  updateHud();
+                  setStatus('<span class="who-you">あなたの番</span>　カードを2枚えらんでね');
+                }
               } else {
-                turn = "you";
-                updateHud();
-                setStatus('<span class="who-you">あなたの番</span>　カードを2枚えらんでね');
+                setStatus("ざんねん…もう一度チャレンジ！");
               }
+            };
+            if (touchedShuffle) {
+              doShuffleRemaining(afterMiss);
             } else {
-              setStatus("ざんねん…もう一度チャレンジ！");
+              afterMiss();
             }
           }, 950);
         }
@@ -664,6 +866,12 @@
             $("end-ta").style.display = "none";
             $("end-score-you").textContent = scores.you;
             $("end-score-cpu").textContent = scores.cpu;
+            $("end-pairs-you").textContent = gotBy.you.length + "ペア";
+            $("end-pairs-cpu").textContent = gotBy.cpu.length + "ペア";
+            var starHolder = gotBy.you.indexOf(special.star) >= 0 ? "あなた" : (gotBy.cpu.indexOf(special.star) >= 0 ? "CPU" : null);
+            $("end-score-note").textContent = starHolder
+              ? "⭐ スターペア「" + memberById[special.star].name + "」は" + starHolder + "がゲットして3pt！　その他のペアは1ptだよ"
+              : "⭐ スターペアは3pt、その他のペアは1ptだよ";
             var title = $("result-title");
             if (scores.you > scores.cpu) {
               title.textContent = "🎉 あなたの勝ち！";
@@ -684,9 +892,18 @@
               if (!side[1].length) html += '<div class="got-item">（なし）</div>';
               side[1].forEach(function (id) {
                 var m = memberById[id];
-                html += '<div class="got-item"><img src="' + m.img + '" alt="" />' + m.name + ' ' + m.mark + '</div>';
+                var badge = specialBadge(id);
+                var pts = id === special.star ? "（3pt）" : "（1pt）";
+                html += '<div class="got-item"><img src="' + m.img + '" alt="" />' + m.name + ' ' + m.mark +
+                        (badge ? ' <span style="color:#b8860b">' + badge + pts + '</span>' : ' <span style="color:var(--ink-soft)">' + pts + '</span>') + '</div>';
               });
             });
+            /* pairs sent back to the board are no longer held, so also reveal
+               where the specials were this game */
+            html += '<div class="side-head">今回の特殊カード</div>' +
+              '<div class="got-item">🔀 シャッフル：' + memberById[special.shuffle].name + '</div>' +
+              '<div class="got-item">⭐ スター（3pt）：' + memberById[special.star].name + '</div>' +
+              (special.back ? '<div class="got-item">↩️ もどす：' + memberById[special.back].name + '</div>' : "");
             $("got-list").innerHTML = html;
           } else {
             $("end-vs").style.display = "none";
@@ -697,6 +914,7 @@
             $("result-sub").textContent = "全8ペアをそろえたよ！おつかれさま！";
             $("end-ta-time").textContent = fmtTime(elapsed);
             $("end-ta-flips").textContent = flips;
+            $("end-ta-star").innerHTML = "⭐ スターカードは「" + memberById[special.star].name + "」だったよ！<br />🔀 シャッフルカードは「" + memberById[special.shuffle].name + "」だったよ";
           }
           show("end");
         }, 900);
