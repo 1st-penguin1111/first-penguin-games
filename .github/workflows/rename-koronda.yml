@@ -1,0 +1,20 @@
+name: Rename koronda
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace koronda.html with difficulty version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git mv -f koronda-difficulty-upload.html koronda.html
+          git commit -m "Replace koronda.html with difficulty version"
+          git push
