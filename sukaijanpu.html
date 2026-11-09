@@ -317,7 +317,7 @@
           <div>💪 <b>パワーアップ</b>：いっきに スピードアップ</div>
           <div>🪽 <b>空中ジャンプ</b>：そらで もう1回 ジャンプ</div>
           <div>🧊 <b>氷のおなか</b>：ちゃくちで ツルツル すべる</div>
-          <div>🎈 <b>風船おなか</b>：ちゃくちで ポーンと 高く はねる</div>
+          <div>🎈 <b>風船おなか</b>：ちゃくちで 1回だけ ポーンと 高く はねる</div>
           <div>✈️ <b>飛行機キャッチ</b>：起動時の 高さのまま 5秒間 すすむ</div>
           <div>🛝 <b>トランポリン</b>：ちゃくちで 特大ジャンプ</div>
           <div>🐧 <b>腕力アップ</b>：はばたいて 高く のぼる</div>
@@ -442,7 +442,7 @@ var ITEMS = {
   power:      { emoji:"💪", name:"パワーアップ", desc:"いっきに加速！" },
   airjump:    { emoji:"🪽", name:"空中ジャンプ", desc:"そらで もう1回！" },
   ice:        { emoji:"🧊", name:"氷のおなか",   desc:"着地で ツルツル すべる" },
-  balloon:    { emoji:"🎈", name:"風船おなか",   desc:"着地で ポーンと 高く はねる" },
+  balloon:    { emoji:"🎈", name:"風船おなか",   desc:"着地で 1回だけ ポーンと 高く はねる" },
   plane:      { emoji:"✈️", name:"飛行機キャッチ", desc:"起動時の高さで 5秒間 前進！" },
   trampoline: { emoji:"🛝", name:"トランポリン", desc:"着地で 特大ジャンプ！" },
   flap:       { emoji:"🐧", name:"腕力アップ",   desc:"はばたいて のぼる" }
@@ -501,13 +501,17 @@ function newRun(){
     members: placeMembers()
   };
 }
+function genMember(x){
+  return { mi:Math.floor(Math.random()*MEMBERS.length), x:x, y:22 + Math.random()*95, taken:false, bob:Math.random()*6.28 };
+}
 function placeMembers(){
   var arr=[], x=110;
   var order = MEMBERS.map(function(_,i){return i;});
   for(var i=order.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=order[i]; order[i]=order[j]; order[j]=tmp; }
   order.forEach(function(mi){
     x += 90 + Math.random()*230;
-    arr.push({ mi:mi, x:x, y:22 + Math.random()*95, taken:false, bob:Math.random()*6.28 });
+    var m=genMember(x); m.mi=mi;
+    arr.push(m);
   });
   return arr;
 }
@@ -802,7 +806,11 @@ function step(dt){
         if(bounce>3.4){
           G.vy=bounce; G.vx*=G.balloonBelly?0.99:0.92;
           G.groundContact=false;
-          if(G.balloonBelly) pop("🎈 ポーン！");
+          if(G.balloonBelly){
+            /* balloon belly works for one bounce only, then it's spent */
+            G.balloonBelly=false;
+            pop("🎈 ポーン！");
+          }
         }else{
           G.vy=0; G.groundContact=true;
         }
@@ -838,6 +846,17 @@ function afterMove(dt){
         G.groundContact=false;
       }
     }
+  }
+  /* members keep appearing ahead until the flight ends: top the sky up
+     with fresh members (any of the 8, repeats allowed) and drop the ones
+     left far behind so the list stays small */
+  if(G.flying && !G.stopped){
+    var furthest = G.members.length ? G.members[G.members.length-1].x : G.x;
+    while(furthest < G.x + 700){
+      furthest += 90 + Math.random()*230;
+      G.members.push(genMember(furthest));
+    }
+    G.members = G.members.filter(function(m){ return m.x > G.x - 160; });
   }
   /* camera */
   var targetX=G.x - (W*0.30)/scale();
