@@ -806,6 +806,8 @@
           </a>
           <a class="yt-link" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener noreferrer">YouTube ▶ @1st-penguin1111</a>
           <button class="big-btn" id="btn-again" type="button">もう一度あそぶ</button>
+          <button class="big-btn sub" id="btn-to-menu" type="button">メニュー画面へもどる</button>
+          <a class="home-link" href="https://1st-penguin1111.github.io/first-penguin-games/" target="_blank" rel="noopener noreferrer">← ゲーム一覧へもどる</a>
         </div>
       </section>
 
@@ -1279,6 +1281,12 @@
           screenEnd.classList.add("hidden");
           screenGame.classList.remove("hidden");
           newRun();
+        });
+        el("btn-to-menu").addEventListener("click", function () {
+          screenEnd.classList.add("hidden");
+          screenGame.classList.add("hidden");
+          screenStart.classList.remove("hidden");
+          window.scrollTo(0, 0);
         });
         buildRoster();
         // 確定演出の写真を先読みしておく（演出時にすぐ浮き出るように）

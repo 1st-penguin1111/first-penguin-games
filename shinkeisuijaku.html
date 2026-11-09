@@ -183,6 +183,7 @@
       @media (prefers-reduced-motion: reduce) { .card.just-matched { animation: none; } .card { transition: none; } }
 
       .game-actions { display: flex; gap: 10px; margin-top: 16px; }
+      .game-actions.end-actions { flex-direction: column; }
       .btn {
         appearance: none; border: none; cursor: pointer; font-family: inherit;
         border-radius: 999px; padding: 12px 18px; font-weight: 800; font-size: 15px;
@@ -353,9 +354,9 @@
           </div>
         </div>
 
-        <div class="game-actions">
+        <div class="game-actions end-actions">
           <button class="btn main" id="btn-again" type="button">もう一度あそぶ</button>
-          <button class="btn sub" id="btn-home" type="button">スタート画面へ</button>
+          <button class="btn sub" id="btn-home" type="button">メニューにもどる</button>
         </div>
 
         <div class="yt-banner">
@@ -365,6 +366,8 @@
           </a>
           <a class="yt-link" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">YouTube ▶ @1st-penguin1111</a>
         </div>
+
+        <a class="list-link pop" href="https://1st-penguin1111.github.io/first-penguin-games/" target="_blank" rel="noopener">🎮 ゲーム一覧にもどる</a>
       </section>
     </div>
 
