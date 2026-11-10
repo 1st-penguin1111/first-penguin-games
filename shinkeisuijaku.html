@@ -315,7 +315,7 @@
         <div class="panel special-panel">
           <h2 class="pop">✨ 特殊カード（毎回ランダム）</h2>
           <ul>
-            <li>🔀 <b>シャッフルカード</b>：ある1人のメンバーのカードは、めくるとそのターンの終わりに、残っている裏向きカード全部の場所がシャッフルされちゃう！覚えた場所がリセットされるよ。</li>
+            <li>🔀 <b>シャッフルカード</b>：ある1人のメンバーのペアを<b>取ったときにだけ</b>、残っている裏向きカード全部の場所がシャッフルされちゃう！めくっただけでは発動しないよ。覚えた場所がリセットされるよ。</li>
             <li>⭐ <b>スターカード</b>：ある1人のペアには星がついてるよ。カードをめくっただけでは分からなくて、<b>ペアを取ったときに初めて発覚</b>するよ！<b>対戦モードでは、このペアを取ると通常1ptのところ3pt</b>入るよ（タイムアタックにはポイントなし）。</li>
             <li>↩️ <b>もどすカード（対戦モードのみ）</b>：ある1人のペアには特殊マークつき。そのペアを取ると、相手がすでに取ったペアの中からランダムで1組が場に裏向きでもどっちゃう！（相手がまだ何も取ってないときは効果なし）</li>
           </ul>
@@ -656,7 +656,7 @@
         var downIdx = [];
         deck.forEach(function (c, i) { if (c.state === "down") downIdx.push(i); });
         if (downIdx.length < 2) { done(); return; }
-        showEvent("🔀", "シャッフル！", "シャッフルカードをめくった！\n残りのカードの場所がシャッフルされたよ");
+        showEvent("🔀", "シャッフル！", "シャッフルカードのペアをゲット！\n残りのカードの場所がシャッフルされたよ");
         setStatus("🔀 シャッフルカード！　残りのカードの場所が変わったよ…！");
         downIdx.forEach(function (i) { deck[i].el.classList.add("shuffling"); });
         setTimeout(function () {
@@ -716,8 +716,6 @@
         var a = openCards[0], b = openCards[1];
         openCards = [];
         var ca = deck[a], cb = deck[b];
-        /* did this turn touch the shuffle card? (either flipped card) */
-        var touchedShuffle = ca.memberId === special.shuffle || cb.memberId === special.shuffle;
         if (ca.memberId === cb.memberId) {
           setTimeout(function () {
             ca.state = "matched"; cb.state = "matched";
@@ -769,8 +767,8 @@
                 setStatus("ペア成立！　あと " + (8 - matchedCount) + " ペア");
               }
             };
-            /* a matched shuffle pair still shuffles what remains */
-            if (touchedShuffle && matchedCount < 8) {
+            /* the shuffle fires only when the shuffle pair itself is acquired */
+            if (kind === "shuffle" && matchedCount < 8) {
               setTimeout(function () { doShuffleRemaining(afterMatch); }, 500);
             } else {
               afterMatch();
@@ -796,11 +794,9 @@
                 setStatus("ざんねん…もう一度チャレンジ！");
               }
             };
-            if (touchedShuffle) {
-              doShuffleRemaining(afterMiss);
-            } else {
-              afterMiss();
-            }
+            /* flipping the shuffle card alone no longer triggers a shuffle:
+               it fires only when its pair is acquired (match branch above) */
+            afterMiss();
           }, 950);
         }
       }
