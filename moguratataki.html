@@ -288,7 +288,6 @@
   .cutin-inner img{width:190px;height:190px;border-radius:50%;object-fit:cover;border:8px solid var(--c,#fff);box-shadow:0 0 0 6px #fff,0 18px 40px rgba(0,0,0,.45);background:#fff}
   .cutin-name{font-family:"Mochiy Pop One",sans-serif;color:#fff;font-size:20px;margin-top:10px;text-shadow:0 2px 8px rgba(0,0,0,.5)}
   .cutin-word{font-family:"Mochiy Pop One",sans-serif;font-size:34px;color:#ffd93d;margin-top:6px;line-height:1.25;text-shadow:0 3px 0 #e84e84,0 6px 0 #c22c5f,0 10px 20px rgba(0,0,0,.4)}
-  .cutin-bonus{display:inline-block;margin-top:10px;background:#fff;color:#1e8fd1;font-family:"Mochiy Pop One",sans-serif;font-size:17px;padding:6px 18px;border-radius:999px;box-shadow:0 6px 14px rgba(0,0,0,.3)}
 
   /* ---------- roulette ---------- */
   .roulette{position:fixed;inset:0;z-index:95;display:none;place-items:center;background:rgba(20,40,70,.55)}
@@ -348,11 +347,11 @@
       <ul class="rules">
         <li><span class="ic">⏱️</span><span><b>30秒スコアアタック</b>：制限時間は <b>30秒</b>。9つの穴からメンバーがランダムに顔を出すよ。</span></li>
         <li><span class="ic">🏁</span><span><b>2000点タイムアタック</b>：時間制限なし！ <b>2000点</b> に届くまでの <b>タイム</b> を競うよ。早く2000点に届くほどすごい称号がもらえるよ。</span></li>
-        <li><span class="ic">🎁</span><span>タイムアタックでは、時間ボーナスは <b>タイム短縮</b> になるよ（カットイン／ルーレットの+5秒ぶんは記録から <b>−5秒</b>）。逆にペンギンをたたくと <b>+2秒</b> のペナルティ！</span></li>
+        <li><span class="ic">🎁</span><span>タイムアタックでは、ルーレットの時間ボーナスは <b>タイム短縮</b> になるよ（+5秒ぶんは記録から <b>−5秒</b>）。逆にペンギンをたたくと <b>+2秒</b> のペナルティ！</span></li>
         <li><span class="ic">👆</span><span>メンバーをタップすると <b>10点</b>！ 次を <b>2秒以内</b> にたたくとコンボがつながってボーナス点が入るよ。<b>2秒たつとコンボ終了</b> だから急いでたたこう！</span></li>
         <li><span class="ic">👑</span><span>金のリングのメンバーはレア！ <b>30点</b> の大チャンス。</span></li>
         <li><span class="ic">🔥</span><span>10コンボで <b>フィーバータイム</b>！ 5秒間、点数が2倍になるよ。</span></li>
-        <li><span class="ic">💥</span><span>同じメンバーを <b>5回</b> たたくとカットイン！「まだまだこれからー！」で <b>時間が+5秒</b> 回復するよ。</span></li>
+        <li><span class="ic">💥</span><span>同じメンバーを <b>5回</b> たたくとカットイン！「まだまだこれからー！」のあとは <b>ルーレット</b> がまわせるよ。</span></li>
         <li><span class="ic">🎰</span><span>カットインのあとは <b>ルーレット</b>！ 得点2倍・+5秒・出現数1.5倍・大当たり…でも大ハズレでボスが増えることも！？ 効果は <b>重なって同時に</b> かかるよ（同じ効果は時間がリセット）。</span></li>
         <li><span class="ic">⚠️</span><span class="warn"><b>邪悪なペンギン</b>をタップすると −30点＆時間も −2秒！ 見かけてもタップしちゃダメ。</span></li>
       </ul>
@@ -450,7 +449,6 @@
     <img id="cutin-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='190'%3E%3C/svg%3E" alt="">
     <div class="cutin-name" id="cutin-name"></div>
     <div class="cutin-word">まだまだ<br>これからー！</div>
-    <div><span class="cutin-bonus" id="cutin-bonus">⏱️ 時間 +5秒 回復！</span></div>
   </div>
 </div>
 
@@ -833,17 +831,15 @@
     if(!playing || paused) return;
     if(isRace() && score >= TARGET_SCORE) return;
     paused = true;
-    if(isRace()){ elapsedTime = Math.max(0, elapsedTime - 5); } else { timeLeft += 5; }
     updateHUD();
     var ci = $("cutin");
     $("cutin-img").src = m.img;
     $("cutin-img").alt = m.name;
     $("cutin-name").textContent = m.name;
-    $("cutin-bonus").textContent = isRace() ? "⏱️ タイム −5秒 短縮！" : "⏱️ 時間 +5秒 回復！";
     $("cutin-inner").style.setProperty("--c", m.color);
     $("cutin-img").style.borderColor = m.color;
     ci.classList.remove("on"); void ci.offsetWidth; ci.classList.add("on");
-    $("game-msg").textContent = isRace() ? (m.name + " 5回ヒット！ タイム−5秒 短縮！") : (m.name + " 5回ヒット！ 時間+5秒 回復！");
+    $("game-msg").textContent = m.name + " 5回ヒット！ カットイン＆ルーレット！";
     sndFever();
     setTimeout(function(){
       ci.classList.remove("on");
