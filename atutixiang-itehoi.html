@@ -207,17 +207,17 @@
       /* ---- 顔＋4方向の矢印（あっち向いてホイ盤面） ---- */
       .face-grid {
         display: grid;
-        grid-template-columns: 78px minmax(0, 1fr) 78px;
-        grid-template-rows: 78px auto 78px;
+        grid-template-columns: 98px minmax(0, 1fr) 98px;
+        grid-template-rows: 98px auto 98px;
         align-items: center;
         justify-items: center;
-        max-width: 368px;
+        max-width: 404px;
         margin: 2px auto 0;
       }
       /* 矢印ボタンの位置に置く四角い枠（顔アイコンの移動先） */
       .dir-cell {
         position: relative;
-        width: 78px; height: 78px;
+        width: 98px; height: 98px;
         display: grid; place-items: center;
       }
       .dir-cell.up { grid-area: 1 / 2; }
@@ -238,13 +238,13 @@
         box-shadow: 0 0 18px rgba(255, 200, 40, 0.55);
       }
       .dir-btn {
-        width: 56px; height: 56px;
+        width: 78px; height: 78px;
         border-radius: 50%;
-        border: 3px solid rgba(255, 255, 255, 0.85);
+        border: 4px solid rgba(255, 255, 255, 0.85);
         background: var(--accent);
         color: #fff;
         font: inherit;
-        font-size: 27px; font-weight: 900; line-height: 1;
+        font-size: 36px; font-weight: 900; line-height: 1;
         display: grid; place-items: center;
         cursor: pointer;
         box-shadow: 0 5px 0 var(--felt-dark), 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -726,9 +726,9 @@
         .fx-layer { display: none; }
       }
       @media (max-width: 380px) {
-        .face-grid { grid-template-columns: 64px minmax(0, 1fr) 64px; grid-template-rows: 64px auto 64px; }
-        .dir-cell { width: 64px; height: 64px; }
-        .dir-btn { width: 48px; height: 48px; font-size: 23px; }
+        .face-grid { grid-template-columns: 84px minmax(0, 1fr) 84px; grid-template-rows: 84px auto 84px; }
+        .dir-cell { width: 84px; height: 84px; }
+        .dir-btn { width: 66px; height: 66px; font-size: 30px; }
         .rivals-icons { gap: 4px; }
         .ricon { width: 30px; height: 30px; }
         .ricon .check { font-size: 21px; }
