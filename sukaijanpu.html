@@ -318,7 +318,7 @@
           <div>🪽 <b>空中ジャンプ</b>：そらで もう1回 ジャンプ</div>
           <div>🧊 <b>氷のおなか</b>：ちゃくちで ツルツル すべる（何個も 使うと すべりやすさが どんどん アップ！）</div>
           <div>🎈 <b>風船おなか</b>：ちゃくちで 1回だけ ポーンと 高く はねる</div>
-          <div>✈️ <b>飛行機キャッチ</b>：起動時の 高さのまま 5秒間 高速で すすむ</div>
+          <div>✈️ <b>飛行機キャッチ</b>：起動時の 高さのまま 5秒間 高速で すすんで、最後は ペンギンが 勢いよく <b>発射</b>される！</div>
           <div>🛝 <b>トランポリン</b>：ちゃくちで 特大ジャンプ</div>
           <div>🐧 <b>腕力アップ</b>：はばたいて 高く のぼる</div>
         </div>
@@ -443,7 +443,7 @@ var ITEMS = {
   airjump:    { emoji:"🪽", name:"空中ジャンプ", desc:"そらで もう1回！" },
   ice:        { emoji:"🧊", name:"氷のおなか",   desc:"着地で ツルツル すべる（重ねがけで もっと すべる！）" },
   balloon:    { emoji:"🎈", name:"風船おなか",   desc:"着地で 1回だけ ポーンと 高く はねる" },
-  plane:      { emoji:"✈️", name:"飛行機キャッチ", desc:"起動時の高さで 5秒間 高速で 前進！" },
+  plane:      { emoji:"✈️", name:"飛行機キャッチ", desc:"起動時の高さで 5秒間 高速で 前進！ 最後は 勢いよく 発射！" },
   trampoline: { emoji:"🛝", name:"トランポリン", desc:"着地で 特大ジャンプ！" },
   flap:       { emoji:"🐧", name:"腕力アップ",   desc:"はばたいて のぼる" }
 };
@@ -495,6 +495,7 @@ function newRun(){
     iceBelly:false, iceUses:0, balloonBelly:false, trampArmed:false,
     boostFuel:0, boosting:false, boostKeepT:0, boostKeepY:0,
     plane:null,        // {t, keepY} while carried at the activation altitude
+    launchFx:null,     // {x, y, t} burst effect when the plane launches the penguin
     trampFx:null,      // {x,t}
     rot:0, flapAnim:0, t:0, finishTimer:-1, runT:0, splashed:false, streakT:0, bgPx:0,
     sinking:false, sinkT:0, sunk:false,
@@ -712,7 +713,10 @@ function iceSlipMul(){
   }
   return m;
 }
-function iceFric(){ return 0.55 / iceSlipMul(); }
+/* ice belly friction: base friction raised (x3 vs before) so the slide
+   no longer runs away, while the stacking multiplier still makes each
+   extra ice use slipperier than the last */
+function iceFric(){ return 1.65 / iceSlipMul(); }
 var DIST_SCALE=5; // 1 world unit = 5 m, so flights are recorded in km
 var SEA_END=200;   // world units: the first 1 km (200u x 5m) past the ice is sea; land starts beyond it
 function fmtDist(units){
@@ -726,6 +730,7 @@ function step(dt){
   if(splashFx.t>0) splashFx.t-=dt;
   if(G.flapAnim>0) G.flapAnim-=dt;
   if(G.trampFx){ G.trampFx.t-=dt; if(G.trampFx.t<=0) G.trampFx=null; }
+  if(G.launchFx){ G.launchFx.t-=dt; if(G.launchFx.t<=0) G.launchFx=null; }
 
   if(!G.flying) return;
   if(G.stopped){
@@ -764,9 +769,14 @@ function step(dt){
     G.vy=0;
     G.x += G.vx*dt;
     if(pl.t<=0){
+      /* catch over: the plane LAUNCHES the penguin — a big forward burst
+         with an upward kick, a flash/streak effect and the speed zoom-out
+         kicking in, so the release feels like being fired, not dropped */
       G.plane=null;
-      G.vy=8; G.vx=48; // released still carrying the plane's speed
-      pop("✈️ バイバイ！");
+      G.vx=72; G.vy=13.5;
+      G.launchFx={ x:G.x, y:G.y, t:0.7 };
+      G.bgPx += 260; // scenery jump for an extra whoosh
+      pop("✈️ 発射ーっ！！🚀");
     }
     afterMove(dt);
     return;
@@ -950,6 +960,7 @@ function draw(){
   G.members.forEach(function(m){ if(!m.taken) drawMember(m, sc); });
   if(G.trampFx) drawTrampoline(G.trampFx.x);
   if(G.plane) drawPlane();
+  if(G.launchFx) drawLaunchFx();
   drawPenguin(sc);
   if(G.sinking) drawSinkFx();
 }
@@ -1251,6 +1262,40 @@ function drawPlane(){
   var px=w2sX(G.x)-sx, py=w2sY(G.y)-sy;
   ctx.beginPath(); ctx.moveTo(6,9); ctx.lineTo(px/s, py/s); ctx.stroke();
   ctx.restore();
+}
+/* burst effect at the moment the plane fires the penguin: a flash,
+   an expanding shock ring and streaks blasting backwards */
+function drawLaunchFx(){
+  var fx=G.launchFx, total=0.7;
+  var k=1 - Math.max(0, fx.t)/total; // 0 -> 1
+  var sx=w2sX(fx.x), sy=w2sY(fx.y);
+  if(sx<-160||sx>W+160) return;
+  ctx.save();
+  /* flash */
+  ctx.globalAlpha=Math.max(0, 0.55*(1-k*1.6));
+  ctx.fillStyle="#fff6cf";
+  ctx.beginPath(); ctx.arc(sx, sy, 26+k*30, 0, 6.29); ctx.fill();
+  /* expanding ring */
+  ctx.globalAlpha=Math.max(0, 0.9-k);
+  ctx.strokeStyle="#ffb03a"; ctx.lineWidth=4-k*2.4;
+  ctx.beginPath(); ctx.ellipse(sx, sy, 14+k*95, (14+k*95)*0.62, 0, 0, 6.29); ctx.stroke();
+  ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.lineWidth=2.4;
+  ctx.beginPath(); ctx.ellipse(sx, sy, 8+k*70, (8+k*70)*0.62, 0, 0, 6.29); ctx.stroke();
+  /* backward streaks (the penguin blasts forward, air rips backward) */
+  ctx.globalAlpha=Math.max(0, 1-k*1.15);
+  ctx.strokeStyle="rgba(255,255,255,.95)"; ctx.lineCap="round";
+  for(var i=0;i<10;i++){
+    var a=Math.PI + (hash(i*3.7)-0.5)*1.5; // fanned out behind (to the left)
+    var d0=16 + k*30 + hash(i*7.1)*14;
+    var len=20 + k*58 + hash(i*5.3)*22;
+    ctx.lineWidth=2.4 + hash(i*9.4)*2.4;
+    ctx.beginPath();
+    ctx.moveTo(sx + Math.cos(a)*d0, sy + Math.sin(a)*d0*0.7);
+    ctx.lineTo(sx + Math.cos(a)*(d0+len), sy + Math.sin(a)*(d0+len)*0.7);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.globalAlpha=1;
 }
 function drawPenguin(sc){
   /* run-in: during the launch phases the penguin runs in from the left
