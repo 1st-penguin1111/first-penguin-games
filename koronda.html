@@ -254,7 +254,7 @@ img{display:block;}
         👀 ペンギンが<b>振り向いたらストップ！</b> 動いていた人は<span class="danger"><b>アウト</b></span><br>
         😏 たまに<b>フェイント</b>（振り向くふり・チラ見）もあるから油断しないで<br>
         ⚡ かけ声の<b>スピードは毎回バラバラ</b>！ ゆっくり読んだり、急に速くなったり、「ころんだ」のところだけ一気に読むこともあるよ<br>
-        👀 しかも たまに<b>めっちゃ速く振り向いたり</b>、唱え終わる前に<b>いきなり振り向く</b>ことも！ 最後まで気を抜かないで<br>
+        👀 振り向くのは<b>かけ声を全部読み終わってから</b>（11文字ぜんぶ赤くなってから）だけ！ でも読み終わったあとに<b>めっちゃ速く振り向く</b>こともあるから、最後まで気を抜かないで<br>
         🏁 距離は <b>30m</b>。上位3人の位置関係はステージ右上の別枠パネルでいつでも見られるよ（全員の「あと◯m」は各キャラの上に出るよ）
       </div>
       <div class="roster" id="roster"></div>
@@ -417,9 +417,8 @@ var phaseStart = 0, phaseDur = 0;
 var chantSyllShown = -1;
 var chantCum = [];          // cumulative end fraction (0..1) per syllable, for variable reading speed
 var chantPattern = "normal"; // normal | fast | rushEnd | random | slowFast
-var suddenAt = -1;           // ms into chant when penguin suddenly turns mid-chant (-1 = none)
 var graceMs = 140;           // ms after turning during which a tap is still forgiven (shorter = harder)
-var watchKind = "normal";    // normal | quick | fastTurn | long | sudden | feint
+var watchKind = "normal";    // normal | quick | fastTurn | long | feint
 var feintAt = -1, feintType = null, feintDone = false, resumeChantAfterFeint = 0;
 var roundNo = 0;
 var tapTotal = 0;
@@ -593,15 +592,11 @@ function beginChant(){
   phaseDur = rand(2800,4700)*speedUp*patternFactor*(totalW/CHANT.length);
   if(chantPattern==="fast") phaseDur = Math.max(1250, phaseDur);
   chantSyllShown=-1; feintDone=false; feintType=null;
-  /* ---- sudden mid-chant turn: occasionally turns around before finishing ---- */
-  suddenAt=-1;
-  if(roundNo>1 && Math.random()<0.20){
-    suddenAt = phaseDur*rand(0.42,0.72);
-  }
-  /* feint plan: 34% chance per chant (not when a sudden turn is already planned) */
-  if(suddenAt<0 && Math.random()<0.34 && roundNo>1){
+  /* feint plan: 34% chance per chant — wiggle only (振り向くふり).
+     ペンギンが実際に振り向くのは、唱えを全部読み終わってからだけ。 */
+  if(Math.random()<0.34 && roundNo>1){
     feintAt = phaseDur*rand(0.35,0.68);
-    feintType = Math.random()<0.62 ? "watch" : "wiggle";
+    feintType = "wiggle";
   } else feintAt=-1;
   penguinEl.classList.add("facing-back"); penguinEl.classList.remove("wiggle");
   setBadge("safe","うしろ向き<br>すすめ！");
@@ -689,7 +684,7 @@ function onTap(){
   if(pr.out) return;
   if(phase==="watch" || phase==="feintwatch"){
     if(now - dangerSince > graceMs){ markOut(pr); return; }
-    return; /* grace: tap right at the turn is forgiven (shorter on fast/sudden turns) */
+    return; /* grace: tap right at the turn is forgiven (shorter on fast turns) */
   }
   if(phase!=="chant") return;
   pr.dist += 0.42;
@@ -713,30 +708,13 @@ function loop(ts){
   var now = gNow;
   if(phase==="chant" || phase==="watch" || phase==="feintwatch"){
     var elapsed = now - phaseStart;
-    /* --- sudden mid-chant turn (turns around before the chant finishes) --- */
-    if(phase==="chant" && suddenAt>0 && elapsed>=suddenAt){
-      suddenAt=-1;
-      renderChant(chantShownFor(elapsed));
-      startWatch(false);
-      watchKind="sudden"; graceMs=55; /* almost no forgiveness on a sudden turn */
-      banner("⚡ いきなり 振り向いた！", "red", 900);
-      /* fall through so CPUs / transitions below still run this frame with the new phase */
-      elapsed = now - phaseStart;
-    }
-    /* --- feint trigger --- */
+    /* --- feint trigger (振り向くふりだけ：実際には振り向かない) --- */
     if(phase==="chant" && feintAt>0 && !feintDone && elapsed>=feintAt){
       feintDone=true;
-      if(feintType==="watch"){
-        resumeChantAfterFeint = phaseDur - elapsed;   // keep remaining chant time
-        banner("😏 フェイント！？", "", 800);
-        sFeint();
-        startWatch(true);
-      } else {
-        penguinEl.classList.remove("wiggle"); void penguinEl.offsetWidth;
-        penguinEl.classList.add("wiggle");
-        banner("😏 フェイント…？", "", 800);
-        sFeint();
-      }
+      penguinEl.classList.remove("wiggle"); void penguinEl.offsetWidth;
+      penguinEl.classList.add("wiggle");
+      banner("😏 フェイント…？", "", 800);
+      sFeint();
     }
     /* --- CPU movement --- */
     racers.forEach(function(r){
@@ -760,9 +738,9 @@ function loop(ts){
     if(phase==="chant" && elapsed>=phaseDur){ renderChant(CHANT.length); startWatch(false); }
     else if(phase==="watch" && elapsed>=phaseDur){ beginChant(); }
     else if(phase==="feintwatch" && elapsed>=phaseDur){
-      /* resume chant with remaining time */
+      /* resume chant with remaining time (legacy path — feintwatch is no longer triggered mid-chant) */
       phase="chant"; phaseStart=now; phaseDur=Math.max(700, resumeChantAfterFeint);
-      chantSyllShown=-1; feintAt=-1; suddenAt=-1;
+      chantSyllShown=-1; feintAt=-1;
       penguinEl.classList.add("facing-back");
       setBadge("safe","うしろ向き<br>すすめ！");
       $("btn-tap").classList.remove("danger");
