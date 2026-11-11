@@ -54,11 +54,10 @@
         overflow: hidden;
         box-shadow: 0 10px 28px rgba(23, 68, 96, .28);
         background: #8fd4f2;
-        touch-action: none;
         user-select: none;
         -webkit-user-select: none;
       }
-      canvas { display: block; width: 100%; }
+      canvas { display: block; width: 100%; touch-action: none; }
 
       /* ---------- HUD ---------- */
       #hud {
@@ -182,6 +181,9 @@
         position: absolute; inset: 0;
         display: none;
         overflow-y: auto;
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         background: linear-gradient(180deg, rgba(214,242,252,.97), rgba(240,250,255,.98));
         z-index: 10;
         padding: 18px 16px 20px;
