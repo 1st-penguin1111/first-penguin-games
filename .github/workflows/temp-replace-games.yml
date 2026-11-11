@@ -1,0 +1,37 @@
+name: Replace game files (temporary)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/temp-replace-games.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  replace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Move new game files into place
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git mv -f linkfix-taiketsu.html 8ren-sheng-tiba-kikadogemu.html
+          git mv -f linkfix-acchi.html atutixiang-itehoi.html
+          git mv -f linkfix-rpg.html ziyankenrpg.html
+          git mv -f linkfix-shinkei.html shinkeisuijaku.html
+          git mv -f linkfix-onawa.html onawajobi.html
+          git mv -f linkfix-mogura.html moguratataki.html
+          git mv -f linkfix-sukai.html sukaijanpu.html
+          git mv -f linkfix-koronda.html koronda.html
+          git mv -f linkfix-pinboru.html pinboru.html
+          git mv -f linkfix-sanpo.html sanpo.html
+          git mv -f junbanate-upload.html junbanate.html
+          git mv -f ochimono-upload.html ochimono.html
+          git status --short
+          git commit -m "ゲームファイルを新版に差し替え（リンク先修正）／新ゲーム2本を正式名に変更"
+          git push
