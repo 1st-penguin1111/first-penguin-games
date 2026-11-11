@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
-  html { background-color: #d3edfb; }
+  html { background-color: #d3edfb; scroll-behavior: smooth; }
   body {
     margin: 0;
     min-height: 100vh;
@@ -56,15 +56,43 @@
   .card-7 h2 { color: #0284c7; }
   .card-8 { border-left-color: #ef4444; }
   .card-8 h2 { color: #dc2626; }
- .card-9 { border-left-color: #a855f7; }
- .card-9 h2 { color: #9333ea; }
- .card-10 { border-left-color: #22c55e; }
- .card-10 h2 { color: #16a34a; }
+  .card-9 { border-left-color: #a855f7; }
+  .card-9 h2 { color: #9333ea; }
+  .card-10 { border-left-color: #22c55e; }
+  .card-10 h2 { color: #16a34a; }
     .yt-photo { display: block; margin-top: 28px; }
    .yt-photo img { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: 0 6px 18px rgba(70, 130, 180, 0.3); }
  .yt { display: block; margin-top: 28px; background: #ff0000; color: #fff; text-decoration: none; font-weight: 800; font-size: 1.05em; line-height: 1.5; padding: 16px 18px; border-radius: 16px; box-shadow: 0 4px 14px rgba(255, 0, 0, 0.3); }
   footer { margin-top: 28px; }
   footer span { display: inline-block; background: rgba(255, 255, 255, 0.92); border-radius: 999px; padding: 6px 16px; font-size: 0.85em; color: #6b8ca3; box-shadow: 0 2px 8px rgba(70, 130, 180, 0.25); }
+  .section-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
+  .section-nav a { display: inline-block; background: #fff; color: #2f6d96; text-decoration: none; font-weight: 700; font-size: 0.9em; padding: 8px 14px; border-radius: 999px; box-shadow: 0 2px 8px rgba(70, 130, 180, 0.25); }
+  .section-nav a:active { transform: scale(0.97); }
+  .section { margin-top: 32px; text-align: left; }
+  .section > h2 { margin: 0 0 14px; text-align: center; font-size: 1.45em; color: #2f6d96; background: #fff; border-radius: 16px; padding: 12px 16px; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.25); }
+  .section p { line-height: 1.7; }
+  .section .menu { margin-top: 0; }
+  .intro-text { background: #fff; border-radius: 20px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.25); margin: 0 0 16px; }
+  .members { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .member { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.25); text-align: center; }
+  .member .band { height: 10px; }
+  .member h3 { margin: 10px 8px 4px; font-size: 1.05em; }
+  .member p { margin: 0 8px 12px; font-size: 0.9em; color: #666; line-height: 1.5; }
+  .news-list { list-style: none; margin: 0; padding: 0; background: #fff; border-radius: 20px; padding: 16px 20px; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.25); }
+  .news-list li { padding: 8px 0; border-bottom: 1px dashed #cfe6f5; line-height: 1.6; }
+  .news-list li:last-child { border-bottom: none; }
+  .news-list time { font-weight: 800; color: #2f6d96; margin-right: 8px; white-space: nowrap; }
+  .schedule-text { background: #fff; border-radius: 20px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.25); margin: 0; text-align: center; }
+  .album { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .album figure { margin: 0; background: #fff; border-radius: 20px; padding: 10px 10px 14px; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.25); }
+  .album img { display: block; width: 100%; height: auto; border-radius: 14px; }
+  .album figcaption { margin-top: 10px; text-align: center; font-weight: 700; color: #2f6d96; }
+  .contact-text { background: #fff; border-radius: 20px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.25); margin: 0; text-align: center; }
+  .line-btn { display: block; margin-top: 16px; background: #06c755; color: #fff; text-decoration: none; font-weight: 800; font-size: 1.05em; text-align: center; line-height: 1.5; padding: 16px 18px; border-radius: 16px; box-shadow: 0 4px 14px rgba(6, 199, 85, 0.35); }
+  .line-btn:active { transform: scale(0.98); }
+  .section .yt-photo { margin-top: 0; }
+  .section .yt { margin-top: 16px; }
+  .yt-link { display: block; margin-top: 16px; text-align: center; font-weight: 700; color: #2f6d96; }
 </style>
 </head>
 <body>
@@ -74,21 +102,75 @@
     <img src="members.jpg" alt="ファーストペンギンのメンバー8人の集合写真">
     <figcaption class="photo-text">たくさん遊んでね</figcaption>
   </figure>
-  <p class="subtitle">あそびたいゲームをえらんでね！</p>
-  <nav class="menu">
-    <a class="card card-1" href="8ren-sheng-tiba-kikadogemu.html"><h2>ファスペンと対決！</h2><p>8人とカードで勝負！合計が大きい方が勝ち</p></a>
-    <a class="card card-2" href="atutixiang-itehoi.html"><h2>あっち向いてホイ</h2><p>ホイ！のタイミングで方向を当てよう</p></a>
-    <a class="card card-3" href="ziyankenrpg.html"><h2>ジャンケンRPG</h2><p>ジャンケンで戦う冒険RPG</p></a>
-    <a class="card card-4" href="shinkeisuijaku.html"><h2>ファスペン神経衰弱</h2><p>8人のペアをそろえるメモリーゲーム</p></a>
-    <a class="card card-5" href="onawajobi.html"><h2>ファスペン大縄跳び</h2><p>タイミングよくタップして全員でとぼう！</p></a>
-    <a class="card card-6" href="moguratataki.html"><h2>ファスペンもぐらたたき</h2><p>出てきたメンバーをたたけ！30秒勝負と2000点タイムアタック</p></a>
-    <a class="card card-7" href="sukaijanpu.html"><h2>ファスペン スカイジャンプ</h2><p>角度・パワー・タイミングで飛ばして、空中のメンバーからアイテムゲット</p></a>
-    <a class="card card-8" href="koronda.html"><h2>ペンギンさんがころんだ</h2><p>振り向く前に連打で進め！9人対戦のだるまさんがころんだ</p></a>
-   <a class="card card-9" href="pinboru.html"><h2>ファスペンピンボール</h2><p>プランジャーを引いて発射！メンバーを集めてボスをたおそう</p></a>
-   <a class="card card-10" href="sanpo.html"><h2>ペンギン線引きさんぽ</h2><p>線を引いて橋を作り、1000m先のゴールをめざそう</p></a>
+  <nav class="section-nav">
+    <a href="#intro">紹介</a>
+    <a href="#news">ニュース</a>
+    <a href="#schedule">スケジュール</a>
+    <a href="#album">アルバム</a>
+    <a href="#games">ゲーム集</a>
+    <a href="#contact">お問い合わせ</a>
+    <a href="#youtube">YouTube</a>
+  </nav>
+  <section class="section" id="intro">
+    <h2>① ファスペンの紹介</h2>
+    <p class="intro-text">ファーストペンギンは、8人のメンバーで活動するグループです。YouTubeで動画をお届けしながら、チャンネル登録者100万人を目指して活動中！このページでは、メンバー紹介やお知らせ、スケジュール、写真、そしてみんなで遊べるブラウザゲームを楽しめます。</p>
+    <div class="members">
+      <div class="member"><div class="band" style="background: #ffd93d;"></div><h3>うっかりカサゴ</h3><p>黄色 🐟💛<br>身長 160cm</p></div>
+      <div class="member"><div class="band" style="background: #7bc96f;"></div><h3>うきょ</h3><p>緑 🐈🍀<br>身長 165cm</p></div>
+      <div class="member"><div class="band" style="background: #ff8fab;"></div><h3>ぎゃるぴヨ</h3><p>ピンク 🌺🐥<br>身長 156cm</p></div>
+      <div class="member"><div class="band" style="background: #b388ff;"></div><h3>はっぴぃはっぴぃ</h3><p>紫 🐰🌙<br>身長 152cm</p></div>
+      <div class="member"><div class="band" style="background: #a67c52;"></div><h3>はいびすかす</h3><p>茶色 🌺<br>身長 163cm</p></div>
+      <div class="member"><div class="band" style="background: #ef4444;"></div><h3>ぽにー</h3><p>赤 🎠🌈<br>身長 162cm</p></div>
+      <div class="member"><div class="band" style="background: #38bdf8;"></div><h3>ぽむぽむティンク</h3><p>青 🍎💫<br>身長 159cm</p></div>
+      <div class="member"><div class="band" style="background: #ff8c42;"></div><h3>にゃろんぱん</h3><p>オレンジ 🐾🧡<br>身長 153cm</p></div>
+    </div>
+  </section>
+  <section class="section" id="news">
+    <h2>② ニュース</h2>
+    <ul class="news-list">
+      <li><time>2026.11.12</time>ホームページを開設しました！</li>
+      <li><time>2026.11.11</time>新ゲーム「ファスペンピンボール」と「ペンギン線引きさんぽ」を追加しました</li>
+    </ul>
+  </section>
+  <section class="section" id="schedule">
+    <h2>③ スケジュール</h2>
+    <p class="schedule-text">現在、予定されているイベントはありません。決まり次第、ここでお知らせします。</p>
+  </section>
+  <section class="section" id="album">
+    <h2>④ アルバム</h2>
+    <div class="album">
+      <figure><img src="members.jpg" alt="ファーストペンギンのメンバー8人の集合写真"><figcaption>ファーストペンギン 100万人への道</figcaption></figure>
+      <figure><img src="yt-photo.jpg" alt="集合写真"><figcaption>集合写真</figcaption></figure>
+    </div>
+  </section>
+  <section class="section" id="games">
+    <h2>⑤ ゲーム集</h2>
+    <p class="subtitle">あそびたいゲームをえらんでね！</p>
+    <nav class="menu">
+      <a class="card card-1" href="8ren-sheng-tiba-kikadogemu.html"><h2>ファスペンと対決！</h2><p>8人とカードで勝負！合計が大きい方が勝ち</p></a>
+      <a class="card card-2" href="atutixiang-itehoi.html"><h2>あっち向いてホイ</h2><p>ホイ！のタイミングで方向を当てよう</p></a>
+      <a class="card card-3" href="ziyankenrpg.html"><h2>ジャンケンRPG</h2><p>ジャンケンで戦う冒険RPG</p></a>
+      <a class="card card-4" href="shinkeisuijaku.html"><h2>ファスペン神経衰弱</h2><p>8人のペアをそろえるメモリーゲーム</p></a>
+      <a class="card card-5" href="onawajobi.html"><h2>ファスペン大縄跳び</h2><p>タイミングよくタップして全員でとぼう！</p></a>
+      <a class="card card-6" href="moguratataki.html"><h2>ファスペンもぐらたたき</h2><p>出てきたメンバーをたたけ！30秒勝負と2000点タイムアタック</p></a>
+      <a class="card card-7" href="sukaijanpu.html"><h2>ファスペン スカイジャンプ</h2><p>角度・パワー・タイミングで飛ばして、空中のメンバーからアイテムゲット</p></a>
+      <a class="card card-8" href="koronda.html"><h2>ペンギンさんがころんだ</h2><p>振り向く前に連打で進め！9人対戦のだるまさんがころんだ</p></a>
+      <a class="card card-9" href="pinboru.html"><h2>ファスペンピンボール</h2><p>プランジャーを引いて発射！メンバーを集めてボスをたおそう</p></a>
+      <a class="card card-10" href="sanpo.html"><h2>ペンギン線引きさんぽ</h2><p>線を引いて橋を作り、1000m先のゴールをめざそう</p></a>
+    </nav>
+  </section>
   <p style="margin: 28px 0 0; font-size: 0.85em; color: #2f6d96; text-align: center;">📱 このページをホーム画面に追加すると、アプリみたいにすぐ遊べるよ！</p>
-  <a class="yt-photo" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener"><img src="yt-photo.jpg" alt="First Penguin members group photo"</a>
- <a class="yt" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">YouTube ▶ @1st-penguin1111 チャンネル登録してね！♡</a>
+  <section class="section" id="contact">
+    <h2>⑥ お問い合わせ</h2>
+    <p class="contact-text">お問い合わせはLINEからお願いします。</p>
+    <a class="line-btn" href="https://line.me/R/ti/p/@337dmeks" target="_blank" rel="noopener">LINEでお問い合わせ</a>
+  </section>
+  <section class="section" id="youtube">
+    <h2>⑦ YouTube</h2>
+    <a class="yt-photo" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener"><img src="yt-photo.jpg" alt="First Penguin members group photo"></a>
+    <a class="yt" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">YouTube ▶ @1st-penguin1111 チャンネル登録してね！♡</a>
+    <a class="yt-link" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">YouTube ▶ @1st-penguin1111</a>
+  </section>
   <footer><span>ファーストペンギン</span></footer>
 </div>
 </body>
