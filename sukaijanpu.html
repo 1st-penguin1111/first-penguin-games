@@ -492,7 +492,7 @@ function newRun(){
     maxAlt:0, camX:-30, camY:0,
     inv:{},            // itemKey -> count (flap: charges)
     gotLog:[],
-    iceBelly:false, iceUses:0, balloonBelly:false, trampArmed:false,
+    iceBelly:false, iceUses:0, balloonStock:0, trampStock:0,
     boostFuel:0, boosting:false, boostKeepT:0, boostKeepY:0,
     plane:null,        // {t, keepY} while carried at the activation altitude
     launchFx:null,     // {x, y, t} burst effect when the plane launches the penguin
@@ -635,6 +635,19 @@ function renderItemBar(){
     }
     itemBar.appendChild(b);
   });
+  /* pending (しかけ中) trampoline / balloon stocks: using another one
+     while waiting for landing adds to the stock instead of overwriting,
+     so show how many are still waiting to fire */
+  [["trampoline", G.trampStock], ["balloon", G.balloonStock]].forEach(function(pair){
+    var n=pair[1]||0;
+    if(n<=0) return;
+    any=true;
+    var it=ITEMS[pair[0]];
+    var chip=document.createElement("span");
+    chip.className="item-btn held";
+    chip.innerHTML=it.emoji+" "+it.name+" しかけ中"+(n>1 ? ' <span class="cnt">×'+n+'</span>' : "");
+    itemBar.appendChild(chip);
+  });
   itemBar.classList.toggle("on", any);
   flightHint.classList.toggle("on", !any && phase==="fly");
 }
@@ -682,8 +695,8 @@ function useItem(key){
     }
   }else if(key==="balloon"){
     consume(key);
-    G.balloonBelly=true;
-    pop("🎈 おなかが 風船に！");
+    G.balloonStock++;
+    pop(G.balloonStock>1 ? "🎈 風船おなか ストック ×"+G.balloonStock+"！" : "🎈 おなかが 風船に！");
   }else if(key==="plane"){
     if(G.plane) return;
     consume(key);
@@ -691,8 +704,8 @@ function useItem(key){
     pop("✈️ 飛行機キャッチ！");
   }else if(key==="trampoline"){
     consume(key);
-    G.trampArmed=true;
-    pop("🛝 トランポリン じゅんびOK！");
+    G.trampStock++;
+    pop(G.trampStock>1 ? "🛝 トランポリン ストック ×"+G.trampStock+"！" : "🛝 トランポリン じゅんびOK！");
   }else if(key==="flap"){
     if(G.plane || G.boostKeepT>0) return;
     consume(key);
@@ -820,23 +833,28 @@ function step(dt){
     }else if(G.vy<0){
       var impact=-G.vy;
       splashFx.x=G.x; splashFx.t=Math.max(splashFx.t, 0.5);
-      if(G.trampArmed){
-        G.trampArmed=false;
+      if(G.trampStock>0){
+        /* one stocked trampoline fires per landing; any extra stock
+           stays armed for the next landing */
+        G.trampStock--;
         G.trampFx={ x:G.x, t:1.4 };
         G.vy=Math.max(impact*1.3, 36);
         G.vx*=1.1;
         G.groundContact=false;
-        pop("🛝 ボヨーン！");
+        pop(G.trampStock>0 ? "🛝 ボヨーン！（あと ×"+G.trampStock+" ストック）" : "🛝 ボヨーン！");
+        renderItemBar();
       }else{
-        var rest=G.balloonBelly?0.92:0.38;
+        var rest=G.balloonStock>0?0.92:0.38;
         var bounce=impact*rest;
         if(bounce>3.4){
-          G.vy=bounce; G.vx*=G.balloonBelly?0.99:0.92;
+          G.vy=bounce; G.vx*=G.balloonStock>0?0.99:0.92;
           G.groundContact=false;
-          if(G.balloonBelly){
-            /* balloon belly works for one bounce only, then it's spent */
-            G.balloonBelly=false;
-            pop("🎈 ポーン！");
+          if(G.balloonStock>0){
+            /* balloon belly works for one bounce per stocked balloon;
+               extra stock stays armed for the next bounce */
+            G.balloonStock--;
+            pop(G.balloonStock>0 ? "🎈 ポーン！（あと ×"+G.balloonStock+" ストック）" : "🎈 ポーン！");
+            renderItemBar();
           }
         }else{
           G.vy=0; G.groundContact=true;
@@ -1335,7 +1353,7 @@ function drawPenguin(sc){
     ctx.fillStyle="#20303f";
     ctx.beginPath(); ctx.ellipse(0,-6,21,10.5,0,0,6.29); ctx.fill();
     /* belly */
-    if(G.balloonBelly){
+    if(G.balloonStock>0){
       ctx.fillStyle="#ff8fb8";
       ctx.beginPath(); ctx.ellipse(1,-2.5,15,6.5,0,0,6.29); ctx.fill();
     }else if(G.iceBelly){
@@ -1366,7 +1384,7 @@ function drawPenguin(sc){
     /* flying pose: fully sideways, head leading to the right, belly down */
     ctx.fillStyle="#20303f";
     ctx.beginPath(); ctx.ellipse(0,0,19,11.5,0,0,6.29); ctx.fill();
-    if(G.balloonBelly){
+    if(G.balloonStock>0){
       ctx.fillStyle="#ff8fb8";
       ctx.beginPath(); ctx.ellipse(1,3.4,14.5,6.8,0,0,6.29); ctx.fill();
     }else if(G.iceBelly){
