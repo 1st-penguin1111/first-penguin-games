@@ -1,0 +1,50 @@
+name: Fix page folders (temporary)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/temp-fix-pages.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Move nested page files to root
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/fix-pages
+          for f in games contact news album youtube; do
+            test -f "$f.html/$f.html"
+            cp "$f.html/$f.html" "/tmp/fix-pages/$f.html"
+          done
+          ls -l /tmp/fix-pages
+          sha256sum /tmp/fix-pages/*.html
+          git rm -r games.html contact.html news.html album.html youtube.html
+          test ! -e games.html
+          test ! -e contact.html
+          test ! -e news.html
+          test ! -e album.html
+          test ! -e youtube.html
+          cp /tmp/fix-pages/games.html ./games.html
+          cp /tmp/fix-pages/contact.html ./contact.html
+          cp /tmp/fix-pages/news.html ./news.html
+          cp /tmp/fix-pages/album.html ./album.html
+          cp /tmp/fix-pages/youtube.html ./youtube.html
+          for f in games contact news album youtube; do
+            diff "/tmp/fix-pages/$f.html" "$f.html"
+          done
+          sha256sum games.html contact.html news.html album.html youtube.html
+          git add -A
+          git status --short
+          git diff --cached --stat
+          git commit -m "Fix 5 page folders to regular files (content unchanged)"
+          git push
