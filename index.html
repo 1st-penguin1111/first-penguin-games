@@ -37,30 +37,32 @@
   .photo img { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: 0 6px 18px rgba(70, 130, 180, 0.3); }
   .photo-text { position: absolute; left: 0; right: 0; bottom: 16px; margin: 0; text-align: center; font-size: 1.7em; font-weight: 900; letter-spacing: 0.06em; color: #fff; text-shadow: 2px 0 0 #ff5e8a, -2px 0 0 #ff5e8a, 0 2px 0 #ff5e8a, 0 -2px 0 #ff5e8a, 2px 2px 0 #ff5e8a, -2px -2px 0 #ff5e8a, 2px -2px 0 #ff5e8a, -2px 2px 0 #ff5e8a, 0 4px 12px rgba(0, 0, 0, 0.4); }
   .subtitle { margin: 10px 0 2px; font-size: 1.05em; font-weight: 700; color: #2f6d96; }
-  .menu { display: flex; flex-direction: column; gap: 16px; margin-top: 28px; text-align: left; }
-  .card { display: block; text-decoration: none; color: #333; background: #fff; border-radius: 20px; padding: 20px 22px; box-shadow: 0 4px 14px rgba(70, 130, 180, 0.3); border-left: 10px solid #ff8fab; }
+  .menu { display: flex; flex-direction: column; gap: 40px; margin-top: 64px; text-align: left; }
+  .card { position: relative; display: block; text-decoration: none; color: #333; background: #fff; border-radius: 20px; padding: 20px 22px; box-shadow: inset 0 0 0 6px #fff, 0 4px 14px rgba(70, 130, 180, 0.3); border: 3px solid #1a1a1a; }
+  .card::before { content: ""; position: absolute; top: 6px; bottom: 6px; left: 6px; width: 10px; background: var(--accent, #ff8fab); border-radius: 11px 0 0 11px; pointer-events: none; }
+  .penguin-peek { position: absolute; right: 14px; bottom: calc(100% - 2px); width: 54px; image-rendering: pixelated; pointer-events: none; }
   .card h2 { margin: 0 0 6px; font-size: 1.5em; line-height: 1.3; }
   .card p { margin: 0; font-size: 1em; color: #666; line-height: 1.5; }
   .card:active { transform: scale(0.98); }
-  .card-1 { border-left-color: #ff8fab; }
+  .card-1 { --accent: #ff8fab; background: #ffe0eb; }
   .card-1 h2 { color: #e75480; }
-  .card-2 { border-left-color: #ffb703; }
+  .card-2 { --accent: #ffb703; }
   .card-2 h2 { color: #dd9a00; }
-  .card-3 { border-left-color: #7bc96f; }
+  .card-3 { --accent: #7bc96f; background: #e2f5dc; }
   .card-3 h2 { color: #4c9a3f; }
-  .card-4 { border-left-color: #5ec8e5; }
+  .card-4 { --accent: #5ec8e5; }
   .card-4 h2 { color: #1d8fb5; }
-  .card-5 { border-left-color: #b388ff; }
+  .card-5 { --accent: #b388ff; background: #eee7ff; }
   .card-5 h2 { color: #7e57c2; }
-  .card-6 { border-left-color: #ff8c42; }
+  .card-6 { --accent: #ff8c42; background: #ffe9d6; }
   .card-6 h2 { color: #e8590c; }
-  .card-7 { border-left-color: #38bdf8; }
+  .card-7 { --accent: #38bdf8; background: #dcf2fe; }
   .card-7 h2 { color: #0284c7; }
-  .card-8 { border-left-color: #ef4444; }
+  .card-8 { --accent: #ef4444; background: #ffe1e1; }
   .card-8 h2 { color: #dc2626; }
-  .card-9 { border-left-color: #a855f7; }
+  .card-9 { --accent: #a855f7; }
   .card-9 h2 { color: #9333ea; }
-  .card-10 { border-left-color: #22c55e; }
+  .card-10 { --accent: #22c55e; }
   .card-10 h2 { color: #16a34a; }
   .yt-photo { display: block; margin-top: 28px; }
   .yt-photo img { display: block; width: 100%; height: auto; border-radius: 20px; box-shadow: 0 6px 18px rgba(70, 130, 180, 0.3); }
@@ -108,12 +110,12 @@
   <img class="top-logo" src="top-logo.jpg" alt="ファーストペンギンの部屋">
   <p class="subtitle">あそびたいページをえらんでね！</p>
   <nav class="menu">
-    <a class="card card-1" href="intro.html"><h2>① ファスペンの紹介</h2><p>メンバー8人のプロフィール</p></a>
-    <a class="card card-3" href="news.html"><h2>② ニュース</h2><p>最新のお知らせ</p></a>
-    <a class="card card-5" href="album.html"><h2>④ アルバム</h2><p>写真ギャラリー</p></a>
-    <a class="card card-7" href="games.html"><h2>⑤ ゲーム集</h2><p>10個のブラウザゲームであそぼう！</p></a>
-    <a class="card card-6" href="contact.html"><h2>⑥ お問い合わせ</h2><p>LINEでお問い合わせ</p></a>
-    <a class="card card-8" href="youtube.html"><h2>⑦ YouTube</h2><p>チャンネル登録してね！</p></a>
+    <a class="card card-1" href="intro.html"><h2>① ファスペンの紹介</h2><p>メンバー8人のプロフィール</p><img class="penguin-peek" src="penguin-peek.png" alt="" aria-hidden="true"></a>
+    <a class="card card-3" href="news.html"><h2>② ニュース</h2><p>最新のお知らせ</p><img class="penguin-peek" src="penguin-peek.png" alt="" aria-hidden="true"></a>
+    <a class="card card-5" href="album.html"><h2>③ アルバム</h2><p>写真ギャラリー</p><img class="penguin-peek" src="penguin-peek.png" alt="" aria-hidden="true"></a>
+    <a class="card card-7" href="games.html"><h2>④ ゲーム集</h2><p>10個のブラウザゲームであそぼう！</p><img class="penguin-peek" src="penguin-peek.png" alt="" aria-hidden="true"></a>
+    <a class="card card-6" href="https://line.me/R/ti/p/@337dmeks" target="_blank" rel="noopener"><h2>⑤ お問い合わせ</h2><p>LINEでお問い合わせ</p><img class="penguin-peek" src="penguin-peek.png" alt="" aria-hidden="true"></a>
+    <a class="card card-8" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener"><h2>⑥ YouTube</h2><p>チャンネル登録してね！</p><img class="penguin-peek" src="penguin-peek.png" alt="" aria-hidden="true"></a>
   </nav>
   <p style="margin: 28px 0 0; font-size: 0.85em; color: #2f6d96; text-align: center;">📱 このページをホーム画面に追加すると、アプリみたいにすぐ遊べるよ！</p>
   <section class="sns-block">
@@ -124,8 +126,6 @@
       <a href="https://www.tiktok.com/@1st_penguin1111" target="_blank" rel="noopener">TikTok</a>
     </div>
   </section>
-  <a class="yt-photo" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener"><img src="yt-photo.jpg" alt="First Penguin members group photo"></a>
-  <a class="yt" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">YouTube ▶ @1st-penguin1111 チャンネル登録してね！♡</a>
   <footer><span>ファーストペンギン</span></footer>
 </div>
 </body>
