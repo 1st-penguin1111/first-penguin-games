@@ -19,6 +19,9 @@ html{background-color:#d3edfb;scroll-behavior:smooth}
 body{margin:0;min-height:100vh;font-family:"M PLUS Rounded 1c","Zen Maru Gothic",sans-serif;color:#333;background-color:#d3edfb;background-image:linear-gradient(45deg,#d3edfb 25%,transparent 25%,transparent 75%,#d3edfb 75%),linear-gradient(45deg,#d3edfb 25%,transparent 25%,transparent 75%,#d3edfb 75%),url("bg-tile.jpg");background-size:240px 240px,240px 240px,120px 120px;background-position:0 0,120px 120px,0 0}
 .wrap{max-width:560px;margin:0 auto;padding:28px 16px 40px;text-align:center}
 .logo{width:min(100%,460px);height:auto;display:block;margin:0 auto}
+.photo{position:relative;margin:18px 0 18px}
+.photo img{display:block;width:100%;height:auto;border-radius:20px;box-shadow:0 6px 18px rgba(70,130,180,.3)}
+.photo-text{position:absolute;left:0;right:0;bottom:16px;margin:0;text-align:center;font-size:1.7em;font-weight:900;letter-spacing:.06em;color:#fff;text-shadow:2px 0 0 #ff5e8a,-2px 0 0 #ff5e8a,0 2px 0 #ff5e8a,0 -2px 0 #ff5e8a,2px 2px 0 #ff5e8a,-2px -2px 0 #ff5e8a,2px -2px 0 #ff5e8a,-2px 2px 0 #ff5e8a,0 4px 12px rgba(0,0,0,.4)}
 .subtitle{margin:10px 0 2px;font-size:1.05em;font-weight:700;color:#2f6d96}
 .section-nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
 .section-nav a{display:inline-block;background:#fff;color:#2f6d96;text-decoration:none;font-weight:700;font-size:.9em;padding:8px 14px;border-radius:999px;box-shadow:0 2px 8px rgba(70,130,180,.25)}
@@ -64,6 +67,10 @@ footer span{display:inline-block;background:rgba(255,255,255,.92);border-radius:
 <section class="section" id="games">
 <h2>⑤ ゲーム集</h2>
 <p class="subtitle">あそびたいゲームをえらんでね！</p>
+<figure class="photo">
+<img src="members.jpg" alt="ファーストペンギンのメンバー8人の集合写真">
+<figcaption class="photo-text">たくさん遊んでね</figcaption>
+</figure>
 <nav class="menu">
 <a class="card card-1" href="8ren-sheng-tiba-kikadogemu.html"><h2>ファスペンと対決！</h2><p>8人とカードで勝負！合計が大きい方が勝ち</p></a>
 <a class="card card-2" href="atutixiang-itehoi.html"><h2>あっち向いてホイ</h2><p>ホイ！のタイミングで方向を当てよう</p></a>
