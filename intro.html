@@ -12,26 +12,26 @@
 <meta name="theme-color" content="#4aa8e0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html{background-color:#d3edfb;scroll-behavior:smooth}
-body{margin:0;min-height:100vh;font-family:"M PLUS Rounded 1c","Zen Maru Gothic",sans-serif;color:#333;background-color:#d3edfb;background-image:linear-gradient(45deg,#d3edfb 25%,transparent 25%,transparent 75%,#d3edfb 75%),linear-gradient(45deg,#d3edfb 25%,transparent 25%,transparent 75%,#d3edfb 75%),url("bg-tile.jpg");background-size:240px 240px,240px 240px,120px 120px;background-position:0 0,120px 120px,0 0}
+body{margin:0;min-height:100vh;font-family:'Noto Sans JP',sans-serif;font-weight:500;color:#333;background-color:#d3edfb;background-image:linear-gradient(45deg,#d3edfb 25%,transparent 25%,transparent 75%,#d3edfb 75%),linear-gradient(45deg,#d3edfb 25%,transparent 25%,transparent 75%,#d3edfb 75%);background-size:60px 60px;background-position:0 0,30px 30px}
 .wrap{max-width:640px;margin:0 auto;padding:28px 16px 40px;text-align:center}
 .logo{width:min(100%,460px);height:auto;display:block;margin:0 auto}
 .section-nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
 .section-nav a{display:inline-block;background:#fff;color:#2f6d96;text-decoration:none;font-weight:700;font-size:.9em;padding:8px 14px;border-radius:999px;box-shadow:0 2px 8px rgba(70,130,180,.25)}
 .section-nav a:active{transform:scale(.97)}
 .section{margin-top:32px;text-align:left}
-.section>h2{margin:0 0 14px;text-align:center;font-size:1.45em;color:#2f6d96;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 4px 14px rgba(70,130,180,.25)}
+.section>h2{margin:0 0 14px;text-align:center;font-size:1.45em;font-weight:900;color:#2f6d96;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 4px 14px rgba(70,130,180,.25)}
 .section p{line-height:1.7}
 .intro-text{background:#fff;border-radius:20px;padding:18px 20px;box-shadow:0 4px 14px rgba(70,130,180,.25);margin:0 0 16px;text-align:center}
-.members-title{margin:24px 0 14px;text-align:center;font-size:1.25em;color:#2f6d96;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 4px 14px rgba(70,130,180,.25)}
+.members-title{margin:24px 0 14px;text-align:center;font-size:1.25em;font-weight:900;color:#2f6d96;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 4px 14px rgba(70,130,180,.25)}
 .members{display:grid;grid-template-columns:1fr;gap:18px}
 .member{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(70,130,180,.25);text-align:center}
 .member-photo{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center top;display:block;border-radius:20px 20px 0 0}
 .member .band{height:10px}
-.member h3{margin:14px 12px 6px;font-size:1.35em}
+.member h3{margin:14px 12px 6px;font-size:1.35em;font-weight:900}
 .member p{margin:0 12px 14px;font-size:1.02em;color:#666;line-height:1.5}
 .member .role{display:inline-block;margin:0 12px 8px;padding:4px 14px;border-radius:999px;background:#e8f4fc;color:#2f6d96;font-size:.95em;font-weight:700}
 .member .birth{margin:0 12px 8px;font-size:1.02em;color:#666;line-height:1.5}
@@ -41,8 +41,8 @@ body{margin:0;min-height:100vh;font-family:"M PLUS Rounded 1c","Zen Maru Gothic"
 .sns a{color:#2f6d96;text-decoration:underline;font-weight:700}
 .sns a:active{transform:scale(.97)}
 footer{margin-top:28px}
-footer span{display:inline-block;background:rgba(255,255,255,.92);border-radius:999px;padding:6px 16px;font-size:.85em;color:#6b8ca3;box-shadow:0 2px 8px rgba(70,130,180,.25)}
-.back-link{display:inline-block;margin-top:28px;font-weight:700;color:#2f6d96;text-decoration:none;background:#fff;border-radius:999px;padding:10px 18px;box-shadow:0 2px 8px rgba(70,130,180,.25)}
+footer span{display:inline-block;background:rgba(255,255,255,.92);border-radius:999px;padding:6px 16px;font-size:.85em;color:#666}
+.back-link{display:inline-block;margin-top:28px;font-weight:700;color:#2f6d96;text-decoration:none;background:#fff;padding:8px 14px;border-radius:999px;box-shadow:0 2px 8px rgba(70,130,180,.25)}
 </style>
 </head>
 <body>
@@ -56,23 +56,24 @@ footer span{display:inline-block;background:rgba(255,255,255,.92);border-radius:
 <a href="contact.html">お問い合わせ</a>
 <a href="youtube.html">YouTube</a>
 </nav>
+<img class="logo" src="top-logo.jpg" alt="ファーストペンギン ゲーム集">
 <section class="section" id="intro">
 <h2>① ファスペンの紹介</h2>
-<p class="intro-text">ファーストペンギン<br>2023年11月11日結成<br>女子中学生YouTuber<br>はじめは5人から始まり<br>メンバーの卒業＆加入を経て<br>現在8人で活動中<br><br>結成24日でチャンネル登録者数1万人達成<br>2025年チャンネル登録者数10万人達成<br>2026年は100万人に向けて爆進中</p>
+<p class="intro-text">ファーストペンギン<br>2023年11月11日結成<br>女子中学生YouTuber<br>はじめは5人から始まり<br>メンバーの卒業＆加入を経て<br>現在は8人で活動中です✨<br>一緒にゲームをしたり<br>日常の動画もアップしています！</p>
 <h3 class="members-title">メンバー紹介</h3>
 <div class="members">
-<article class="member"><img class="member-photo" src="member-kasago.jpg" alt="うっかりカサゴ"><div class="band" style="background:#ffcf3f"></div><h3>うっかりカサゴ 🐟💛</h3><p class="role">リーダー</p><p class="birth">2012年11月16日</p><p class="hometown">出身地：北海道</p><div class="sns"><span class="sns-item">Instagram <a href="https://www.instagram.com/kasago_1pen" target="_blank" rel="noopener">kasago_1pen</a></span><span class="sns-item">X <a href="https://x.com/kasago_1pen" target="_blank" rel="noopener">kasago_1pen</a></span><span class="sns-item">TikTok <a href="https://www.tiktok.com/@kasago_1pen" target="_blank" rel="noopener">@kasago_1pen</a></span></div></article>
-<article class="member"><img class="member-photo" src="member-ukyo.jpg" alt="うきょ"><div class="band" style="background:#7bc96f"></div><h3>うきょ 🐈🍀</h3><p class="birth">2013年2月10日</p><p class="hometown">出身地：山梨</p><div class="sns"><span class="sns-item">Instagram <a href="https://www.instagram.com/ukyo_1pen" target="_blank" rel="noopener">ukyo_1pen</a></span><span class="sns-item">X <a href="https://x.com/ukyo_1pen" target="_blank" rel="noopener">ukyo_1pen</a></span><span class="sns-item">TikTok <a href="https://www.tiktok.com/@ukyo_1pen" target="_blank" rel="noopener">@ukyo_1pen</a></span></div></article>
-<article class="member"><img class="member-photo" src="member-gyarupiyo.jpg" alt="ぎゃるぴヨ"><div class="band" style="background:#ff8fab"></div><h3>ぎゃるぴヨ 🌺🐥</h3><p class="role">サブリーダー</p><p class="birth">2013年7月26日</p><p class="hometown">出身地：東京</p><div class="sns"><span class="sns-item">Instagram <a href="https://www.instagram.com/piyo_1pen" target="_blank" rel="noopener">piyo_1pen</a></span><span class="sns-item">X <a href="https://x.com/piyo_1pen" target="_blank" rel="noopener">piyo_1pen</a></span><span class="sns-item">TikTok <a href="https://www.tiktok.com/@piyo_1pen" target="_blank" rel="noopener">@piyo_1pen</a></span></div></article>
-<article class="member"><img class="member-photo" src="member-happi.jpg" alt="はっぴぃはっぴぃ"><div class="band" style="background:#b388ff"></div><h3>はっぴぃはっぴぃ 🐰🌙</h3><p class="birth">2011年5月13日</p><p class="hometown">出身地：神奈川</p><div class="sns"><span class="sns-item">Instagram <a href="https://www.instagram.com/happy_1pen" target="_blank" rel="noopener">happy_1pen</a></span><span class="sns-item">X <a href="https://x.com/happy_1pen" target="_blank" rel="noopener">happy_1pen</a></span><span class="sns-item">TikTok <a href="https://www.tiktok.com/@happy_1pen" target="_blank" rel="noopener">@happy_1pen</a></span></div></article>
-<article class="member"><img class="member-photo" src="member-pony.jpg" alt="ぽにー"><div class="band" style="background:#ef4444"></div><h3>ぽにー 🎠🌈</h3><p class="role">サブリーダー</p><p class="birth">2011年4月3日</p><p class="hometown">出身地：埼玉</p><div class="sns"><span class="sns-item">Instagram <a href="https://www.instagram.com/pony_1st" target="_blank" rel="noopener">pony_1st</a></span><span class="sns-item">TikTok <a href="https://www.tiktok.com/@pony_1st" target="_blank" rel="noopener">@pony_1st</a></span></div></article>
-<article class="member"><img class="member-photo" src="member-nyaronpan.jpg" alt="にゃろんぱん"><div class="band" style="background:#ff8c42"></div><h3>にゃろんぱん 🐾🧡</h3><p class="birth">2012年5月20日</p><p class="hometown">出身地：静岡</p><div class="sns"><span class="sns-item">Instagram <a href="https://www.instagram.com/nyaronpan_1pen" target="_blank" rel="noopener">nyaronpan_1pen</a></span><span class="sns-item">TikTok <a href="https://www.tiktok.com/@nyaronpan" target="_blank" rel="noopener">@nyaronpan</a></span></div></article>
-<article class="member"><img class="member-photo" src="member-haibisukasu.jpg" alt="はいびすかす"><div class="band" style="background:#8d6e63"></div><h3>はいびすかす 🌺</h3><p class="birth">2011年4月4日</p><p class="hometown">出身地：静岡</p><div class="sns"><span class="sns-item">Instagram <a href="https://www.instagram.com/haibisukasu0404" target="_blank" rel="noopener">haibisukasu0404</a></span><span class="sns-item">TikTok <a href="https://www.tiktok.com/@user4858252086000" target="_blank" rel="noopener">@user4858252086000</a></span></div></article>
-<article class="member"><img class="member-photo" src="member-pompom.jpg" alt="ぽむぽむティンク"><div class="band" style="background:#38bdf8"></div><h3>ぽむぽむティンク 🍎💫</h3><p class="birth">2012年3月6日</p><p class="hometown">出身地：群馬</p><div class="sns"><span class="sns-item">Instagram <a href="https://www.instagram.com/pompom.tink_1st" target="_blank" rel="noopener">pompom.tink_1st</a></span><span class="sns-item">TikTok <a href="https://www.tiktok.com/@pompom.tink" target="_blank" rel="noopener">@pompom.tink</a></span></div></article>
+<article class="member"><img class="member-photo" src="member-kasago.jpg" alt="うっかりカサゴ"><div class="band" style="background:#ff7aa2"></div><h3>うっかりカサゴ</h3><span class="role">リーダー</span><p class="birth">誕生日: 10月16日</p><p class="hometown">出身：北海道</p><div class="sns"><span class="sns-item">🎥 YouTube：<a href="https://www.youtube.com/@FirstPenguin_kasago" target="_blank" rel="noopener">うっかりカサゴ</a></span><span class="sns-item">🎵 TikTok：<a href="https://www.tiktok.com/@firstpenguin_kasago" target="_blank" rel="noopener">@firstpenguin_kasago</a></span></div></article>
+<article class="member"><img class="member-photo" src="member-ukyo.jpg" alt="れんれん"><div class="band" style="background:#a06cd5"></div><h3>れんれん</h3><span class="role">ゲーム係</span><p class="birth">誕生日: 5月31日</p><p class="hometown">出身：岡山県</p><div class="sns"><span class="sns-item">🎥 YouTube：<a href="https://www.youtube.com/@RenRenfp" target="_blank" rel="noopener">れんれん</a></span><span class="sns-item">🎵 TikTok：<a href="https://www.tiktok.com/@renren_fp06" target="_blank" rel="noopener">@renren_fp06</a></span></div></article>
+<article class="member"><img class="member-photo" src="member-happi.jpg" alt="はっぴぃたいよう"><div class="band" style="background:#ffd23f"></div><h3>はっぴぃたいよう</h3><span class="role">ムードメーカー</span><p class="birth">誕生日: 10月7日</p><p class="hometown">出身：愛知県</p><div class="sns"><span class="sns-item">🎥 YouTube：<a href="https://www.youtube.com/@FirstPenguin_taiyou" target="_blank" rel="noopener">はっぴぃたいよう</a></span><span class="sns-item">🎵 TikTok：<a href="https://www.tiktok.com/@firstpenguin_taiyou" target="_blank" rel="noopener">@firstpenguin_taiyou</a></span></div></article>
+<article class="member"><img class="member-photo" src="member-nyaronpan.jpg" alt="にゃろんぱん"><div class="band" style="background:#ff9f43"></div><h3>にゃろんぱん</h3><span class="role">動画編集</span><p class="birth">誕生日: 4月14日</p><p class="hometown">出身：埼玉県</p><div class="sns"><span class="sns-item">🎥 YouTube：<a href="https://www.youtube.com/@FirstPenguin_pan" target="_blank" rel="noopener">にゃろんぱん</a></span><span class="sns-item">🎵 TikTok：<a href="https://www.tiktok.com/@firstpenguin_pan" target="_blank" rel="noopener">@firstpenguin_pan</a></span></div></article>
+<article class="member"><img class="member-photo" src="member-gyarupiyo.jpg" alt="ぎゃるぴよ"><div class="band" style="background:#ff5d8f"></div><h3>ぎゃるぴよ</h3><span class="role">ダンスリーダー</span><p class="birth">誕生日: 11月14日</p><p class="hometown">出身：神奈川県</p><div class="sns"><span class="sns-item">🎥 YouTube：<a href="https://www.youtube.com/@FirstPenguin_piyo" target="_blank" rel="noopener">ぎゃるぴよ</a></span><span class="sns-item">🎵 TikTok：<a href="https://www.tiktok.com/@firstpenguin_piyo" target="_blank" rel="noopener">@firstpenguin_piyo</a></span></div></article>
+<article class="member"><img class="member-photo" src="member-pompom.jpg" alt="ぽんぽむ"><div class="band" style="background:#6bcB77"></div><h3>ぽんぽむ</h3><span class="role">ダンス</span><p class="birth">誕生日: 11月11日</p><p class="hometown">出身：兵庫県</p><div class="sns"><span class="sns-item">🎥 YouTube：<a href="https://www.youtube.com/@FirstPenguin_pomu" target="_blank" rel="noopener">ぽんぽむ</a></span><span class="sns-item">🎵 TikTok：<a href="https://www.tiktok.com/@firstpenguin_pomu" target="_blank" rel="noopener">@firstpenguin_pomu</a></span></div></article>
+<article class="member"><img class="member-photo" src="member-haibisukasu.jpg" alt="はいびすかす"><div class="band" style="background:#4aa8e0"></div><h3>はいびすかす</h3><span class="role">歌</span><p class="birth">誕生日: 10月25日</p><p class="hometown">出身：茨城県</p><div class="sns"><span class="sns-item">🎥 YouTube：<a href="https://www.youtube.com/@FirstPenguin_hibiscus" target="_blank" rel="noopener">はいびすかす</a></span><span class="sns-item">🎵 TikTok：<a href="https://www.tiktok.com/@firstpenguin_hibiscus" target="_blank" rel="noopener">@firstpenguin_hibiscus</a></span></div></article>
+<article class="member"><img class="member-photo" src="member-pony.jpg" alt="ぽにょ"><div class="band" style="background:#ff6b35"></div><h3>ぽにょ</h3><span class="role">末っ子</span><p class="birth">誕生日: 7月8日</p><p class="hometown">出身：長野県</p><div class="sns"><span class="sns-item">🎥 YouTube：<a href="https://www.youtube.com/@FirstPenguin_ponyo" target="_blank" rel="noopener">ぽにょ</a></span><span class="sns-item">🎵 TikTok：<a href="https://www.tiktok.com/@firstpenguin_ponyo" target="_blank" rel="noopener">@firstpenguin_ponyo</a></span></div></article>
 </div>
 </section>
-<footer><span>ファーストペンギン</span></footer>
-<a class="back-link" href="index.html">← トップページへもどる</a>
+<footer><span>© 2025 ファーストペンギン ゲーム集</span></footer>
+<a class="back-link" href="index.html">← トップに戻る</a>
 </div>
 </body>
 </html>
