@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="data:," />
     <title>ファスペン数字タップ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -127,6 +127,27 @@
         font-size: 1rem;
         color: var(--accent-deep);
         min-height: 1.4em;
+      }
+
+      /* ---------- カテゴリ＋記録（全ゲーム共通） ---------- */
+      .info-bar {
+        display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        margin: 16px 0 0;
+      }
+      .cat-chip, .record-chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.82rem; font-weight: 800; line-height: 1.3;
+        padding: 6px 12px; border-radius: 999px;
+        border: 2px solid var(--line); background: var(--card);
+        color: var(--ink);
+      }
+      .cat-chip { background: #ffe4ef; border-color: #ffb3cd; color: #a4134f; }
+      @media (prefers-color-scheme: dark) {
+        .cat-chip { background: #3d1f31; border-color: #7a3557; color: #ffb3cd; }
+      }
+      .record-chip .clear-badge {
+        background: #f59e0b; color: #fff; font-size: 0.72rem; font-weight: 800;
+        padding: 2px 7px; border-radius: 999px; letter-spacing: 0.02em;
       }
 
       /* ---------- YouTubeバナー ---------- */
@@ -574,6 +595,11 @@
           </div>
         </div>
 
+        <div class="info-bar" aria-label="カテゴリと記録">
+          <span class="cat-chip">カテゴリ：スコアアタック</span>
+          <span class="record-chip" id="record-start-text">あなたの記録：まだプレイなし</span>
+        </div>
+
         <button class="big-btn" id="btn-start" type="button">▶ スタート</button>
 
         <div class="howto">
@@ -740,6 +766,64 @@
         var sessionBest = null; // 秒（ペナルティ込み）
 
         function fmt(sec) { return sec.toFixed(2); }
+
+        /* ---------- 記録保存（全ゲーム共通 fpg_records_v1） ---------- */
+        var RECORD_KEY = "fpg_records_v1";
+        var RECORD_ID = "suujitap";
+        function loadAllRecords() {
+          try {
+            var raw = localStorage.getItem(RECORD_KEY);
+            if (!raw) return {};
+            var obj = JSON.parse(raw);
+            return (obj && typeof obj === "object") ? obj : {};
+          } catch (e) { return {}; }
+        }
+        function getMyRecord() {
+          var all = loadAllRecords();
+          return all[RECORD_ID] || null;
+        }
+        function formatRecordText(rec) {
+          if (!rec || typeof rec.plays !== "number" || rec.plays <= 0) return "あなたの記録：まだプレイなし";
+          var best = rec.best || ((typeof rec.bestVal === "number" && rec.bestVal > 0) ? (fmt(rec.bestVal) + "秒クリア") : "―");
+          return "あなたの記録：ベスト " + best + " ／ プレイ " + rec.plays + "回";
+        }
+        function refreshRecordDisplay() {
+          var rec = getMyRecord();
+          var startEl = document.getElementById("record-start-text");
+          if (startEl) {
+            if (rec && rec.cleared) {
+              startEl.innerHTML = "";
+              var t = document.createTextNode(formatRecordText(rec) + " ");
+              var b = document.createElement("span");
+              b.className = "clear-badge"; b.textContent = "クリア済み ✓";
+              startEl.appendChild(t); startEl.appendChild(b);
+            } else {
+              startEl.textContent = formatRecordText(rec);
+            }
+          }
+        }
+        function saveGameRecord(totalSec) {
+          try {
+            var all = loadAllRecords();
+            var prev = all[RECORD_ID] || { cleared: false, best: "", bestVal: 0, plays: 0 };
+            var plays = (typeof prev.plays === "number" ? prev.plays : 0) + 1;
+            var cleared = !!prev.cleared || true;
+            var prevBestVal = (typeof prev.bestVal === "number" && prev.bestVal > 0) ? prev.bestVal : null;
+            var bestVal, best;
+            if (prevBestVal === null || totalSec < prevBestVal) {
+              bestVal = totalSec;
+              best = fmt(totalSec) + "秒クリア";
+            } else {
+              bestVal = prevBestVal;
+              best = prev.best || (fmt(prevBestVal) + "秒クリア");
+            }
+            var entry = { cleared: cleared, best: best, bestVal: bestVal, plays: plays };
+            all[RECORD_ID] = entry;
+            localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+            return entry;
+          } catch (e) { return null; }
+        }
+
         function elapsedSec() {
           if (!started) return misses * 1; // 開始前はペナルティのみ（実質0）
           return (performance.now() - startStamp) / 1000 + misses;
@@ -905,6 +989,10 @@
           document.getElementById("result-best").textContent = fmt(sessionBest) + " 秒";
           document.getElementById("new-best").style.display = isBest ? "inline-block" : "none";
           document.getElementById("start-best").textContent = "セッションベスト: " + fmt(sessionBest) + " 秒";
+
+          // 記録保存：結果表示のタイミングで保存（plays+1／クリア・ベスト更新）
+          saveGameRecord(total);
+          refreshRecordDisplay();
 
           // シェアボタン（結果を入れた投稿文を動的にセット）
           var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/suujitap.html";
@@ -1194,9 +1282,10 @@
           bgmUpdateBtn();
         });
 
+        refreshRecordDisplay();
         document.getElementById("btn-start").addEventListener("click", function () { startGame(); bgmStart(); });
         document.getElementById("btn-again").addEventListener("click", function () { startGame(); bgmStart(); });
-        document.getElementById("btn-menu").addEventListener("click", function () { bgmStop(); show("start"); });
+        document.getElementById("btn-menu").addEventListener("click", function () { bgmStop(); refreshRecordDisplay(); show("start"); });
       })();
     </script>
   </body>

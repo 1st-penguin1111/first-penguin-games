@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="data:," />
     <title>ファスペン大縄跳び</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -285,6 +285,45 @@
         opacity: .92;
       }
       .bgm-toggle:active { transform: translateY(1px); }
+      /* Category + record display */
+      .cat-row { display: flex; justify-content: center; margin: 0 0 12px; }
+      .cat-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-weight: 900; font-size: 13.5px; line-height: 1;
+        color: #1d6f3a; background: #dcf5e3;
+        border: 2px solid #37c978; border-radius: 999px;
+        padding: 7px 14px 8px;
+      }
+      @media (prefers-color-scheme: dark) {
+        .cat-badge { color: #a7e8bd; background: #1e3a28; border-color: #37c978; }
+      }
+      .record-panel {
+        margin-top: 14px;
+        background: var(--panel);
+        border: 3px solid var(--line);
+        border-radius: 18px;
+        padding: 13px 16px 14px;
+        box-shadow: var(--shadow);
+      }
+      .record-title {
+        font-family: "Mochiy Pop One", sans-serif;
+        font-size: 15px; color: var(--accent-dark);
+        margin: 0 0 7px; letter-spacing: .02em;
+      }
+      .record-body { font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--ink); }
+      .record-body .record-best { color: var(--sky-btn); font-weight: 900; }
+      .record-body .record-cleared {
+        display: inline-block; margin-left: 6px;
+        font-size: 12.5px; font-weight: 900; color: #fff;
+        background: var(--zone); border-radius: 999px; padding: 2px 9px 3px;
+        vertical-align: 1px;
+      }
+      .record-body .record-none { color: var(--ink-soft); }
+      .end-record {
+        margin-top: 10px !important; padding: 9px 10px;
+        background: var(--gauge-bg); border-radius: 10px;
+        font-size: 13.5px !important;
+      }
     </style>
   </head>
   <body>
@@ -293,6 +332,7 @@
       <section id="screen-start">
         <h1 class="title">ファスペン大縄跳び</h1>
         <p class="subtitle">ちびキャラ8人で、みんなで大縄跳び！</p>
+        <div class="cat-row"><span class="cat-badge">🌿 カテゴリ：のんびり</span></div>
         <div class="panel">
           <div class="stage-box">
             <canvas id="canvas-start" class="px" width="720" height="300"></canvas>
@@ -309,6 +349,10 @@
               <li>ゾーンの外で押したら<b>失敗でゲームオーバー</b>！8人全員が跳べたらクリア！</li>
             </ul>
           </div>
+        </div>
+        <div class="record-panel" id="record-panel">
+          <p class="record-title">📖 きみの記録</p>
+          <div class="record-body" id="record-display"><span class="record-none">まだ記録がないよ。はじめての挑戦、がんばって！</span></div>
         </div>
         <div class="yt-banner">
           <a class="yt-photo-link" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">
@@ -352,6 +396,7 @@
         <h2 id="end-title">ゲームオーバー</h2>
         <p id="end-main"></p>
         <p id="end-sub"></p>
+        <p class="end-record" id="end-record"></p>
         <div class="share-row">
           <a class="btn-share btn-share-x" id="share-x" href="#" target="_blank" rel="noopener">𝕏 Xでシェア</a>
           <a class="btn-share btn-share-line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
@@ -1010,7 +1055,60 @@
         }
       }
 
+      /* ================= RECORDS (shared across all games) =================
+         Stored in localStorage under fpg_records_v1 as a JSON object:
+         { "onawajobi": { cleared, best, bestVal, plays }, ... } */
+      var RECORD_KEY = "fpg_records_v1";
+      var GAME_KEY = "onawajobi";
+      function loadAllRecords() {
+        try {
+          var raw = localStorage.getItem(RECORD_KEY);
+          if (!raw) return {};
+          var parsed = JSON.parse(raw);
+          return (parsed && typeof parsed === "object") ? parsed : {};
+        } catch (e) { return {}; }
+      }
+      function renderRecord() {
+        var el = document.getElementById("record-display");
+        if (!el) return;
+        var rec = loadAllRecords()[GAME_KEY];
+        if (!rec || typeof rec.plays !== "number" || rec.plays < 1) {
+          el.innerHTML = "<span class='record-none'>まだ記録がないよ。はじめての挑戦、がんばって！</span>";
+          return;
+        }
+        var html = "ベスト：<span class='record-best'>" + (rec.best || (rec.bestVal + "人まで跳べた")) + "</span>";
+        if (rec.cleared) html += "<span class='record-cleared'>クリア済み ✓</span>";
+        html += "<br />プレイ回数：" + rec.plays + "回";
+        el.innerHTML = html;
+      }
+      function saveRecord(clear) {
+        var jumped = clear ? 8 : state.inCount;
+        var entry = null;
+        try {
+          var all = loadAllRecords();
+          var prev = all[GAME_KEY] || {};
+          var prevBestVal = (typeof prev.bestVal === "number") ? prev.bestVal : -1;
+          var bestVal = prevBestVal;
+          var best = prev.best || "";
+          if (jumped > prevBestVal) {
+            bestVal = jumped;
+            best = clear ? "8人全員クリア！" : (jumped + "人まで跳べた");
+          }
+          entry = {
+            cleared: !!(prev.cleared || clear),
+            best: best,
+            bestVal: bestVal,
+            plays: ((typeof prev.plays === "number") ? prev.plays : 0) + 1
+          };
+          all[GAME_KEY] = entry;
+          localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+        } catch (e) { /* storage unavailable (e.g. private browsing): play continues without saving */ }
+        renderRecord();
+        return entry;
+      }
+
       function showEnd(clear) {
+        var savedRec = saveRecord(clear);
         var ov = document.getElementById("end-overlay");
         document.getElementById("end-title").textContent = clear ? "🎉 クリア！ 🎉" : "ゲームオーバー";
         document.getElementById("end-main").innerHTML = clear
@@ -1019,6 +1117,14 @@
         document.getElementById("end-sub").textContent = clear
           ? "成功ゾーンが一番狭いところまで乗り切った！すごい！"
           : (state.inCount === 0 ? "まずは1人目、線が真ん中に来た瞬間を狙ってみて。" : "あと少し！ " + (state.inCount + 1) + "人目の " + MEMBERS[state.order[state.current]].name + " で引っかかっちゃった。");
+        var endRecEl = document.getElementById("end-record");
+        if (endRecEl) {
+          if (savedRec) {
+            endRecEl.innerHTML = "📖 きみの記録　ベスト：" + savedRec.best + (savedRec.cleared ? "（クリア済み ✓）" : "") + " ／ プレイ " + savedRec.plays + "回目";
+          } else {
+            endRecEl.textContent = "📖 今回の結果：" + (clear ? "8人全員クリア！" : state.inCount + "人まで跳べた");
+          }
+        }
         /* share links carry this run's actual result */
         var shareText = clear
           ? "『ファスペン大縄跳び』で遊んだよ！（結果：8人全員クリア！）"
@@ -1088,6 +1194,7 @@
         document.getElementById("screen-start").classList.remove("hidden");
         state.phase = "aim";
         jumpBtn.disabled = false;
+        renderRecord();
         window.scrollTo(0, 0);
       }
 
@@ -1105,6 +1212,7 @@
       var startCtx = document.getElementById("canvas-start").getContext("2d");
       drawStartLineup(startCtx, 720, 300);
       updateHUD();
+      renderRecord();
       requestAnimationFrame(loop);
     </script>
   </body>
