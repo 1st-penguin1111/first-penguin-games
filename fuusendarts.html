@@ -368,6 +368,16 @@ border-radius: 999px; padding: 2px 8px;
 .breakdown .pts { margin-left: auto; font-family: "Zen Kaku Gothic New", sans-serif; font-weight: 900; font-size: 17px; white-space: nowrap; }
 .breakdown .bull-tag { color: #eab308; font-weight: 800; font-size: 12px; }
 
+/* ---------- BGM toggle ---------- */
+.bgm-btn {
+position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 80;
+border: 2px solid var(--line); background: var(--card); color: var(--ink);
+font-family: inherit; font-weight: 800; font-size: 13px;
+border-radius: 999px; padding: 8px 14px; min-height: 40px; cursor: pointer;
+box-shadow: var(--shadow); opacity: .92; touch-action: manipulation;
+}
+.bgm-btn:active { transform: translateY(2px);}
+
 @media (prefers-reduced-motion: reduce) {
 .balloon-dots span,.marker-pulse,.burst,.dart-wobble,.cloud-drift,.cloud-drift2,.sfx-pop, body.zero-on main,.opening-fig.speaking,.opening-fig.cheering,.opening-hint,.opening-bubble.bubble-pop { animation: none!important;}
 .f-step.on { opacity: 1 !important; animation: none !important;}
@@ -593,6 +603,7 @@ border-radius: 999px; padding: 2px 8px;
 </section>
 </main>
 <div id="zeroDim" aria-hidden="true"></div>
+<button class="bgm-btn" id="bgmBtn" aria-label="BGMのオン・オフ">🔊 BGM</button>
 
 <script>
 "use strict";
@@ -674,6 +685,7 @@ var OPENING_ALL = ["kasago", "ukyo", "gyarupiyo", "happi", "pony", "nyaronpan", 
 var openingIdx = 0;
 function showOpening() {
 audio();
+startBGM();
 openingIdx = 0;
 for (var i = 0; i < OPENING_ALL.length; i++) {
 var f = $("ofig-" + OPENING_ALL[i]);
@@ -772,6 +784,96 @@ for (var i = 0; i < notes.length; i++) tone(notes[i], null, 0.22, "square", 0.12
 tone(1319, null, 0.4, "square", 0.12, 0.38);
 }
 function sndLock() { tone(880, 990, 0.07, "sine", 0.10);}
+
+/* ================= BGM (お祭りポップ) ================= */
+var bgmOn = true;
+var bgmTimer = null, bgmStep = 0, bgmNextTime = 0;
+var BGM_BPM = 132;
+var BGM_STEP = 60 / BGM_BPM / 4; // 16分音符
+function mf(m) { return 440 * Math.pow(2, (m - 69) / 12);}
+// メロディ：ヨナ抜き音階寄りの弾む旋律（8分音符単位、4小節）
+var BGM_MEL = [
+76, null, 79, null, 81, null, 79, null, 76, null, 74, null, 76, null, 79, null,
+81, null, 84, null, 81, null, 79, null, 81, null, 79, null, 76, null, 74, null,
+74, null, 76, null, 79, null, 81, null, 79, null, 76, null, 74, null, 76, null,
+79, null, 81, null, 84, null, 81, null, 79, null, 76, null, 74, null, 72, null
+];
+// ベースのルート（小節ごと）: C / F / G / C
+var BGM_BASS = [36, 41, 43, 36];
+function bgmTone(freq, t, dur, type, vol) {
+var o = AC.createOscillator(), g = AC.createGain();
+o.type = type;
+o.frequency.setValueAtTime(freq, t);
+g.gain.setValueAtTime(0.0001, t);
+g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+o.connect(g); g.connect(AC.destination);
+o.start(t); o.stop(t + dur + 0.03);
+}
+function bgmNoise(t, dur, vol, freq) {
+if (!noiseBuf) {
+noiseBuf = AC.createBuffer(1, AC.sampleRate * 0.3, AC.sampleRate);
+var d = noiseBuf.getChannelData(0);
+for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+}
+var src = AC.createBufferSource(); src.buffer = noiseBuf;
+var f = AC.createBiquadFilter(); f.type = "highpass"; f.frequency.value = freq;
+var g = AC.createGain();
+g.gain.setValueAtTime(vol, t);
+g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+src.connect(f); f.connect(g); g.connect(AC.destination);
+src.start(t); src.stop(t + dur + 0.02);
+}
+function bgmTaiko(t, vol) {
+var o = AC.createOscillator(), g = AC.createGain();
+o.type = "sine";
+o.frequency.setValueAtTime(150, t);
+o.frequency.exponentialRampToValueAtTime(52, t + 0.16);
+g.gain.setValueAtTime(vol, t);
+g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+o.connect(g); g.connect(AC.destination);
+o.start(t); o.stop(t + 0.22);
+}
+function bgmScheduleStep(step, t) {
+var bar = Math.floor(step / 16);
+var s16 = step % 16;
+// メロディ（篠笛っぽい三角波＋控えめな倍音）
+if (s16 % 2 === 0) {
+var m = BGM_MEL[step / 2 | 0];
+if (m) {
+bgmTone(mf(m), t, BGM_STEP * 3.4, "triangle", 0.055);
+bgmTone(mf(m + 12), t, BGM_STEP * 1.6, "sine", 0.014);
+}
+}
+// ベース（4分音符でルートを刻む）
+if (s16 % 4 === 0) bgmTone(mf(BGM_BASS[bar] + 12), t, BGM_STEP * 3.2, "sine", 0.075);
+if (s16 === 14) bgmTone(mf(BGM_BASS[bar] + 19), t, BGM_STEP * 1.8, "sine", 0.05);
+// 和太鼓ドン（1・3拍目）と拍子木っぽいカッ（裏拍）
+if (s16 === 0 || s16 === 8) bgmTaiko(t, 0.16);
+if (s16 === 4 || s16 === 12) bgmTaiko(t, 0.09);
+if (s16 % 4 === 2) bgmNoise(t, 0.03, 0.05, 3200);
+if (s16 % 2 === 1) bgmNoise(t, 0.02, 0.018, 5200);
+}
+function bgmTick() {
+if (!AC) return;
+while (bgmNextTime < AC.currentTime + 0.16) {
+bgmScheduleStep(bgmStep, bgmNextTime);
+bgmNextTime += BGM_STEP;
+bgmStep = (bgmStep + 1) % 64;
+}
+}
+function startBGM() {
+if (!bgmOn) return;
+var ac = audio(); if (!ac) return;
+if (bgmTimer) return;
+bgmStep = 0;
+bgmNextTime = ac.currentTime + 0.06;
+bgmTimer = setInterval(bgmTick, 40);
+}
+function stopBGM() {
+if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null;}
+}
+function updateBgmBtn() { $("bgmBtn").textContent = bgmOn? "🔊 BGM": "🔇 BGM";}
 
 /* ================= balloons ================= */
 function shuffle(a) {
@@ -1256,7 +1358,13 @@ $("startBtn").addEventListener("click", showOpening);
 $("retryBtn").addEventListener("click", showOpening);
 $("openingScene").addEventListener("click", advanceOpening);
 $("openingSkip").addEventListener("click", function (e) { e.stopPropagation(); skipOpening();});
-$("menuBtn").addEventListener("click", function () { phase = "idle"; showScreen("start");});
+$("menuBtn").addEventListener("click", function () { phase = "idle"; stopBGM(); showScreen("start");});
+$("bgmBtn").addEventListener("click", function () {
+bgmOn = !bgmOn;
+updateBgmBtn();
+if (bgmOn && startScreen.classList.contains("hidden")) startBGM();
+else stopBGM();
+});
 aimBtn.addEventListener("click", function (e) { e.stopPropagation(); lockAim();});
 powerBtn.addEventListener("click", function (e) { e.stopPropagation(); confirmPower();});
 document.addEventListener("gesturestart", function (e) { e.preventDefault();});

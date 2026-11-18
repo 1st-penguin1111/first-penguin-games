@@ -294,6 +294,17 @@
       .stat-line { text-align: center; font-size: 17px; font-weight: 800; margin: 6px 0; }
       .stat-line span { color: var(--pink-deep); font-size: 22px; }
       @media (prefers-color-scheme: dark) { .stat-line span { color: var(--pink); } }
+
+      /* ---------- BGM toggle ---------- */
+      .bgm-btn {
+        position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        z-index: 40; appearance: none; cursor: pointer; font-family: inherit;
+        border: 2px solid var(--line); border-radius: 999px;
+        background: var(--panel); color: var(--ink); box-shadow: var(--shadow);
+        padding: 8px 14px; font-size: 13px; font-weight: 800; line-height: 1;
+        transition: transform 0.12s ease;
+      }
+      .bgm-btn:active { transform: scale(0.96); }
     </style>
   </head>
   <body>
@@ -437,6 +448,8 @@
         <a class="list-link pop" href="https://1st-penguin1111.github.io/first-penguin-games/games.html" target="_blank" rel="noopener">🎮 ゲーム一覧にもどる</a>
       </section>
     </div>
+
+    <button class="bgm-btn" id="bgm-btn" type="button" aria-label="BGMのオン・オフを切り替える">🔊 BGM オン</button>
 
     <div class="toast" id="toast">
       <div class="t-get" id="toast-get">ペア ゲット！</div>
@@ -931,12 +944,111 @@
         }, 900);
       }
 
+      /* ================= BGM (Web Audio, original) =================
+         Calm, concentration-friendly loop: slow soft pads with a sparse
+         gentle melody, kept quiet so it never fights the game. Starts on
+         the player's start tap, loops through play and the result screen,
+         and stops when returning to the start screen. */
+      var bgmCtx = null, bgmGain = null, bgmTimer = null;
+      var bgmOn = true, bgmPlaying = false;
+      var bgmBar = 0, bgmNextTime = 0;
+      var BGM_BPM = 72;
+      var BGM_BAR = 60 / BGM_BPM * 4; /* seconds per 4-beat bar */
+      /* chord tones per bar (midi): Cmaj7 / Am7 / Fmaj7 / G7 — soft and open */
+      var BGM_CHORDS = [
+        [48, 60, 64, 67, 71],
+        [45, 57, 60, 64, 67],
+        [41, 53, 57, 60, 64],
+        [43, 55, 59, 62, 65]
+      ];
+      /* sparse melody per bar: [beat, midi, beats long] — plenty of rests */
+      var BGM_MELODY = [
+        [[0, 76, 1.5], [2, 79, 1.5]],
+        [[0, 72, 1.5], [2.5, 76, 1]],
+        [[0, 72, 1.5], [2, 69, 1.5]],
+        [[0, 74, 1.5], [3, 71, 1]]
+      ];
+      function bgmFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+      function bgmEnsureCtx() {
+        if (!bgmCtx) {
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return false;
+          bgmCtx = new AC();
+          bgmGain = bgmCtx.createGain();
+          bgmGain.gain.value = bgmOn ? 0.5 : 0;
+          bgmGain.connect(bgmCtx.destination);
+        }
+        if (bgmCtx.state === "suspended") bgmCtx.resume();
+        return true;
+      }
+      function bgmPadTone(midi, t, dur, vol) {
+        var o1 = bgmCtx.createOscillator(); o1.type = "sine"; o1.frequency.value = bgmFreq(midi);
+        var o2 = bgmCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = bgmFreq(midi); o2.detune.value = 5;
+        var g = bgmCtx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol, t + Math.min(0.9, dur * 0.35));
+        g.gain.setValueAtTime(vol, t + dur - Math.min(0.9, dur * 0.35));
+        g.gain.linearRampToValueAtTime(0, t + dur);
+        o1.connect(g); o2.connect(g); g.connect(bgmGain);
+        o1.start(t); o2.start(t); o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+      }
+      function bgmMelodyTone(midi, t, dur) {
+        var o = bgmCtx.createOscillator(); o.type = "triangle"; o.frequency.value = bgmFreq(midi);
+        var g = bgmCtx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.055, t + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.0008, t + Math.max(0.3, dur * (60 / BGM_BPM) * 0.95));
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + dur * (60 / BGM_BPM) + 0.1);
+      }
+      function bgmScheduleBar(barIdx, t) {
+        var chord = BGM_CHORDS[barIdx % BGM_CHORDS.length];
+        for (var i = 0; i < chord.length; i++) {
+          bgmPadTone(chord[i], t, BGM_BAR + 0.15, i === 0 ? 0.028 : 0.02);
+        }
+        var mel = BGM_MELODY[barIdx % BGM_MELODY.length];
+        for (var j = 0; j < mel.length; j++) {
+          bgmMelodyTone(mel[j][1], t + mel[j][0] * (60 / BGM_BPM), mel[j][2]);
+        }
+      }
+      function bgmStart() {
+        if (bgmPlaying) { bgmEnsureCtx(); return; }
+        if (!bgmEnsureCtx()) return;
+        bgmPlaying = true;
+        bgmBar = 0;
+        bgmNextTime = bgmCtx.currentTime + 0.08;
+        bgmTimer = setInterval(function () {
+          if (!bgmPlaying) return;
+          while (bgmNextTime < bgmCtx.currentTime + 0.7) {
+            bgmScheduleBar(bgmBar, bgmNextTime);
+            bgmBar++;
+            bgmNextTime += BGM_BAR;
+          }
+        }, 200);
+      }
+      function bgmStop() {
+        bgmPlaying = false;
+        if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+        if (bgmCtx) bgmCtx.close().catch(function () {});
+        bgmCtx = null; bgmGain = null;
+      }
+      function bgmUpdateBtn() {
+        $("bgm-btn").textContent = bgmOn ? "🔊 BGM オン" : "🔇 BGM オフ";
+      }
+      $("bgm-btn").addEventListener("click", function () {
+        bgmOn = !bgmOn;
+        if (bgmGain && bgmCtx) {
+          bgmGain.gain.setTargetAtTime(bgmOn ? 0.5 : 0, bgmCtx.currentTime, 0.08);
+        }
+        bgmUpdateBtn();
+      });
+
       /* ================= wiring ================= */
-      $("btn-vs").addEventListener("click", function () { startGame("vs"); });
-      $("btn-ta").addEventListener("click", function () { startGame("ta"); });
-      $("btn-quit").addEventListener("click", function () { stopTimer(); show("start"); });
-      $("btn-home").addEventListener("click", function () { show("start"); });
-      $("btn-again").addEventListener("click", function () { startGame(mode); });
+      $("btn-vs").addEventListener("click", function () { bgmStart(); startGame("vs"); });
+      $("btn-ta").addEventListener("click", function () { bgmStart(); startGame("ta"); });
+      $("btn-quit").addEventListener("click", function () { stopTimer(); bgmStop(); show("start"); });
+      $("btn-home").addEventListener("click", function () { bgmStop(); show("start"); });
+      $("btn-again").addEventListener("click", function () { bgmStart(); startGame(mode); });
     </script>
   </body>
 </html>

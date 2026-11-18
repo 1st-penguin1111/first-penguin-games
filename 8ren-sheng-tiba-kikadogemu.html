@@ -823,6 +823,27 @@
       .result-row .r-badge.lose { color: #ff5348; }
       .hidden { display: none !important; }
 
+      /* ---- BGMオン／オフボタン（右下固定） ---- */
+      .bgm-toggle {
+        position: fixed;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        z-index: 70;
+        font: inherit;
+        font-size: 13.5px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        color: var(--ink);
+        background: var(--panel);
+        border: 2px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 14px;
+        box-shadow: 0 4px 12px rgba(11, 80, 130, 0.22);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .bgm-toggle:active { transform: translateY(1px); opacity: 0.9; }
+
       @media (prefers-reduced-motion: reduce) {
         .playing-card .inner { transition: none; }
         .playing-card.slow-flip .inner { transition: none; }
@@ -934,6 +955,9 @@
 
     </div>
 
+    <!-- ===== BGMオン／オフ ===== -->
+    <button class="bgm-toggle" id="bgm-toggle" type="button" aria-pressed="true">🔊 BGM オン</button>
+
     <!-- ===== 休み時間の掛け合いオープニング ===== -->
     <div class="opening-overlay" id="opening-overlay" aria-hidden="true">
       <div class="opening-stage step-1" id="opening-stage">
@@ -1008,6 +1032,127 @@
         var battleBg = el("battle-bg");
         var openingOverlay = el("opening-overlay"), opStage = el("opening-stage");
         var opBubble = el("op-bubble"), opName = el("op-name"), opLine = el("op-line"), opHint = el("op-hint");
+
+        /* ---------- BGM（Web Audio生成：教室の休み時間っぽい軽快ポップ） ----------
+           コード進行 C→Am→F→G、132BPM。マリンバ／ウクレレ風プラックのメロディ、
+           軽いベースとパーカッションをループ再生する。既存の効果音とは独立。 */
+        var bgmBtn = el("bgm-toggle");
+        var bgmCtx = null, bgmMaster = null, bgmTimer = null, bgmNoiseBuf = null;
+        var bgmWanted = true;
+        var bgmPlaying = false;
+        var bgmStep = 0, bgmNextTime = 0;
+        var BGM_STEP_DUR = 60 / 132 / 2; // 8分音符ぶん
+        var BGM_CHORDS = [
+          { root: 48, tones: [60, 64, 67] },
+          { root: 45, tones: [57, 60, 64] },
+          { root: 41, tones: [53, 57, 60] },
+          { root: 43, tones: [55, 59, 62] }
+        ];
+        var BGM_MELODY = [
+          76, 79, 81, 79, 76, 74, 76, 79,
+          81, 79, 76, 79, 81, 84, 81, 79,
+          81, 79, 77, 79, 81, 79, 77, 76,
+          79, 76, 74, 76, 79, 74, 72, null
+        ];
+        function bgmFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+        function bgmEnsureCtx() {
+          if (bgmCtx) return true;
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return false;
+          bgmCtx = new AC();
+          bgmMaster = bgmCtx.createGain();
+          bgmMaster.gain.value = 0.16;
+          bgmMaster.connect(bgmCtx.destination);
+          var len = Math.floor(bgmCtx.sampleRate * 0.5);
+          bgmNoiseBuf = bgmCtx.createBuffer(1, len, bgmCtx.sampleRate);
+          var data = bgmNoiseBuf.getChannelData(0);
+          for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+          return true;
+        }
+        function bgmPluck(midi, time, vol, dur) {
+          var o1 = bgmCtx.createOscillator(); o1.type = "sine"; o1.frequency.value = bgmFreq(midi);
+          var o2 = bgmCtx.createOscillator(); o2.type = "triangle"; o2.frequency.value = bgmFreq(midi) * 2;
+          var g2 = bgmCtx.createGain(); g2.gain.value = 0.22;
+          var g = bgmCtx.createGain();
+          g.gain.setValueAtTime(0, time);
+          g.gain.linearRampToValueAtTime(vol, time + 0.012);
+          g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+          o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(bgmMaster);
+          o1.start(time); o2.start(time);
+          o1.stop(time + dur + 0.05); o2.stop(time + dur + 0.05);
+        }
+        function bgmBass(midi, time) {
+          var o = bgmCtx.createOscillator(); o.type = "triangle"; o.frequency.value = bgmFreq(midi);
+          var g = bgmCtx.createGain();
+          g.gain.setValueAtTime(0, time);
+          g.gain.linearRampToValueAtTime(0.5, time + 0.015);
+          g.gain.exponentialRampToValueAtTime(0.001, time + 0.34);
+          o.connect(g); g.connect(bgmMaster);
+          o.start(time); o.stop(time + 0.4);
+        }
+        function bgmKick(time) {
+          var o = bgmCtx.createOscillator(); o.type = "sine";
+          o.frequency.setValueAtTime(140, time);
+          o.frequency.exponentialRampToValueAtTime(48, time + 0.1);
+          var g = bgmCtx.createGain();
+          g.gain.setValueAtTime(0.5, time);
+          g.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+          o.connect(g); g.connect(bgmMaster);
+          o.start(time); o.stop(time + 0.14);
+        }
+        function bgmHat(time, accent) {
+          var src = bgmCtx.createBufferSource(); src.buffer = bgmNoiseBuf;
+          var f = bgmCtx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 7000;
+          var g = bgmCtx.createGain();
+          g.gain.setValueAtTime(accent ? 0.15 : 0.08, time);
+          g.gain.exponentialRampToValueAtTime(0.001, time + 0.045);
+          src.connect(f); f.connect(g); g.connect(bgmMaster);
+          src.start(time); src.stop(time + 0.06);
+        }
+        function bgmScheduleStep(step, time) {
+          var bar = Math.floor(step / 8) % 4;
+          var chord = BGM_CHORDS[bar];
+          var inBar = step % 8;
+          var note = BGM_MELODY[step % 32];
+          if (note !== null && note !== undefined) bgmPluck(note, time, 0.5, 0.32);
+          if (inBar % 2 === 0) bgmPluck(chord.tones[(inBar / 2) % 3] + 12, time, 0.13, 0.22);
+          if (inBar === 0 || inBar === 4) { bgmBass(chord.root, time); bgmKick(time); }
+          bgmHat(time, inBar % 2 === 1);
+        }
+        function bgmTick() {
+          if (!bgmCtx) return;
+          while (bgmNextTime < bgmCtx.currentTime + 0.25) {
+            bgmScheduleStep(bgmStep, bgmNextTime);
+            bgmNextTime += BGM_STEP_DUR;
+            bgmStep = (bgmStep + 1) % 32;
+          }
+        }
+        function bgmUpdateBtn() {
+          bgmBtn.textContent = bgmWanted ? "🔊 BGM オン" : "🔇 BGM オフ";
+          bgmBtn.setAttribute("aria-pressed", bgmWanted ? "true" : "false");
+        }
+        function startBGM() {
+          if (!bgmWanted) return;
+          if (!bgmEnsureCtx()) return;
+          if (bgmCtx.state === "suspended") bgmCtx.resume();
+          if (bgmPlaying) return;
+          bgmPlaying = true;
+          bgmStep = 0;
+          bgmNextTime = bgmCtx.currentTime + 0.06;
+          bgmTimer = setInterval(bgmTick, 90);
+          bgmTick();
+        }
+        function stopBGM() {
+          bgmPlaying = false;
+          if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+          if (bgmCtx && bgmCtx.state === "running") bgmCtx.suspend();
+        }
+        bgmBtn.addEventListener("click", function () {
+          bgmWanted = !bgmWanted;
+          bgmUpdateBtn();
+          if (bgmWanted) startBGM(); else stopBGM();
+        });
+        bgmUpdateBtn();
 
         var round = 1;        // 現在の回戦 1..8
         var wins = 0;
@@ -1467,6 +1612,7 @@
         }
         /* スタート／もう一度：まずオープニングを見せてから対戦開始 */
         function beginRun() {
+          startBGM();
           screenStart.classList.add("hidden");
           screenEnd.classList.add("hidden");
           screenGame.classList.remove("hidden");
@@ -1477,6 +1623,7 @@
         el("btn-start").addEventListener("click", beginRun);
         el("btn-again").addEventListener("click", beginRun);
         el("btn-to-menu").addEventListener("click", function () {
+          stopBGM();
           setBattleBg(false);
           screenEnd.classList.add("hidden");
           screenGame.classList.add("hidden");

@@ -331,6 +331,18 @@
       }
       @keyframes cutinpop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
       .confetti { position: fixed; top: -14px; z-index: 60; width: 10px; height: 16px; border-radius: 2px; pointer-events: none; }
+
+      /* ---------- BGMボタン ---------- */
+      .bgm-btn {
+        position: fixed; right: 12px; bottom: 12px; z-index: 70;
+        display: none; min-height: 44px; padding: 8px 16px;
+        font-size: .92rem; font-weight: 800;
+        color: var(--ink); background: var(--card);
+        border: 3px solid var(--card-line); border-radius: 999px;
+        box-shadow: var(--shadow);
+      }
+      .bgm-btn.show { display: block; }
+      .bgm-btn.off { color: var(--ink-soft); opacity: .8; }
     </style>
   </head>
   <body>
@@ -427,6 +439,8 @@
 
     </div>
 
+    <button class="bgm-btn" id="btn-bgm" type="button" aria-label="BGMのオンオフ">♪ BGM ON</button>
+
     <!-- 勝者カットイン -->
     <div class="cutin" id="cutin">
       <img id="cutin-img" alt="" />
@@ -489,6 +503,93 @@
         var notes = [523, 659, 784, 1047];
         for (var i = 0; i < notes.length; i++) tone(notes[i], i * 0.13, 0.34, "triangle", 0.2);
         tone(1319, 0.55, 0.5, "triangle", 0.18);
+      }
+
+      /* ================= BGM（冬のゆったりキラキラ系・Web Audio生成） ================= */
+      var BGM_BPM = 96;
+      var BGM_BEAT = 60 / BGM_BPM;
+      var BGM_BAR = BGM_BEAT * 4;
+      var BGM_CHORDS = [
+        { bass: 130.81, tones: [261.63, 329.63, 392.00, 493.88] }, /* C */
+        { bass: 110.00, tones: [220.00, 261.63, 329.63, 392.00] }, /* Am */
+        { bass: 87.31,  tones: [174.61, 220.00, 261.63, 329.63] }, /* F */
+        { bass: 98.00,  tones: [196.00, 246.94, 293.66, 392.00] }  /* G */
+      ];
+      var BGM_MELODY = [
+        [{ b: 0, f: 659.25 }, { b: 1, f: 783.99 }, { b: 2, f: 880.00 }, { b: 3, f: 783.99 }],
+        [{ b: 0, f: 1046.50 }, { b: 1, f: 880.00 }, { b: 2, f: 659.25 }, { b: 3, f: 783.99 }],
+        [{ b: 0, f: 880.00 }, { b: 1, f: 1046.50 }, { b: 2, f: 880.00 }, { b: 3, f: 698.46 }],
+        [{ b: 0, f: 783.99 }, { b: 1, f: 987.77 }, { b: 2, f: 1174.66 }, { b: 3, f: 783.99 }]
+      ];
+      var BGM = { playing: false, muted: false, timer: null, nextTime: 0, bar: 0 };
+      var bgmGain = null;
+      function bgmGainNode() {
+        var ctx = ac(); if (!ctx) return null;
+        if (!bgmGain) {
+          bgmGain = ctx.createGain();
+          bgmGain.gain.value = BGM.muted ? 0 : 0.9;
+          bgmGain.connect(ctx.destination);
+        }
+        return bgmGain;
+      }
+      function bgmNote(freq, start, dur, type, vol, attack) {
+        var ctx = ac(); var out = bgmGainNode(); if (!ctx || !out) return;
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = type; o.frequency.setValueAtTime(freq, start);
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.exponentialRampToValueAtTime(vol, start + (attack || 0.02));
+        g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        o.connect(g); g.connect(out);
+        o.start(start); o.stop(start + dur + 0.05);
+      }
+      function scheduleBar(barIdx, t) {
+        var ch = BGM_CHORDS[barIdx % BGM_CHORDS.length];
+        var i, f;
+        /* 柔らかいパッド */
+        for (i = 0; i < ch.tones.length; i++) bgmNote(ch.tones[i], t, BGM_BAR * 0.98, "sine", 0.022, 0.4);
+        /* ゆったりベース */
+        bgmNote(ch.bass, t, BGM_BEAT * 1.8, "triangle", 0.06);
+        bgmNote(ch.bass, t + BGM_BEAT * 2, BGM_BEAT * 1.8, "triangle", 0.045);
+        /* キラキラしたアルペジオ（オルゴール風・1オクターブ上） */
+        for (i = 0; i < 8; i++) {
+          f = ch.tones[i % ch.tones.length] * 2;
+          bgmNote(f, t + i * BGM_BEAT * 0.5, 0.32, "sine", 0.016);
+        }
+        /* メロディ（オルゴール風） */
+        var mel = BGM_MELODY[barIdx % BGM_MELODY.length];
+        for (i = 0; i < mel.length; i++) bgmNote(mel[i].f, t + mel[i].b * BGM_BEAT, BGM_BEAT * 1.35, "sine", 0.052, 0.01);
+      }
+      function bgmTick() {
+        var ctx = ac(); if (!ctx || !BGM.playing) return;
+        while (BGM.nextTime < ctx.currentTime + 0.5) {
+          scheduleBar(BGM.bar, BGM.nextTime);
+          BGM.nextTime += BGM_BAR;
+          BGM.bar++;
+        }
+      }
+      function updateBgmBtn() {
+        var b = document.getElementById("btn-bgm"); if (!b) return;
+        b.classList.toggle("show", BGM.playing);
+        b.classList.toggle("off", BGM.muted);
+        b.textContent = BGM.muted ? "♪ BGM OFF" : "♪ BGM ON";
+      }
+      function bgmStart() {
+        var ctx = ac(); if (!ctx) return;
+        var out = bgmGainNode();
+        if (out) out.gain.value = BGM.muted ? 0 : 0.9;
+        if (BGM.playing) { updateBgmBtn(); return; }
+        BGM.playing = true;
+        BGM.bar = 0;
+        BGM.nextTime = ctx.currentTime + 0.06;
+        BGM.timer = setInterval(bgmTick, 200);
+        bgmTick();
+        updateBgmBtn();
+      }
+      function bgmStop() {
+        BGM.playing = false;
+        if (BGM.timer) { clearInterval(BGM.timer); BGM.timer = null; }
+        if (bgmGain) bgmGain.gain.value = 0;
+        updateBgmBtn();
       }
 
       /* ================= 画面切替 ================= */
@@ -1049,9 +1150,17 @@
       }
 
       /* ================= 画面遷移ボタン ================= */
-      $("btn-start").addEventListener("click", function () { ac(); sndPop(); startOpening(); });
-      $("btn-again").addEventListener("click", function () { sndPop(); startOpening(); });
-      $("btn-menu").addEventListener("click", function () { sndPop(); show("menu"); });
+      $("btn-start").addEventListener("click", function () { ac(); sndPop(); bgmStart(); startOpening(); });
+      $("btn-again").addEventListener("click", function () { sndPop(); bgmStart(); startOpening(); });
+      $("btn-menu").addEventListener("click", function () { sndPop(); bgmStop(); show("menu"); });
+      $("btn-bgm").addEventListener("click", function () {
+        ac();
+        BGM.muted = !BGM.muted;
+        var out = bgmGainNode();
+        if (out) out.gain.value = BGM.muted ? 0 : 0.9;
+        if (!BGM.muted) sndPop();
+        updateBgmBtn();
+      });
     </script>
   </body>
 </html>

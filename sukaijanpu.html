@@ -292,6 +292,17 @@
         touch-action:manipulation; user-select:none;
       }
       .menu-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(23,58,94,.25); }
+      /* BGM toggle: fixed bottom-right, above everything */
+      #bgmBtn{
+        position:fixed; right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:60;
+        font-family:"M PLUS Rounded 1c",sans-serif; font-weight:800; font-size:14px;
+        color:var(--ink); background:rgba(255,255,255,.94);
+        border:3px solid var(--ink); border-radius:999px;
+        padding:7px 14px; cursor:pointer;
+        box-shadow:0 4px 0 rgba(23,58,94,.25);
+        touch-action:manipulation; user-select:none;
+      }
+      #bgmBtn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(23,58,94,.25); }
     </style>
   </head>
   <body>
@@ -422,6 +433,8 @@
       </div>
       <a class="games-link" href="https://1st-penguin1111.github.io/first-penguin-games/games.html" target="_blank" rel="noopener">🎮 ゲーム一覧へもどる</a>
     </section>
+
+    <button id="bgmBtn" type="button" aria-label="BGMのオンとオフを切り替える">🔊 BGM オン</button>
 
 <script>
 (function(){
@@ -1526,6 +1539,165 @@ function escapeHtml(s){
   return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
+/* ================= BGM (Web Audio, original) =================
+   爽やかな空の曲: bright pop in C major, C-G-Am-F, 128 BPM.
+   Wind-like airy lead (triangle + soft sine harmony), light pad,
+   bouncy bass and gentle percussion. Loops during play, from the
+   start tap through the result screen; stops back at the menu. */
+var BGM = (function(){
+  var actx=null, master=null, timer=null, on=true, playing=false;
+  var step=0, nextTime=0;
+  var BPM=128;
+  var SPB=60/BPM;          // seconds per beat
+  var EIGHTH=SPB/2;        // eighth note
+  // 4 bars x 8 eighths = 32 steps
+  // chords: C, G, Am, F  (root midi, pad tones midi)
+  var CHORDS=[
+    { root:48, pad:[60,64,67] },  // C
+    { root:43, pad:[59,62,67] },  // G
+    { root:45, pad:[57,60,64] },  // Am
+    { root:41, pad:[53,57,60] }   // F
+  ];
+  // melody (midi, 0 = rest) - bright, soaring, pentatonic-leaning
+  var MEL=[
+    76,79,81,79, 76,74,72,74,   // C: E5 G5 A5 G5 E5 D5 C5 D5
+    76,79,83,79, 76,74,71,74,   // G: E5 G5 B5 G5 E5 D5 B4 D5
+    76,81,84,81, 76,72,69,72,   // Am: E5 A5 C6 A5 E5 C5 A4 C5
+    77,81,84,81, 77,76,74,76    // F: F5 A5 C6 A5 F5 E5 D5 E5
+  ];
+  // sparkle harmony a third/sixth above, sparse (0 = rest)
+  var HARM=[
+    0,0,84,0, 0,0,79,0,
+    0,0,86,0, 0,0,79,0,
+    0,0,88,0, 0,0,81,0,
+    0,0,88,0, 0,0,84,0
+  ];
+  // bass pattern per bar (scale offsets in semitones from root): root, root, fifth, root...
+  var BASS_PAT=[0, null, 7, null, 0, null, 7, 12];
+  function mf(m){ return 440*Math.pow(2,(m-69)/12); }
+  function ensureCtx(){
+    if(actx) return true;
+    try{
+      var AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC) return false;
+      actx=new AC();
+      master=actx.createGain();
+      master.gain.value=on?0.5:0;
+      master.connect(actx.destination);
+    }catch(e){ return false; }
+    return true;
+  }
+  function tone(midi, t, dur, type, vol, glideTo){
+    if(!midi) return;
+    var o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.setValueAtTime(mf(midi), t);
+    if(glideTo) o.frequency.exponentialRampToValueAtTime(mf(glideTo), t+dur*0.9);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t+dur+0.05);
+  }
+  function padChord(ch, t, dur){
+    ch.pad.forEach(function(m){
+      var o=actx.createOscillator(), g=actx.createGain();
+      o.type="sine"; o.frequency.setValueAtTime(mf(m+12), t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.045, t+0.18);
+      g.gain.setValueAtTime(0.045, t+dur-0.18);
+      g.gain.linearRampToValueAtTime(0.0001, t+dur);
+      o.connect(g); g.connect(master);
+      o.start(t); o.stop(t+dur+0.05);
+    });
+  }
+  function kick(t){
+    var o=actx.createOscillator(), g=actx.createGain();
+    o.type="sine";
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(48, t+0.11);
+    g.gain.setValueAtTime(0.22, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+0.13);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t+0.15);
+  }
+  function hat(t, open){
+    var len=open?0.14:0.05;
+    var buf=actx.createBuffer(1, Math.ceil(actx.sampleRate*len), actx.sampleRate);
+    var d=buf.getChannelData(0);
+    for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+    var src=actx.createBufferSource(); src.buffer=buf;
+    var f=actx.createBiquadFilter(); f.type="highpass"; f.frequency.value=7200;
+    var g=actx.createGain(); g.gain.value=open?0.07:0.05;
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(t);
+  }
+  function shaker(t){
+    var len=0.09;
+    var buf=actx.createBuffer(1, Math.ceil(actx.sampleRate*len), actx.sampleRate);
+    var d=buf.getChannelData(0);
+    for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/d.length);
+    var src=actx.createBufferSource(); src.buffer=buf;
+    var f=actx.createBiquadFilter(); f.type="bandpass"; f.frequency.value=5200; f.Q.value=0.8;
+    var g=actx.createGain(); g.gain.value=0.035;
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(t);
+  }
+  function scheduleStep(s, t){
+    var bar=Math.floor(s/8)%4;
+    var idx=s%8;
+    var ch=CHORDS[bar];
+    if(idx===0) padChord(ch, t, SPB*4);
+    // melody: airy triangle lead, slightly detached for a breezy feel
+    var m=MEL[s%32];
+    if(m) tone(m, t, EIGHTH*1.7, "triangle", 0.16);
+    var h=HARM[s%32];
+    if(h) tone(h, t, EIGHTH*1.4, "sine", 0.05);
+    // bass
+    var b=BASS_PAT[idx];
+    if(b!==null && b!==undefined) tone(ch.root+12+b, t, EIGHTH*1.5, "triangle", 0.13);
+    // percussion: kick on beats, hat on eighths, shaker off-beats
+    if(idx%2===0) kick(t);
+    hat(t, idx===7);
+    if(idx%2===1) shaker(t);
+  }
+  function tick(){
+    if(!actx) return;
+    while(nextTime < actx.currentTime + 0.22){
+      scheduleStep(step, nextTime);
+      nextTime += EIGHTH;
+      step = (step+1)%32;
+    }
+  }
+  function start(){
+    if(!ensureCtx()) return;
+    if(actx.state==="suspended") actx.resume();
+    if(playing) return;
+    playing=true;
+    step=0;
+    nextTime=actx.currentTime+0.06;
+    timer=setInterval(tick, 90);
+    tick();
+  }
+  function stop(){
+    playing=false;
+    if(timer){ clearInterval(timer); timer=null; }
+  }
+  function setOn(v){
+    on=v;
+    if(master && actx){
+      master.gain.cancelScheduledValues(actx.currentTime);
+      master.gain.setTargetAtTime(on?0.5:0, actx.currentTime, 0.03);
+    }
+    var btn=document.getElementById("bgmBtn");
+    if(btn) btn.textContent = on ? "🔊 BGM オン" : "🔇 BGM オフ";
+  }
+  return { start:start, stop:stop, setOn:setOn, isOn:function(){ return on; } };
+})();
+(function(){
+  var btn=document.getElementById("bgmBtn");
+  if(btn) btn.addEventListener("click", function(){ BGM.setOn(!BGM.isOn()); });
+})();
+
 /* ================= main loop ================= */
 function loop(ts){
   var dt=Math.min(0.033, (ts-lastTs)/1000 || 0.016);
@@ -1567,6 +1739,7 @@ function loop(ts){
 
 /* ================= flow ================= */
 function startGame(){
+  BGM.start();
   startScreen.classList.add("hidden");
   resultScreen.classList.add("hidden");
   stage.classList.remove("hidden");
@@ -1582,6 +1755,7 @@ function startGame(){
   setPhase("angle");
 }
 function goToMenu(){
+  BGM.stop();
   resultScreen.classList.add("hidden");
   stage.classList.add("hidden");
   deck.classList.add("hidden");

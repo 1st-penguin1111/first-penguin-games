@@ -316,6 +316,9 @@
           <button class="flip-btn left" id="flip-l">◀ 左フリッパー</button>
           <button class="flip-btn right" id="flip-r">右フリッパー ▶</button>
         </div>
+        <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+          <button class="mini-btn" id="btn-bgm">🔊 BGM オン</button>
+        </div>
         <p class="howto-mini">発射：右レーンを下に引っぱってはなす ／ フリッパー：画面の左半分タップで左、右半分タップで右（盤面の外でもOK）</p>
       </section>
 
@@ -324,6 +327,7 @@
         <h1 class="title" style="font-size:28px;">けっか発表！</h1>
         <div class="result-score"><small>SCORE</small><div class="num" id="res-score">0</div></div>
         <div class="result-title" id="res-title"></div>
+        <div style="text-align:center; margin:8px 0 0;"><button class="mini-btn" id="btn-bgm2">🔊 BGM オン</button></div>
         <div class="card">
           <div class="stat-row"><span>コンビボーナス</span><b id="res-pairs">―</b></div>
           <div class="stat-row"><span>ボス撃破</span><b id="res-boss">0回</b></div>
@@ -402,6 +406,70 @@
       else if(name === "sling"){ tone(170,0,0.08,"square",0.06); tone(260,0.03,0.09,"square",0.05); }
       else if(name === "target"){ tone(1560,0,0.07,"square",0.05); tone(2090,0.05,0.09,"square",0.045); }
       else if(name === "spin"){ tone(1900,0,0.04,"square",0.028); tone(2350,0.03,0.04,"square",0.024); }
+    }
+
+    /* ================= BGM: retro arcade chiptune loop =================
+       Original Web Audio chiptune: square-wave lead over a triangle
+       bass with a tick "hat", C–C–G–G–Am–Am–F–G at 150 BPM, 8 bars
+       of eighth notes looping. Shares the SFX AudioContext and sits
+       quieter than the effects. Starts on the start button (a user
+       gesture), keeps playing onto the result screen, and stops when
+       the player goes back to the menu / quits. */
+    var bgmOn = true, bgmTimer = null, bgmStep = 0, bgmNextT = 0;
+    var BGM_MEL = [
+      76,79,84,79, 81,79,76,74,   76,79,84,88, 84,79,81,79,
+      74,79,83,79, 86,83,79,74,   79,74,71,74, 79,74,71,67,
+      76,81,84,81, 88,84,81,76,   84,81,76,72, 76,81,84,81,
+      77,81,84,81, 85,84,81,77,   79,83,86,83, 79,74,71,74
+    ];
+    var BGM_BASS_ROOT = [48,48,43,43,45,45,41,43]; // C C G G Am Am F G
+    function midiHz(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+    function bgmNote(f, t, dur, type, vol){
+      var ac = AC; if(!ac) return;
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t); o.stop(t + dur + 0.02);
+    }
+    function bgmSchedule(){
+      var ac = AC; if(!ac) return;
+      var stepDur = 60 / 150 / 2; // eighth note at 150 BPM
+      while(bgmNextT < ac.currentTime + 0.18){
+        var s = bgmStep % 64, bar = Math.floor(s / 8), inBar = s % 8;
+        var mel = BGM_MEL[s];
+        if(mel) bgmNote(midiHz(mel), bgmNextT, stepDur * 0.92, "square", 0.03);
+        if(inBar % 2 === 0){
+          var root = BGM_BASS_ROOT[bar];
+          bgmNote(midiHz(inBar === 4 ? root + 7 : root), bgmNextT, stepDur * 1.8, "triangle", 0.05);
+        }
+        if(inBar % 2 === 1) bgmNote(6200, bgmNextT, 0.03, "square", 0.008);
+        bgmNextT += stepDur;
+        bgmStep++;
+      }
+    }
+    function bgmStart(){
+      var ac = audio(); if(!ac) return;
+      if(!bgmOn || bgmTimer){ updateBgmBtns(); return; }
+      bgmStep = 0; bgmNextT = ac.currentTime + 0.06;
+      bgmTimer = setInterval(bgmSchedule, 40);
+      bgmSchedule();
+      updateBgmBtns();
+    }
+    function bgmStop(){
+      if(bgmTimer){ clearInterval(bgmTimer); bgmTimer = null; }
+    }
+    function updateBgmBtns(){
+      var b1 = document.getElementById("btn-bgm");
+      if(b1) b1.textContent = bgmOn ? "🔊 BGM オン" : "🔇 BGM オフ";
+      var b2 = document.getElementById("btn-bgm2");
+      if(b2) b2.textContent = bgmOn ? "🔊 BGM オン" : "🔇 BGM オフ";
+    }
+    function bgmToggle(){
+      bgmOn = !bgmOn;
+      if(bgmOn) bgmStart(); else bgmStop();
+      updateBgmBtns();
     }
 
     /* ================= field geometry (logical 420 x 560) ================= */
@@ -1752,6 +1820,7 @@
       serveBall();
       buildChips();
       refreshHUD();
+      bgmStart();
       showScreen("scr-game");
       toast("ボール 1 ！ 右レーンを引っぱって発射", 1800);
     }
@@ -1786,12 +1855,15 @@
     }
     $("btn-start").addEventListener("click", function(){ audio(); startGame(); });
     $("btn-again").addEventListener("click", function(){ audio(); startGame(); });
-    $("btn-menu").addEventListener("click", function(){ showScreen("scr-start"); });
+    $("btn-menu").addEventListener("click", function(){ bgmStop(); showScreen("scr-start"); });
     $("btn-quit").addEventListener("click", function(){
       if(G) G.state = "over";
       balls = [];
+      bgmStop();
       showScreen("scr-start");
     });
+    $("btn-bgm").addEventListener("click", function(){ audio(); bgmToggle(); });
+    $("btn-bgm2").addEventListener("click", function(){ audio(); bgmToggle(); });
     window.addEventListener("resize", fitCanvas);
     // first paint of the field behind nothing (start screen) is skipped by loop guard
     G = newGame(); // allows render helpers to run safely

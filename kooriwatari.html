@@ -226,6 +226,30 @@
         box-shadow: 0 2px 0 #17384d;
       }
       #btn-restart:active { transform: translateY(2px); box-shadow: none; }
+      .bgm-toggle {
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #17384d;
+        background: rgba(255, 255, 255, 0.92);
+        border: 2px solid #17384d;
+        border-radius: 999px;
+        padding: 6px 12px;
+        min-height: 2.25rem;
+        cursor: pointer;
+        box-shadow: 0 2px 0 #17384d;
+      }
+      .bgm-toggle:active { transform: translateY(2px); box-shadow: none; }
+      #btn-bgm {
+        position: absolute;
+        right: 10px; bottom: 10px;
+        z-index: 5;
+      }
+      .bgm-row {
+        display: flex;
+        justify-content: center;
+        margin-top: 14px;
+      }
       #tap-hint {
         position: absolute;
         left: 0; right: 0; bottom: 16px;
@@ -545,6 +569,7 @@
         <div id="stage">
           <canvas id="cv" width="420" height="540"></canvas>
           <button id="btn-restart" type="button">🔁 はじめから</button>
+          <button id="btn-bgm" class="bgm-toggle" type="button">🔊 BGM オン</button>
           <div id="cutin">
             <img id="cutin-img" alt="" />
             <div class="cutin-name" id="cutin-name"></div>
@@ -584,6 +609,9 @@
         <div class="result-btns">
           <button id="btn-again" class="big-btn" type="button">もういちど</button>
           <button id="btn-menu" class="sub-btn" type="button">メニューにもどる</button>
+        </div>
+        <div class="bgm-row">
+          <button id="btn-bgm2" class="bgm-toggle" type="button">🔊 BGM オン</button>
         </div>
 
         <a class="yt-banner" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">
@@ -670,6 +698,129 @@
         setTimeout(function () { blip(1320, 1320, 0.16, "square", 0.07); }, 180);
       }
       function sndSplash() { blip(300, 60, 0.45, "sawtooth", 0.07); }
+
+      /* ================= BGM（WebAudio・冬のキラキラ系オリジナル） =================
+         澄んだ鈴のような音色で明るくループする自作曲。効果音とは別系統で共存する。 */
+      var bgmOn = true;
+      var bgmTimer = null;
+      var bgmStep = 0;
+      var bgmNextTime = 0;
+      var bgmGain = null;
+      var BGM_BPM = 116;
+      var BGM_STEP = 60 / BGM_BPM / 2;   // 8分音符ひとつ分
+      // コード進行 C → Am → F → G（各1小節）
+      var BGM_CHORDS = [
+        { root: 48, tones: [60, 64, 67] },
+        { root: 45, tones: [57, 60, 64] },
+        { root: 41, tones: [53, 57, 60] },
+        { root: 43, tones: [55, 59, 62] }
+      ];
+      // メロディ（MIDIノート番号・0は休符／4小節=32ステップ）
+      var BGM_MELODY = [
+        76, 79, 81, 79, 76, 79, 84, 79,
+        81, 79, 76, 79, 81, 84, 81, 79,
+        81, 84, 81, 77, 81, 77, 76, 0,
+        79, 83, 79, 74, 79, 83, 86, 83
+      ];
+      function midiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+      function bellNote(m, t, vol, dur) {
+        if (!audioCtx || !bgmGain) return;
+        try {
+          var f = midiHz(m);
+          var o1 = audioCtx.createOscillator(); o1.type = "sine"; o1.frequency.value = f;
+          var o2 = audioCtx.createOscillator(); o2.type = "sine"; o2.frequency.value = f * 2;
+          var g2 = audioCtx.createGain(); g2.gain.value = 0.35;
+          var g = audioCtx.createGain();
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.linearRampToValueAtTime(vol, t + 0.008);
+          g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+          o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(bgmGain);
+          o1.start(t); o2.start(t);
+          o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+        } catch (e) {}
+      }
+      function padChord(tones, t, dur) {
+        if (!audioCtx || !bgmGain) return;
+        try {
+          tones.forEach(function (m) {
+            var o = audioCtx.createOscillator(); o.type = "triangle"; o.frequency.value = midiHz(m);
+            var g = audioCtx.createGain();
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.linearRampToValueAtTime(0.026, t + 0.3);
+            g.gain.setValueAtTime(0.026, Math.max(t + 0.3, t + dur - 0.3));
+            g.gain.linearRampToValueAtTime(0.0001, t + dur);
+            o.connect(g); g.connect(bgmGain);
+            o.start(t); o.stop(t + dur + 0.05);
+          });
+        } catch (e) {}
+      }
+      function bassNote(m, t) {
+        if (!audioCtx || !bgmGain) return;
+        try {
+          var o = audioCtx.createOscillator(); o.type = "sine"; o.frequency.value = midiHz(m);
+          var g = audioCtx.createGain();
+          g.gain.setValueAtTime(0.09, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + BGM_STEP * 1.8);
+          o.connect(g); g.connect(bgmGain);
+          o.start(t); o.stop(t + BGM_STEP * 2);
+        } catch (e) {}
+      }
+      function scheduleStep(step, t) {
+        var bar = Math.floor(step / 8) % 4;
+        var inBar = step % 8;
+        var ch = BGM_CHORDS[bar];
+        if (inBar === 0) padChord(ch.tones, t, BGM_STEP * 8);
+        if (inBar === 0 || inBar === 4) bassNote(ch.root, t);
+        var mel = BGM_MELODY[step % 32];
+        if (mel) bellNote(mel, t, 0.10, 0.55);
+        // きらきらアルペジオ（コードトーンの2オクターブ上を控えめに）
+        if (inBar === 2 || inBar === 6) {
+          bellNote(ch.tones[Math.floor(step / 2) % 3] + 24, t, 0.04, 0.3);
+        }
+      }
+      function bgmTick() {
+        if (!audioCtx) return;
+        while (bgmNextTime < audioCtx.currentTime + 0.25) {
+          scheduleStep(bgmStep, bgmNextTime);
+          bgmNextTime += BGM_STEP;
+          bgmStep++;
+        }
+      }
+      function startBGM() {
+        if (!bgmOn) return;
+        ensureAudio();
+        if (!audioCtx || bgmTimer) return;
+        try {
+          if (!bgmGain) {
+            bgmGain = audioCtx.createGain();
+            bgmGain.gain.value = 0.9;
+            bgmGain.connect(audioCtx.destination);
+          }
+          bgmStep = 0;
+          bgmNextTime = audioCtx.currentTime + 0.06;
+          bgmTimer = setInterval(bgmTick, 90);
+        } catch (e) {}
+      }
+      function stopBGM() {
+        if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+      }
+      var bgmBtns = [document.getElementById("btn-bgm"), document.getElementById("btn-bgm2")];
+      function updateBgmBtns() {
+        var label = bgmOn ? "🔊 BGM オン" : "🔇 BGM オフ";
+        bgmBtns.forEach(function (b) { if (b) b.textContent = label; });
+      }
+      function toggleBGM() {
+        bgmOn = !bgmOn;
+        updateBgmBtns();
+        if (bgmOn) {
+          if (state === "playing" || state === "ending" || !scrResult.classList.contains("hidden")) startBGM();
+        } else {
+          stopBGM();
+        }
+      }
+      bgmBtns.forEach(function (b) {
+        if (b) b.addEventListener("click", function (e) { e.stopPropagation(); toggleBGM(); });
+      });
 
       /* ================= ゲーム本体 ================= */
       var W = 420, H = 540;
@@ -876,6 +1027,7 @@
 
       function startGame() {
         ensureAudio();
+        startBGM();
         resetGame();
         state = "playing";
         showScreen("game");
@@ -1422,7 +1574,7 @@
       /* ================= 操作 ================= */
       var stage = document.getElementById("stage");
       stage.addEventListener("pointerdown", function (e) {
-        if (e.target && e.target.id === "btn-restart") return;
+        if (e.target && (e.target.id === "btn-restart" || e.target.id === "btn-bgm")) return;
         e.preventDefault();
         ensureAudio();
         startCharge();
@@ -1463,6 +1615,7 @@
       document.getElementById("btn-again").addEventListener("click", startGame);
       document.getElementById("btn-menu").addEventListener("click", function () {
         state = "idle";
+        stopBGM();
         showScreen("start");
       });
     </script>

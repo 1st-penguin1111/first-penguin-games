@@ -262,6 +262,15 @@
       .end-card .big-num { font-size: 40px; font-family: "Mochiy Pop One", sans-serif; color: var(--sky-btn); }
       .hidden { display: none !important; }
       .mini-note { text-align: center; font-size: 12.5px; color: var(--ink-soft); font-weight: 700; margin-top: 10px; }
+      .bgm-toggle {
+        position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 80;
+        font-family: "Zen Maru Gothic", sans-serif; font-weight: 900; font-size: 13px;
+        background: var(--panel); color: var(--ink);
+        border: 2px solid var(--line); border-radius: 999px;
+        padding: 8px 14px; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,.18);
+        opacity: .92;
+      }
+      .bgm-toggle:active { transform: translateY(1px); }
     </style>
   </head>
   <body>
@@ -320,6 +329,8 @@
         <p class="mini-note">成功ゾーンの中でボタンを押せたら成功！外れたら失敗だよ。</p>
       </section>
     </div>
+
+    <button type="button" class="bgm-toggle" id="btn-bgm" aria-label="BGMのオンとオフを切り替える">🔊 BGM オン</button>
 
     <!-- ===== END OVERLAY (fixed, full viewport) ===== -->
     <div class="end-overlay" id="end-overlay">
@@ -807,18 +818,128 @@
 
       /* tiny synth sounds */
       var audioCtx = null;
+      function ensureCtx() {
+        if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        return audioCtx;
+      }
       function beep(freq, dur, type, delay) {
         try {
-          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          if (audioCtx.state === "suspended") audioCtx.resume();
-          var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          var ctx = ensureCtx(); if (!ctx) return;
+          var o = ctx.createOscillator(), g = ctx.createGain();
           o.type = type || "square"; o.frequency.value = freq;
-          g.gain.setValueAtTime(0.08, audioCtx.currentTime + (delay || 0));
-          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (delay || 0) + dur);
-          o.connect(g); g.connect(audioCtx.destination);
-          o.start(audioCtx.currentTime + (delay || 0)); o.stop(audioCtx.currentTime + (delay || 0) + dur);
+          g.gain.setValueAtTime(0.08, ctx.currentTime + (delay || 0));
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (delay || 0) + dur);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(ctx.currentTime + (delay || 0)); o.stop(ctx.currentTime + (delay || 0) + dur);
         } catch (e) { /* no sound is fine */ }
       }
+
+      /* ================= BGM =================
+         Original Web Audio loop: bright sports-day march.
+         120 BPM, 4/4, C major — C / F / C / G progression,
+         tuba-like bass on the beat, snare on 2 & 4, light melody.
+         Not too fast, steady marching rhythm. Coexists with SFX
+         through the same AudioContext but its own gain bus. */
+      var BGM_BPM = 120;
+      var BGM_STEP_DUR = 60 / BGM_BPM / 2; /* eighth note */
+      /* 8 bars x 8 eighth notes; 0 = rest. Midi numbers. */
+      var BGM_MEL = [
+        72, 0, 67, 0, 64, 0, 67, 0,
+        69, 0, 72, 0, 77, 0, 72, 0,
+        72, 0, 67, 0, 64, 0, 67, 0,
+        74, 0, 71, 0, 67, 0, 71, 0,
+        72, 0, 67, 0, 64, 0, 67, 0,
+        69, 0, 72, 0, 77, 0, 72, 0,
+        67, 0, 71, 0, 74, 0, 71, 0,
+        72, 0, 67, 0, 72, 0, 0, 0
+      ];
+      var BGM_ROOTS = [48, 53, 48, 55, 48, 53, 55, 48]; /* C F C G C F G C (midi) */
+      var bgmOn = true, bgmPlaying = false, bgmTimer = null, bgmNextTime = 0, bgmStep = 0, bgmGain = null, bgmNoiseBuf = null;
+      function midiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+      function bgmTone(ctx, freq, t, dur, type, vol) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = type; o.frequency.value = freq;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol, t + 0.015);
+        g.gain.setValueAtTime(vol, t + Math.max(0.02, dur - 0.05));
+        g.gain.linearRampToValueAtTime(0, t + dur);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + dur + 0.02);
+      }
+      function bgmNoise(ctx, t, dur, vol, freq, q) {
+        if (!bgmNoiseBuf) {
+          bgmNoiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+          var d = bgmNoiseBuf.getChannelData(0);
+          for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+        }
+        var src = ctx.createBufferSource(); src.buffer = bgmNoiseBuf;
+        var f = ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q || 0.9;
+        var g = ctx.createGain();
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        src.connect(f); f.connect(g); g.connect(bgmGain);
+        src.start(t); src.stop(t + dur + 0.02);
+      }
+      function bgmScheduleStep(step, t) {
+        var ctx = audioCtx; if (!ctx || !bgmGain) return;
+        var bar = Math.floor(step / 8), s = step % 8;
+        var root = BGM_ROOTS[bar];
+        /* melody: cheery square-ish lead, kept modest */
+        var m = BGM_MEL[step];
+        if (m) bgmTone(ctx, midiHz(m), t, BGM_STEP_DUR * 0.92, "triangle", 0.16);
+        /* harmony sparkle on off-beats */
+        if (s % 2 === 1 && m) bgmTone(ctx, midiHz(m + 12), t, BGM_STEP_DUR * 0.5, "sine", 0.035);
+        /* marching bass: root / fifth alternating on quarter beats */
+        if (s % 2 === 0) {
+          var bn = (s === 0 || s === 4) ? root : root + 7;
+          bgmTone(ctx, midiHz(bn), t, BGM_STEP_DUR * 1.7, "triangle", 0.20);
+          bgmTone(ctx, midiHz(bn), t, BGM_STEP_DUR * 1.7, "sine", 0.10);
+        }
+        /* drums: kick on 1 & 3, snare on 2 & 4, hat on every eighth */
+        if (s === 0 || s === 4) {
+          var ko = ctx.createOscillator(), kg = ctx.createGain();
+          ko.type = "sine";
+          ko.frequency.setValueAtTime(150, t);
+          ko.frequency.exponentialRampToValueAtTime(52, t + 0.10);
+          kg.gain.setValueAtTime(0.28, t);
+          kg.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+          ko.connect(kg); kg.connect(bgmGain);
+          ko.start(t); ko.stop(t + 0.15);
+        }
+        if (s === 2 || s === 6) bgmNoise(ctx, t, 0.11, 0.13, 1900, 0.8);
+        bgmNoise(ctx, t, 0.035, s % 2 === 0 ? 0.045 : 0.028, 7500, 1.2);
+      }
+      function bgmTick() {
+        if (!bgmPlaying || !audioCtx) return;
+        while (bgmNextTime < audioCtx.currentTime + 0.14) {
+          bgmScheduleStep(bgmStep, bgmNextTime);
+          bgmNextTime += BGM_STEP_DUR;
+          bgmStep = (bgmStep + 1) % BGM_MEL.length;
+        }
+      }
+      function startBGM() {
+        if (!bgmOn || bgmPlaying) return;
+        var ctx = ensureCtx(); if (!ctx) return;
+        if (!bgmGain) { bgmGain = ctx.createGain(); bgmGain.gain.value = 0.55; bgmGain.connect(ctx.destination); }
+        bgmPlaying = true; bgmStep = 0;
+        bgmNextTime = ctx.currentTime + 0.06;
+        bgmTick();
+        bgmTimer = setInterval(bgmTick, 30);
+      }
+      function stopBGM() {
+        bgmPlaying = false;
+        if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+      }
+      var bgmBtn = document.getElementById("btn-bgm");
+      function syncBgmBtn() { bgmBtn.textContent = bgmOn ? "🔊 BGM オン" : "🔇 BGM オフ"; }
+      bgmBtn.addEventListener("click", function () {
+        bgmOn = !bgmOn;
+        syncBgmBtn();
+        if (!bgmOn) stopBGM();
+        else if (!document.getElementById("screen-game").classList.contains("hidden") || document.getElementById("end-overlay").classList.contains("show")) startBGM();
+      });
+      syncBgmBtn();
 
       function doJump() {
         if (state.phase !== "aim") return;
@@ -901,6 +1022,7 @@
         document.getElementById("screen-start").classList.add("hidden");
         document.getElementById("screen-game").classList.remove("hidden");
         updateHUD();
+        startBGM();
         window.scrollTo(0, 0);
       }
 
@@ -930,6 +1052,7 @@
       }
 
       function showMenu() {
+        stopBGM();
         clearTimeout(state.failTimer); clearTimeout(state.okTimer);
         hideFlash();
         document.getElementById("end-overlay").classList.remove("show");

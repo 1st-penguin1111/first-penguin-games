@@ -176,6 +176,18 @@
       #restartBtn.on { display: block; }
       #restartBtn:active { transform: translateY(2px); }
 
+      /* ---------- BGM toggle ---------- */
+      #bgmBtn {
+        position: absolute; right: 10px; bottom: 10px;
+        z-index: 12;
+        border: 3px solid #fff; border-radius: 999px;
+        background: rgba(255,255,255,.92); color: #22303c;
+        font-size: 13px; font-weight: 900;
+        padding: 6px 13px; min-height: 2.4rem;
+        box-shadow: 0 3px 10px rgba(10,40,60,.35);
+      }
+      #bgmBtn:active { transform: translateY(2px); }
+
       /* ---------- overlays (start / result) ---------- */
       .overlay {
         position: absolute; inset: 0;
@@ -331,6 +343,7 @@
         <div id="inkEmpty">インク切れ！アイコンやチェックポイントで補充しよう</div>
 
         <button id="restartBtn" type="button">🔁 はじめから</button>
+        <button id="bgmBtn" type="button" aria-label="BGMのオン・オフを切り替える">🔊 BGM オン</button>
 
         <!-- START -->
         <div class="overlay on" id="startScreen">
@@ -511,6 +524,121 @@
     function sndCp() { beep(659, .12, "triangle", .1); beep(880, .12, "triangle", .1, .1); beep(1174, .26, "triangle", .1, .2); }
     function sndJump() { beep(392, .1, "square", .05); beep(784, .18, "square", .05, .07); }
     function sndFall() { beep(520, .5, "sawtooth", .06); }
+
+    /* ================= BGM (original, Web Audio) =================
+       のんびり散歩：ゆったり明るいウォーキング・ポップ。
+       C–Am–F–G / 104 BPM、歩くリズムに合わせた軽いビート＋
+       口笛みたいなメロディ＋柔らかいベースとパッド。 */
+    var BGM_BPM = 104;
+    var bgmOn = true;
+    var bgmTimer = null, bgmNextTime = 0, bgmStep = 0;
+    var bgmMaster = null;
+    var bgmBtn = document.getElementById("bgmBtn");
+    function bgmEnsureCtx() {
+      if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return false; } }
+      if (AC.state === "suspended") AC.resume();
+      if (!bgmMaster) {
+        bgmMaster = AC.createGain();
+        bgmMaster.gain.value = 0.9;
+        bgmMaster.connect(AC.destination);
+      }
+      return true;
+    }
+    function mtof(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+    function bgmTone(midi, t, dur, type, vol, glideTo) {
+      if (!midi) return;
+      var o = AC.createOscillator(), g = AC.createGain();
+      o.type = type; o.frequency.setValueAtTime(mtof(midi), t);
+      if (glideTo) o.frequency.exponentialRampToValueAtTime(mtof(glideTo), t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(bgmMaster);
+      o.start(t); o.stop(t + dur + 0.05);
+    }
+    function bgmKick(t) {
+      var o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(55, t + 0.11);
+      g.gain.setValueAtTime(0.20, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+      o.connect(g); g.connect(bgmMaster);
+      o.start(t); o.stop(t + 0.15);
+    }
+    function bgmHat(t, vol) {
+      var o = AC.createOscillator(), g = AC.createGain();
+      o.type = "square"; o.frequency.value = 6800;
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+      o.connect(g); g.connect(bgmMaster);
+      o.start(t); o.stop(t + 0.05);
+    }
+    // 4小節ループ（8分音符×32ステップ）
+    var BGM_CHORDS = [
+      { root: 36, pad: [60, 64, 67] },  // C
+      { root: 33, pad: [57, 60, 64] },  // Am
+      { root: 29, pad: [53, 57, 60] },  // F
+      { root: 31, pad: [55, 59, 62] }   // G
+    ];
+    var BGM_MELODY = [
+      64, 67, 69, 67, 64, 62, 64, 0,
+      69, 72, 71, 69, 67, 69, 0, 0,
+      69, 72, 74, 72, 69, 67, 69, 0,
+      71, 74, 71, 67, 69, 71, 67, 0
+    ];
+    function bgmScheduleStep(step, t) {
+      var bar = Math.floor(step / 8), s8 = step % 8;
+      var ch = BGM_CHORDS[bar];
+      var stepDur = 60 / BGM_BPM / 2;
+      // パッド：小節頭に柔らかくコード
+      if (s8 === 0) {
+        for (var i = 0; i < ch.pad.length; i++) bgmTone(ch.pad[i], t, stepDur * 7.5, "triangle", 0.035);
+      }
+      // ベース：1拍目と3拍目にルート／5度（歩く足取り）
+      if (s8 === 0) bgmTone(ch.root + 12, t, stepDur * 1.8, "sine", 0.16);
+      if (s8 === 4) bgmTone(ch.root + 19, t, stepDur * 1.8, "sine", 0.13);
+      // 軽いビート：キックは1・3拍、ハットは裏拍
+      if (s8 === 0 || s8 === 4) bgmKick(t);
+      if (s8 % 2 === 1) bgmHat(t, 0.018);
+      if (s8 === 2 || s8 === 6) bgmHat(t, 0.03);
+      // メロディ：口笛みたいなサイン波（少しだけ次の音へなめらかに）
+      var m = BGM_MELODY[step];
+      if (m) {
+        var nxt = BGM_MELODY[(step + 1) % 32];
+        bgmTone(m + 12, t, stepDur * 0.95, "sine", 0.075, (nxt && Math.abs(nxt - m) === 2) ? nxt + 12 : null);
+        bgmTone(m + 12, t, stepDur * 0.9, "triangle", 0.028);
+      }
+    }
+    function bgmSchedule() {
+      if (!AC) return;
+      var stepDur = 60 / BGM_BPM / 2;
+      while (bgmNextTime < AC.currentTime + 0.24) {
+        bgmScheduleStep(bgmStep, bgmNextTime);
+        bgmNextTime += stepDur;
+        bgmStep = (bgmStep + 1) % 32;
+      }
+    }
+    function bgmUpdateBtn() { bgmBtn.textContent = bgmOn ? "🔊 BGM オン" : "🔇 BGM オフ"; }
+    function startBGM() {
+      if (!bgmOn) { bgmUpdateBtn(); return; }
+      if (!bgmEnsureCtx()) return;
+      if (bgmTimer) return;
+      bgmStep = 0;
+      bgmNextTime = AC.currentTime + 0.06;
+      bgmTimer = setInterval(bgmSchedule, 90);
+      bgmSchedule();
+    }
+    function stopBGM() {
+      if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+    }
+    bgmBtn.addEventListener("click", function () {
+      bgmOn = !bgmOn;
+      bgmUpdateBtn();
+      if (!bgmOn) stopBGM();
+      else if (state === "play" || state === "over" || state === "clear") startBGM();
+    });
+    bgmUpdateBtn();
 
     /* ================= game state ================= */
     var state = "start"; // start | play | over
@@ -1714,6 +1842,7 @@
       resize();
       resetGame();
       state = "play";
+      startBGM();
       startScreen.classList.remove("on");
       resultScreen.classList.remove("on");
       clearScreen.classList.remove("on");
@@ -1730,6 +1859,7 @@
       startGame(); // stuck? restart the walk from the very beginning
     });
     document.getElementById("menuBtn").addEventListener("click", function () {
+      stopBGM();
       resultScreen.classList.remove("on");
       startScreen.classList.add("on");
       restartBtn.classList.remove("on");
@@ -1738,6 +1868,7 @@
     });
     document.getElementById("clearRetryBtn").addEventListener("click", function () { beep(660, .1, "sine", .07); startGame(); });
     document.getElementById("clearMenuBtn").addEventListener("click", function () {
+      stopBGM();
       clearScreen.classList.remove("on");
       startScreen.classList.add("on");
       restartBtn.classList.remove("on");

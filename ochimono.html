@@ -338,6 +338,16 @@
 
       .drag-hint { text-align: center; color: var(--ink-soft); font-weight: 700; font-size: 13.5px; margin-top: 10px; }
 
+      /* ---------- BGM toggle ---------- */
+      .bgm-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+      .bgm-btn {
+        font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800; font-size: 13px;
+        color: var(--ink); background: var(--card);
+        border: none; border-radius: 999px; padding: 7px 14px;
+        box-shadow: 0 3px 0 rgba(35,64,94,.22); cursor: pointer; min-height: 36px;
+      }
+      .bgm-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(35,64,94,.22); }
+
       /* ---------- result ---------- */
       .result-score { text-align: center; padding: 20px 16px 14px; }
       .result-score .endmsg { font-weight: 800; color: var(--ink-soft); margin: 0 0 2px; }
@@ -483,6 +493,7 @@
           </div>
         </div>
         <p class="drag-hint">👆 ゆびを左右にうごかしてペンギンを走らせよう！</p>
+        <div class="bgm-row"><button class="bgm-btn" id="btn-bgm-game" type="button">🔊 BGM オン</button></div>
       </section>
 
       <!-- ===== RESULT ===== -->
@@ -510,6 +521,7 @@
           <div class="stat-grid" id="res-members"></div>
         </div>
 
+        <div class="bgm-row" style="margin:0 0 10px;"><button class="bgm-btn" id="btn-bgm-result" type="button">🔊 BGM オン</button></div>
         <button class="btn" id="btn-retry">🔁 もう一度あそぶ</button>
         <button class="btn sub" id="btn-menu">メニューにもどる</button>
 
@@ -647,6 +659,109 @@
       function sndBad() { beep(220, 0.18, "sawtooth", 0.09); beep(147, 0.25, "sawtooth", 0.09, 0.1); }
       function sndBonus() { [659, 784, 988, 1319, 1568].forEach(function (f, i) { beep(f, 0.13, "triangle", 0.11, i * 0.07); }); }
       function sndRoulette() { for (var i = 0; i < 10; i++) beep(500 + i * 40, 0.05, "square", 0.05, i * 0.16); }
+
+      /* ---------- BGM: lively original pop loop (Web Audio) ----------
+         Bright, bouncy tune for the 60-second scramble: C–G–Am–F at
+         140 BPM, square-wave lead + triangle bass + kick/hat rhythm.
+         Shares the SFX AudioContext and its own gain, so the catch /
+         roulette sounds play over it untouched. Starts from the start
+         button (a user gesture), keeps playing on the result screen,
+         and stops when the player returns to the menu. */
+      var BGM = (function () {
+        var BPM = 140, STEP = 60 / BPM / 4; // 16th note
+        var MEL = [ // one bar of eighth notes per chord (MIDI)
+          [76, 79, 84, 79, 81, 79, 76, 74], // C
+          [74, 79, 83, 79, 81, 83, 86, 83], // G
+          [84, 81, 76, 81, 84, 83, 81, 79], // Am
+          [81, 84, 89, 84, 81, 79, 77, 76]  // F
+        ];
+        var BASS = [48, 43, 45, 41];        // C3 G2 A2 F2
+        var TRIAD = [[64, 67], [62, 67], [64, 69], [65, 69]]; // soft chord tones per bar
+        var gain = null, timer = null, step = 0, nextT = 0, playing = false, muted = false, noiseBuf = null;
+        function ensure() {
+          if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+          if (actx.state === "suspended") actx.resume();
+          if (!gain) { gain = actx.createGain(); gain.gain.value = muted ? 0 : 0.55; gain.connect(actx.destination); }
+          if (!noiseBuf) {
+            noiseBuf = actx.createBuffer(1, actx.sampleRate * 0.1, actx.sampleRate);
+            var d = noiseBuf.getChannelData(0);
+            for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+          }
+        }
+        function tone(midi, t, dur, type, vol) {
+          var o = actx.createOscillator(), g = actx.createGain();
+          o.type = type;
+          o.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
+          g.gain.setValueAtTime(vol, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          o.connect(g); g.connect(gain);
+          o.start(t); o.stop(t + dur + 0.03);
+        }
+        function kick(t) {
+          var o = actx.createOscillator(), g = actx.createGain();
+          o.type = "sine";
+          o.frequency.setValueAtTime(150, t);
+          o.frequency.exponentialRampToValueAtTime(48, t + 0.11);
+          g.gain.setValueAtTime(0.5, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+          o.connect(g); g.connect(gain);
+          o.start(t); o.stop(t + 0.14);
+        }
+        function hat(t) {
+          var src = actx.createBufferSource(); src.buffer = noiseBuf;
+          var f = actx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 7000;
+          var g = actx.createGain();
+          g.gain.setValueAtTime(0.10, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+          src.connect(f); f.connect(g); g.connect(gain);
+          src.start(t); src.stop(t + 0.06);
+        }
+        function scheduleStep(s, t) {
+          var bar = Math.floor(s / 16) % 4, st = s % 16;
+          if (st % 2 === 0) tone(MEL[bar][st / 2], t, 0.17, "square", 0.045); // lead, eighth notes
+          if (st === 0) { tone(TRIAD[bar][0], t, 1.5, "triangle", 0.018); tone(TRIAD[bar][1], t, 1.5, "triangle", 0.018); }
+          if (st % 4 === 0) tone(BASS[bar], t, 0.2, "triangle", 0.15);        // bass on quarters
+          if (st === 14) tone(BASS[bar] + 12, t, 0.1, "triangle", 0.10);      // bouncy octave hop
+          if (st % 4 === 0) kick(t);
+          if (st % 4 === 2) hat(t);
+        }
+        function tick() {
+          if (!playing) return;
+          while (nextT < actx.currentTime + 0.25) {
+            scheduleStep(step, nextT);
+            nextT += STEP;
+            step = (step + 1) % 64;
+          }
+        }
+        return {
+          start: function () {
+            try {
+              ensure();
+              if (playing) return;
+              playing = true; step = 0;
+              nextT = actx.currentTime + 0.06;
+              timer = setInterval(tick, 90);
+              tick();
+            } catch (e) { /* BGM is optional */ }
+          },
+          stop: function () {
+            playing = false;
+            if (timer) { clearInterval(timer); timer = null; }
+          },
+          toggleMute: function () {
+            muted = !muted;
+            if (gain && actx) gain.gain.setTargetAtTime(muted ? 0 : 0.55, actx.currentTime, 0.03);
+            return muted;
+          },
+          isMuted: function () { return muted; }
+        };
+      })();
+      function syncBgmBtns() {
+        var label = BGM.isMuted() ? "🔇 BGM オフ" : "🔊 BGM オン";
+        var b1 = $("btn-bgm-game"), b2 = $("btn-bgm-result");
+        if (b1) b1.textContent = label;
+        if (b2) b2.textContent = label;
+      }
 
       /* ---------- roulette (mogura-style contents) ---------- */
       // 10 segments: the four 22.5% effects are split into two wedges each,
@@ -1143,6 +1258,7 @@
       }
 
       function startGame() {
+        BGM.start();
         pickFieldBg();
         S = newState();
         // clear old items / popups / overlays
@@ -1238,7 +1354,9 @@
 
       $("btn-start").addEventListener("click", startGame);
       $("btn-retry").addEventListener("click", startGame);
-      $("btn-menu").addEventListener("click", function () { show(scrStart); });
+      $("btn-menu").addEventListener("click", function () { BGM.stop(); show(scrStart); });
+      $("btn-bgm-game").addEventListener("click", function () { BGM.toggleMute(); syncBgmBtns(); });
+      $("btn-bgm-result").addEventListener("click", function () { BGM.toggleMute(); syncBgmBtns(); });
     </script>
   </body>
 </html>

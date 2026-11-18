@@ -352,6 +352,15 @@
     .mole,.mole img{width:68px;height:68px}
     .mole{margin-left:-34px}
   }
+  .bgm-btn{
+    position:fixed;right:12px;bottom:12px;z-index:120;display:none;
+    border:3px solid #ffb3cd;background:#fff;color:#e84e84;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:13px;
+    padding:8px 14px;border-radius:999px;box-shadow:0 4px 0 #ffb3cd,0 8px 18px rgba(37,50,71,.2);
+    cursor:pointer;
+  }
+  .bgm-btn.on{display:block}
+  .bgm-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #ffb3cd}
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:.01s !important;transition-duration:.01s !important}
   }
@@ -499,6 +508,7 @@
   </div>
 </div>
 
+<button class="bgm-btn" id="bgm-toggle" type="button" aria-label="BGMのオン・オフを切り替える">🔊 BGM オン</button>
 <div class="count-overlay" id="count-overlay"><div class="num pop" id="count-num">3</div></div>
 <div class="flash-red" id="flash-red"></div>
 
@@ -626,6 +636,108 @@
   function sndHit(gold){ beep(880,0.1,"sine",0.13); beep(1174,0.12,"sine",0.13,0.06); if(gold){ beep(1568,0.16,"sine",0.13,0.12);} }
   function sndBad(){ beep(160,0.25,"sawtooth",0.12); beep(110,0.3,"sawtooth",0.1,0.05); }
   function sndFever(){ [660,880,1108,1318].forEach(function(f,i){ beep(f,0.12,"triangle",0.12,i*0.07); }); }
+
+  /* ---------- BGM: fast comical bouncing pop (Web Audio, original) ----------
+     152 BPM, C–F–C–G / C–F–G–C, staccato triangle melody with octave-hop
+     bass and a light tick/hat rhythm. Loops during play (incl. cut-in,
+     roulette and the result screen); stops when returning to the menu. */
+  var bgmGain = null, bgmTimer = null, bgmStep = 0, bgmNextTime = 0, bgmPlaying = false, bgmMuted = false;
+  var BGM_BPM = 152;
+  var BGM_STEP_DUR = 60 / BGM_BPM / 2; // eighth notes
+  function midiHz(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+  // 8 bars x 8 eighth notes = 64 steps. 0 = rest.
+  var BGM_MELODY = [
+    72,76,79,76, 81,79,76,74,  // C
+    77,81,84,81, 79,77,74,77,  // F
+    72,76,79,76, 81,79,76,74,  // C
+    74,79,83,79, 86,83,79,74,  // G
+    72,76,79,76, 81,79,76,74,  // C
+    77,81,84,81, 86,84,81,77,  // F
+    79,76,74,71, 72,74,76,79,  // G (turnaround climb)
+    81,79,76,74, 72,0,76,0     // C
+  ];
+  var BGM_CHORD_ROOT = [48,53,48,55, 48,53,55,48]; // C F C G / C F G C (midi, per bar)
+  function bgmNote(freq, t, dur, type, vol){
+    var ac = actx; if(!ac || !bgmGain) return;
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(bgmGain);
+    o.start(t); o.stop(t + dur + 0.03);
+  }
+  function bgmHat(t, accent){
+    var ac = actx; if(!ac || !bgmGain) return;
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = "square"; o.frequency.setValueAtTime(6800, t);
+    g.gain.setValueAtTime(accent ? 0.028 : 0.016, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+    o.connect(g); g.connect(bgmGain);
+    o.start(t); o.stop(t + 0.06);
+  }
+  function bgmKick(t){
+    var ac = actx; if(!ac || !bgmGain) return;
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(52, t + 0.11);
+    g.gain.setValueAtTime(0.20, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+    o.connect(g); g.connect(bgmGain);
+    o.start(t); o.stop(t + 0.15);
+  }
+  function bgmScheduleStep(step, t){
+    var bar = Math.floor(step / 8), inBar = step % 8;
+    var root = BGM_CHORD_ROOT[bar];
+    var mel = BGM_MELODY[step];
+    if(mel) bgmNote(midiHz(mel), t, BGM_STEP_DUR * 0.92, "triangle", 0.11);
+    // bouncing bass: root / fifth hopping an octave on alternating eighths
+    if(inBar % 2 === 0){
+      var bassMidi = root + (inBar === 4 ? 7 : 0) + ((inBar / 2) % 2 === 1 ? 12 : 0);
+      if(inBar === 6) bassMidi = root + 7;
+      bgmNote(midiHz(bassMidi), t, BGM_STEP_DUR * 0.95, "square", 0.045);
+    }
+    if(inBar % 4 === 0) bgmKick(t);
+    if(inBar % 2 === 1) bgmHat(t, inBar === 7);
+  }
+  function bgmScheduler(){
+    if(!bgmPlaying || !actx) return;
+    while(bgmNextTime < actx.currentTime + 0.14){
+      bgmScheduleStep(bgmStep, bgmNextTime);
+      bgmNextTime += BGM_STEP_DUR;
+      bgmStep = (bgmStep + 1) % BGM_MELODY.length;
+    }
+  }
+  function startBGM(){
+    var ac = audio(); if(!ac) return;
+    if(!bgmGain){
+      bgmGain = ac.createGain();
+      bgmGain.gain.setValueAtTime(bgmMuted ? 0 : 0.9, ac.currentTime);
+      bgmGain.connect(ac.destination);
+    }
+    $("bgm-toggle").classList.add("on");
+    if(bgmPlaying) return;
+    bgmPlaying = true;
+    bgmStep = 0;
+    bgmNextTime = ac.currentTime + 0.06;
+    bgmScheduler();
+    bgmTimer = setInterval(bgmScheduler, 30);
+  }
+  function stopBGM(){
+    bgmPlaying = false;
+    if(bgmTimer){ clearInterval(bgmTimer); bgmTimer = null; }
+    $("bgm-toggle").classList.remove("on");
+  }
+  function updateBgmBtn(){
+    $("bgm-toggle").textContent = bgmMuted ? "🔇 BGM オフ" : "🔊 BGM オン";
+  }
+  $("bgm-toggle").addEventListener("click", function(){
+    bgmMuted = !bgmMuted;
+    var ac = audio();
+    if(ac && bgmGain) bgmGain.gain.setTargetAtTime(bgmMuted ? 0 : 0.9, ac.currentTime, 0.03);
+    updateBgmBtn();
+  });
 
   /* ---------- game state ---------- */
   var playing = false;
@@ -1082,6 +1194,7 @@
   function startGame(mode){
     if(mode === "race" || mode === "normal") gameMode = mode;
     audio();
+    startBGM();
     score = 0; combo = 0; maxCombo = 0; hits = 0; goldHits = 0;
     ended = false;
     timeLeft = GAME_TIME; elapsedTime = 0; clearTime = 0; feverRemain = 0; comboRemain = 0; hitCounts = {};
@@ -1178,6 +1291,7 @@
 
   function quitGame(){
     ended = true;
+    stopBGM();
     playing = false; paused = false;
     comboRemain = 0;
     doubleRemain = 0; spawnBoostRemain = 0; bossBoostRemain = 0;

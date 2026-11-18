@@ -1027,6 +1027,16 @@ filter:drop-shadow(0 0 14px rgba(230,230,238,.85)) drop-shadow(0 0 5px rgba(255,
 #screen-battle .hands-stage .hand-btn[data-hand="0"]{box-shadow:0 8px 0 rgba(0,0,0,.7),0 18px 34px rgba(0,0,0,.8),0 0 30px rgba(170,170,185,.55),0 0 56px rgba(120,120,135,.35);}
 #screen-battle .hands-stage .hand-btn[data-hand="1"]{box-shadow:0 8px 0 rgba(0,0,0,.7),0 18px 34px rgba(0,0,0,.8),0 0 30px rgba(170,170,185,.55),0 0 56px rgba(120,120,135,.35);}
 #screen-battle .hands-stage .hand-btn[data-hand="2"]{box-shadow:0 8px 0 rgba(0,0,0,.7),0 18px 34px rgba(0,0,0,.8),0 0 30px rgba(170,170,185,.55),0 0 56px rgba(120,120,135,.35);}
+
+/* ---------- BGM toggle ---------- */
+.bgm-btn{
+position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:95;
+font-family:inherit;font-weight:900;font-size:13px;letter-spacing:.03em;cursor:pointer;
+color:#fff;background:rgba(8,42,78,.82);border:2px solid rgba(255,255,255,.75);border-radius:999px;
+padding:8px 14px;box-shadow:0 4px 12px rgba(0,20,50,.4);backdrop-filter:blur(3px);
+}
+.bgm-btn:active{transform:translateY(2px);}
+.bgm-btn.off{background:rgba(40,44,52,.85);color:#cfd6dd;}
 </style>
 </head>
 <body>
@@ -1357,6 +1367,8 @@ filter:drop-shadow(0 0 14px rgba(230,230,238,.85)) drop-shadow(0 0 5px rgba(255,
 </div>
 
 <div class="rain hidden" id="rain"></div>
+
+<button class="bgm-btn" id="bgm-btn" type="button" aria-pressed="false" aria-label="BGMのオン・オフ">🔊 BGM</button>
 
 <script>
 (function(){
@@ -1784,6 +1796,7 @@ inv = { herb:2, natto:1, sushi:1, pai:2};
 roomNo = 0; calmStreak = 0;
 renderHP();
 enterDoorRoom("洞窟の扉の間についた！ 2つの扉、どっちを開ける？ メンバーか、アイテムか、ベッドか、なにもなしか…！");
+bgmPlay("field");
 }
 /* ラスボス戦モード: a standalone mode that jumps straight into the
    last-boss battle with all 8 members already beaten, starting from
@@ -1812,6 +1825,7 @@ doorFoe = foes[foes.length - 1];
 renderHP(); renderDoorProgress();
 show("screen-doors");
 setDoorLog("ラスボス戦モード：洞窟の最深部で、邪悪な気配が…！");
+bgmPlay("boss");
 showBossIntro(doorFoe);
 }
 function setDoorsEnabled(on){
@@ -1825,6 +1839,7 @@ return calmType === "item"? "🎁": (calmType === "bed"? "🛏️": "✨");
 }
 function enterDoorRoom(msg){
 if (foes.length && beatenCount() >= foes.length){ endGame(true); return;}
+if (bgm.playing && bgm.track !== "field") bgm.pending = "field";
 roomNo++;
 doorsBusy = false;
 /* what is behind a door is rolled when the player opens it (see chooseDoor):
@@ -1942,6 +1957,7 @@ setTimeout(function(){ overlay.classList.remove("shake"); }, 320);
 }
 }
 function showBossIntro(foe){
+bgmSwitch("boss");
 /* right before the last boss battle: the screen goes pitch black and
    only the boss's words appear, one line at a time — no pictures,
    lit here and there by flashes of lightning */
@@ -2013,6 +2029,7 @@ $("door-next").classList.remove("hidden");
 
 /* ---------- battle ---------- */
 function startBattle(foe){
+bgmSwitch(foe.char.boss? "boss": "field");
 currentFoe = foe; inBattle = true;
 enemyMax = foe.max; enemyHP = enemyMax; battleDealt = 0;
 enemyGauge = 0; healUsed = false; healCount = 0; healMax = foe.char.boss? 3: 1; busy = true;
@@ -2644,6 +2661,200 @@ var wins = bossMode? (foes[foes.length-1].beaten? 1: 0): beatenCount();
 $("result-stats").textContent = "🏆 " + wins + "勝 ／ 合計 " + turns + "ターン ／ 与えたダメージ " + totalDealt + " ／ 残りHP " + Math.max(0,playerHP);
 }
 
+/* ---------- BGM (Web Audio, original loops) ----------
+   Two tracks: a brave adventure loop for exploring / normal battles,
+   and a tense minor loop for the last-boss (邪悪なペンギン) battle.
+   Switching happens on the next bar line so the music never cuts
+   mid-phrase. Starts only from a user gesture (the start buttons);
+   the fixed bottom-right button toggles mute. Visual sound-effect
+   pops are unrelated and keep working as before. */
+var BGM_TRACKS = {
+field: {
+bpm: 138, kind: "field",
+bassRoots: [50, 47, 43, 45],
+chords: [[62,66,69],[59,62,66],[59,62,67],[61,64,69]],
+melody: [
+74,0,76,77, 79,0,77,76, 74,0,76,0, 74,0,0,0,
+71,0,74,76, 74,0,71,0, 69,0,71,74, 71,0,0,0,
+79,0,76,74, 76,0,79,81, 79,0,76,79, 76,0,0,0,
+76,0,73,76, 81,0,79,76, 77,0,76,74, 76,0,0,0
+]
+},
+boss: {
+bpm: 100, kind: "boss",
+bassRoots: [38, 38, 46, 45],
+chords: [[50,53,57],[50,51,57],[46,50,53],[45,49,52]],
+melody: [
+69,0,0,0, 68,0,0,0, 69,0,0,0, 0,0,0,0,
+65,0,0,0, 64,0,0,0, 62,0,0,0, 0,0,0,0,
+70,0,0,0, 69,0,0,0, 65,0,0,0, 0,0,0,0,
+68,0,0,0, 69,0,0,0, 73,0,0,0, 76,0,0,0
+]
+}
+};
+var bgm = {
+ctx: null, master: null, noiseBuf: null,
+playing: false, muted: false, track: "field", pending: null,
+step: 0, nextTime: 0, timer: null
+};
+function bgmFreq(midi){ return 440 * Math.pow(2, (midi - 69) / 12); }
+function bgmEnsure(){
+if (bgm.ctx) return true;
+try {
+var AC = window.AudioContext || window.webkitAudioContext;
+if (!AC) return false;
+bgm.ctx = new AC();
+bgm.master = bgm.ctx.createGain();
+bgm.master.gain.value = bgm.muted ? 0 : 0.42;
+bgm.master.connect(bgm.ctx.destination);
+var len = bgm.ctx.sampleRate;
+bgm.noiseBuf = bgm.ctx.createBuffer(1, len, bgm.ctx.sampleRate);
+var d = bgm.noiseBuf.getChannelData(0);
+for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+return true;
+} catch (e) { return false; }
+}
+function bgmOsc(type, freq, t){
+var o = bgm.ctx.createOscillator();
+o.type = type; o.frequency.setValueAtTime(freq, t);
+o.connect(bgm.master);
+return o;
+}
+function bgmLead(midi, t, tr, stepDur){
+var boss = tr.kind === "boss";
+var dur = stepDur * (boss ? 3.4 : 1.9);
+var g = bgm.ctx.createGain();
+g.connect(bgm.master);
+var f = bgm.ctx.createBiquadFilter();
+f.type = "lowpass"; f.frequency.value = boss ? 1300 : 2500;
+f.connect(g);
+var o = bgm.ctx.createOscillator();
+o.type = boss ? "sawtooth" : "square";
+o.frequency.setValueAtTime(bgmFreq(midi), t);
+o.connect(f); o.start(t); o.stop(t + dur + 0.05);
+if (boss){
+var o2 = bgm.ctx.createOscillator();
+o2.type = "sawtooth"; o2.frequency.setValueAtTime(bgmFreq(midi), t); o2.detune.value = 9;
+o2.connect(f); o2.start(t); o2.stop(t + dur + 0.05);
+}
+g.gain.setValueAtTime(0, t);
+g.gain.linearRampToValueAtTime(boss ? 0.10 : 0.13, t + 0.015);
+g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+}
+function bgmBass(midi, t, tr, stepDur){
+var boss = tr.kind === "boss";
+var g = bgm.ctx.createGain(); g.connect(bgm.master);
+var o = bgm.ctx.createOscillator();
+o.type = boss ? "sawtooth" : "triangle";
+o.frequency.setValueAtTime(bgmFreq(midi), t);
+if (boss){
+var f = bgm.ctx.createBiquadFilter();
+f.type = "lowpass"; f.frequency.value = 340;
+o.connect(f); f.connect(g);
+} else { o.connect(g); }
+var dur = stepDur * (boss ? 1.6 : 1.8);
+o.start(t); o.stop(t + dur + 0.03);
+g.gain.setValueAtTime(boss ? 0.20 : 0.17, t);
+g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+}
+function bgmPad(chord, t, tr, barDur){
+var boss = tr.kind === "boss";
+for (var i = 0; i < chord.length; i++){
+var g = bgm.ctx.createGain(); g.connect(bgm.master);
+var f = bgm.ctx.createBiquadFilter();
+f.type = "lowpass"; f.frequency.value = boss ? 720 : 1500;
+f.connect(g);
+var o = bgm.ctx.createOscillator();
+o.type = boss ? "sawtooth" : "triangle";
+o.frequency.setValueAtTime(bgmFreq(chord[i]), t);
+o.detune.value = (i - 1) * 5;
+o.connect(f); o.start(t); o.stop(t + barDur + 0.1);
+g.gain.setValueAtTime(0, t);
+g.gain.linearRampToValueAtTime(boss ? 0.045 : 0.05, t + barDur * 0.25);
+g.gain.setValueAtTime(boss ? 0.045 : 0.05, t + barDur * 0.75);
+g.gain.linearRampToValueAtTime(0, t + barDur);
+}
+}
+function bgmKick(t, deep){
+var o = bgm.ctx.createOscillator();
+o.type = "sine";
+o.frequency.setValueAtTime(deep ? 95 : 130, t);
+o.frequency.exponentialRampToValueAtTime(deep ? 32 : 42, t + 0.12);
+var g = bgm.ctx.createGain(); g.connect(bgm.master);
+o.connect(g); o.start(t); o.stop(t + 0.16);
+g.gain.setValueAtTime(deep ? 0.55 : 0.4, t);
+g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+}
+function bgmNoise(t, type, freq, peak, dur){
+var src = bgm.ctx.createBufferSource();
+src.buffer = bgm.noiseBuf; src.loop = true;
+src.playbackRate.value = 0.9 + Math.random() * 0.2;
+var f = bgm.ctx.createBiquadFilter();
+f.type = type; f.frequency.value = freq;
+var g = bgm.ctx.createGain(); g.connect(bgm.master);
+src.connect(f); f.connect(g);
+src.start(t); src.stop(t + dur + 0.02);
+g.gain.setValueAtTime(peak, t);
+g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+}
+function bgmScheduleStep(step, t){
+var tr = BGM_TRACKS[bgm.track];
+var bar = Math.floor(step / 16), s = step % 16;
+var stepDur = 60 / tr.bpm / 4, barDur = stepDur * 16;
+if (s === 0) bgmPad(tr.chords[bar], t, tr, barDur);
+var root = tr.bassRoots[bar];
+if (tr.kind === "field"){
+if (s % 2 === 0) bgmBass(s === 14 ? root + 7 : (s === 6 || s === 10 ? root + 12 : root), t, tr, stepDur);
+if (s === 0 || s === 4 || s === 8 || s === 12) bgmKick(t, false);
+if (s === 4 || s === 12) bgmNoise(t, "bandpass", 1800, 0.16, 0.09);
+if (s % 2 === 0) bgmNoise(t, "highpass", 6500, s % 4 === 2 ? 0.055 : 0.035, 0.03);
+} else {
+if (s === 0 || s === 3 || s === 6 || s === 8 || s === 11 || s === 14) bgmBass(s === 8 ? root + 7 : root, t, tr, stepDur);
+if (s === 0 || s === 10) bgmKick(t, true);
+if (bar === 3 && s === 12) bgmKick(t, true);
+if (s === 14) bgmNoise(t, "highpass", 5000, 0.028, 0.04);
+}
+var m = tr.melody[step];
+if (m) bgmLead(m, t, tr, stepDur);
+}
+function bgmTick(){
+if (!bgm.ctx) return;
+while (bgm.nextTime < bgm.ctx.currentTime + 0.14){
+if (bgm.step % 16 === 0 && bgm.pending){ bgm.track = bgm.pending; bgm.pending = null; }
+bgmScheduleStep(bgm.step, bgm.nextTime);
+bgm.nextTime += 60 / BGM_TRACKS[bgm.track].bpm / 4;
+bgm.step = (bgm.step + 1) % 64;
+}
+}
+function bgmPlay(track){
+if (!bgmEnsure()) return;
+if (bgm.ctx.state === "suspended") bgm.ctx.resume();
+if (bgm.playing){
+if (track && track !== bgm.track) bgm.pending = track;
+return;
+}
+bgm.track = track || "field";
+bgm.pending = null;
+bgm.step = 0;
+bgm.nextTime = bgm.ctx.currentTime + 0.06;
+bgm.playing = true;
+bgm.timer = setInterval(bgmTick, 46);
+}
+function bgmSwitch(track){
+if (!bgm.playing){ bgmPlay(track); return; }
+if (track && track !== bgm.track) bgm.pending = track;
+}
+function bgmStop(){
+if (bgm.timer){ clearInterval(bgm.timer); bgm.timer = null; }
+bgm.playing = false; bgm.pending = null; bgm.step = 0;
+}
+function bgmRenderBtn(){
+var b = $("bgm-btn");
+b.textContent = bgm.muted ? "🔇 BGMオフ" : "🔊 BGM";
+b.classList.toggle("off", bgm.muted);
+b.setAttribute("aria-pressed", bgm.muted ? "true" : "false");
+}
+
 /* ---------- init ---------- */
 var roster = $("roster");
 CHARS.forEach(function(c){
@@ -2661,7 +2872,15 @@ $("btn-boss-mode").addEventListener("click", startBossMode);
 $("btn-retry").addEventListener("click", function(){ if (bossMode) startBossMode(); else startGame(); });
 $("btn-menu").addEventListener("click", function(){
 bossMode = false; inBattle = false; busy = false; currentFoe = null;
+bgmStop();
 show("screen-start");
+});
+$("bgm-btn").addEventListener("click", function(){
+bgm.muted = !bgm.muted;
+if (bgm.master && bgm.ctx){
+bgm.master.gain.setTargetAtTime(bgm.muted ? 0 : 0.42, bgm.ctx.currentTime, 0.03);
+}
+bgmRenderBtn();
 });
 $("cmd-janken").addEventListener("click", function(){ if (!busy) showPanel("hands");});
 $("cmd-item").addEventListener("click", function(){ if (!busy) showPanel("items");});

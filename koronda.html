@@ -363,9 +363,20 @@ img{display:block;}
 .btn-again:active{transform:translateY(4px);box-shadow:0 2px 0 #14532d;}
 .btn-menu{font-family:"Mochiy Pop One",sans-serif;font-size:16px;background:var(--card);color:var(--accent);border:3px solid var(--accent);border-radius:999px;padding:11px 30px;box-shadow:var(--shadow);margin-top:12px;}
 .btn-menu:active{transform:translateY(2px);}
+
+/* ---------- BGM toggle（画面右下に固定・邪魔にならない位置） ---------- */
+.bgm-btn{
+  position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:200;
+  background:var(--card);color:var(--ink);border:2px solid var(--line);
+  font-weight:900;font-size:13px;border-radius:999px;padding:8px 14px;min-height:40px;
+  box-shadow:var(--shadow);opacity:.94;
+}
+.bgm-btn.off{opacity:.6;}
+.bgm-btn:active{transform:scale(.95);}
 </style>
 </head>
 <body>
+<button class="bgm-btn" id="bgmBtn" type="button" aria-label="BGMのオン・オフを切り替える">🔊 BGM オン</button>
 <div class="wrap">
 
   <!-- ======= START ======= -->
@@ -576,6 +587,122 @@ function sOut(){ beep(180,0.35,"sawtooth",0.14); beep(140,0.4,"sawtooth",0.12,0.
 function sFeint(){ beep(1200,0.08,"square",0.08); beep(1200,0.08,"square",0.08,0.13); }
 function sWin(){ var n=[523,659,784,1046,784,1046]; for(var i=0;i<n.length;i++) beep(n[i],0.22,"triangle",0.12,i*0.13); }
 
+/* ================= BGM =================
+   ドキドキ感のあるオリジナル曲を Web Audio で生成（既存曲は使わない）：
+   120 BPM・8小節ループ。前半4小節は C–G–F–G の明るく軽快な「緩」、
+   後半4小節は Am–Am–F–E の短く刻むメロディ＋心拍キックで「緊張」を作り、
+   また前半に戻る。ペンギンが振り向いている間は低いパルスが重なって
+   ドキドキ感が増す。効果音・かけ声（beep系）とは別系統（bgmGain）で共存し、
+   ミュートはBGMだけに効く。スタート操作（ユーザー操作）を起点に再生開始。 */
+var BGM_STEP=60/120/2; /* one eighth note at 120 BPM */
+var BGM_CHORDS=[ /* per bar: bass root, bass fifth, arpeggio tones */
+  {root:65.41, fifth:98.00,  tones:[261.63,329.63,392.00]},  /* C  （緩） */
+  {root:98.00, fifth:146.83, tones:[246.94,293.66,392.00]},  /* G  （緩） */
+  {root:87.31, fifth:130.81, tones:[174.61,220.00,261.63]},  /* F  （緩） */
+  {root:98.00, fifth:146.83, tones:[246.94,293.66,392.00]},  /* G  （緩） */
+  {root:55.00, fifth:82.41,  tones:[220.00,261.63,329.63]},  /* Am （緊張） */
+  {root:55.00, fifth:82.41,  tones:[220.00,261.63,329.63]},  /* Am （緊張） */
+  {root:87.31, fifth:130.81, tones:[174.61,220.00,261.63]},  /* F  （緊張） */
+  {root:82.41, fifth:123.47, tones:[164.81,207.65,246.94]}   /* E  （緊張→解決へ） */
+];
+var BGM_MELODY=[ /* 64 eighth-note steps, 0 = rest */
+  659.25,783.99,1046.50,783.99, 659.25,0,783.99,0,          /* C：のびのび */
+  587.33,783.99,987.77,783.99,  587.33,0,783.99,987.77,     /* G */
+  698.46,880.00,1046.50,880.00, 698.46,880.00,0,698.46,     /* F */
+  783.99,987.77,783.99,587.33,  659.25,587.33,523.25,0,     /* G */
+  880.00,880.00,0,880.00,       1046.50,987.77,880.00,0,    /* Am：短く刻む */
+  880.00,659.25,880.00,659.25,  880.00,1046.50,987.77,880.00, /* Am：反復でドキドキ */
+  880.00,698.46,880.00,1046.50, 987.77,880.00,783.99,698.46,  /* F */
+  987.77,830.61,659.25,830.61,  987.77,0,880.00,0           /* E：引っ張って頭へ戻る */
+];
+var bgm={playing:false, muted:false, timer:null, step:0, next:0, noiseBuf:null, gain:null};
+function bgmDest(){
+  if(!AC) return null;
+  if(!bgm.gain){ bgm.gain=AC.createGain(); bgm.gain.gain.value=0.55; bgm.gain.connect(AC.destination); }
+  return bgm.gain;
+}
+function bgmTone(freq,t,dur,type,vol){
+  if(!AC || !bgmDest()) return;
+  var o=AC.createOscillator(), g=AC.createGain();
+  o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.connect(g); g.connect(bgm.gain); o.start(t); o.stop(t+dur+0.02);
+}
+function bgmNoise(t,dur,vol,hp){
+  if(!AC || !bgmDest()) return;
+  if(!bgm.noiseBuf){
+    bgm.noiseBuf=AC.createBuffer(1,AC.sampleRate*0.5,AC.sampleRate);
+    var d=bgm.noiseBuf.getChannelData(0);
+    for(var i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  }
+  var src=AC.createBufferSource(); src.buffer=bgm.noiseBuf;
+  src.playbackRate.value=0.7+Math.random()*0.6;
+  var f=AC.createBiquadFilter(); f.type="highpass"; f.frequency.value=hp||6000;
+  var g=AC.createGain();
+  g.gain.setValueAtTime(vol,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  src.connect(f); f.connect(g); g.connect(bgm.gain);
+  src.start(t); src.stop(t+dur+0.02);
+}
+function bgmKick(t){
+  if(!AC || !bgmDest()) return;
+  var o=AC.createOscillator(), g=AC.createGain();
+  o.type="sine";
+  o.frequency.setValueAtTime(150,t);
+  o.frequency.exponentialRampToValueAtTime(48,t+0.11);
+  g.gain.setValueAtTime(0.12,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+0.13);
+  o.connect(g); g.connect(bgm.gain); o.start(t); o.stop(t+0.15);
+}
+function bgmScheduleStep(s,t){
+  var bar=Math.floor(s/8)%8, st=s%8, ch=BGM_CHORDS[bar];
+  var tense = bar>=4; /* 後半4小節＝緊張パート */
+  var danger = (typeof phase!=="undefined") && (phase==="watch" || phase==="feintwatch");
+  var mel=BGM_MELODY[s%64];
+  if(mel) bgmTone(mel,t,BGM_STEP*(tense?0.95:1.7),"triangle",tense?0.066:0.06);
+  bgmTone(ch.tones[s%3]*2,t,BGM_STEP*0.9,"square",tense?0.019:0.015); /* sparkly arp */
+  if(st===0||st===4) bgmTone(ch.root*2,t,BGM_STEP*1.6,"sine",0.095);
+  if(st===2||st===6) bgmTone(ch.fifth*2,t,BGM_STEP*1.6,"sine",0.08);
+  if(st===0||st===4) bgmKick(t);
+  if(tense && (st===0||st===4)) bgmKick(t+BGM_STEP*0.55); /* 心拍のドクン…ドクン */
+  if(st===2||st===6) bgmNoise(t,0.09,0.04,1800); /* snare-ish */
+  if(st%2===1) bgmNoise(t,0.03,tense?0.022:0.016,7000); /* hat */
+  if(danger && st%2===0) bgmTone(110,t,BGM_STEP*0.9,"sine",0.05); /* 見られてる間の低いパルス */
+}
+function bgmTick(){
+  if(!AC || !bgm.playing) return;
+  while(bgm.next<AC.currentTime+0.28){
+    bgmScheduleStep(bgm.step,bgm.next);
+    bgm.next+=BGM_STEP;
+    bgm.step=(bgm.step+1)%64;
+  }
+}
+function updateBgmBtn(){
+  var b=$("bgmBtn"); if(!b) return;
+  b.textContent=bgm.muted?"🔇 BGM オフ":"🔊 BGM オン";
+  b.classList.toggle("off",bgm.muted);
+}
+function startBGM(){
+  if(bgm.playing || bgm.muted){ updateBgmBtn(); return; }
+  var ac=audio(); if(!ac) return;
+  bgmDest();
+  bgm.playing=true; bgm.step=0; bgm.next=ac.currentTime+0.08;
+  bgm.timer=setInterval(bgmTick,90);
+  bgmTick();
+  updateBgmBtn();
+}
+function stopBGM(){
+  bgm.playing=false;
+  if(bgm.timer){ clearInterval(bgm.timer); bgm.timer=null; }
+  updateBgmBtn();
+}
+function toggleBGM(){
+  bgm.muted=!bgm.muted;
+  if(bgm.muted) stopBGM(); else startBGM();
+  updateBgmBtn();
+}
+
 /* ================= state ================= */
 var racers = [];        // {data..., dist, out, el, barEl, speedNow, movingUntil, caughtTimer}
 var player = null;
@@ -752,7 +879,7 @@ function applyOpeningStep(n){
   openingTimer = setTimeout(function(){ openingNext(); }, sc.dur);
 }
 function showOpening(){
-  audio();
+  audio(); startBGM();
   clearOpeningTimer();
   showScreen("screen-opening");
   applyOpeningStep(0);
@@ -770,7 +897,7 @@ function finishOpening(){
 /* ================= race flow ================= */
 function startGame(){
   clearOpeningTimer();
-  audio();
+  audio(); startBGM();
   setupRace();
   showScreen("screen-game");
   phase="count"; var n=3;
@@ -1075,7 +1202,8 @@ $("btn-to-start").addEventListener("click", function(){ showOpening(); });
 $("btn-again").addEventListener("click", function(){ showOpening(); });
 $("opening-stage").addEventListener("click", function(){ openingNext(); });
 $("btn-skip").addEventListener("click", function(e){ e.stopPropagation(); finishOpening(); });
-$("btn-menu").addEventListener("click", function(){ phase="idle"; finished=true; if(bannerTimer) clearTimeout(bannerTimer); var b=$("stage-banner"); if(b) b.className="stage-banner pop"; showScreen("screen-start"); });
+$("btn-menu").addEventListener("click", function(){ stopBGM(); phase="idle"; finished=true; if(bannerTimer) clearTimeout(bannerTimer); var b=$("stage-banner"); if(b) b.className="stage-banner pop"; showScreen("screen-start"); });
+$("bgmBtn").addEventListener("click", function(){ audio(); toggleBGM(); });
 $("btn-restart").addEventListener("click", function(){ if(rafId) cancelAnimationFrame(rafId); lastTs=0; rafId=requestAnimationFrame(loop); startGame(); });
 var tapBtn=$("btn-tap");
 tapBtn.addEventListener("pointerdown", function(e){ e.preventDefault(); onTap(); });

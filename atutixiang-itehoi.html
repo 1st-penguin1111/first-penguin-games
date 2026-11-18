@@ -768,6 +768,15 @@
       .result-row .r-badge.lose { color: #ff5348; }
       .hidden { display: none !important; }
 
+      /* ===== BGMオンオフ（右下に固定・盤面やボタンに被らない位置） ===== */
+      .bgm-btn {
+        position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 200;
+        background: var(--panel); color: var(--ink); border: 2px solid var(--line); cursor: pointer;
+        font-family: inherit; font-size: 13px; font-weight: 800;
+        padding: 8px 14px; border-radius: 999px; box-shadow: var(--shadow); opacity: .94;
+      }
+      .bgm-btn:active { transform: scale(.95); }
+
       @media (prefers-reduced-motion: reduce) {
         .opp-portrait { transition: none; }
         .opp-portrait.chanting { animation: none; }
@@ -785,6 +794,7 @@
     </style>
   </head>
   <body>
+    <button class="bgm-btn" id="bgmBtn" type="button" aria-label="BGMのオンオフ">🔊 BGM オン</button>
     <div class="wrap">
 
       <!-- ===== START ===== -->
@@ -1308,6 +1318,138 @@
             "結果：<b>" + wins + "勝</b> ／ あと" + (TOTAL_ROUNDS - wins) + "勝でクリアだったよ");
         }
 
+        /* ---------- BGM（Web Audio生成・和風ポップ） ----------
+           琴のようなプラック音色で C→Am→F→G をループするオリジナル曲（既存曲は使わない）。
+           五音音階寄りの軽快なメロディに、太鼓っぽい低音と拍子木っぽいクリックを重ねた和風ポップ。
+           スタートボタンのタップを起点に再生し、結果画面でも流れ続け、メニューに戻ると止まる。 */
+        var actx = null;
+        var bgmOn = true, bgmTimer = null, bgmStep = 0, bgmNextT = 0, bgmGain = null, noiseBuf = null;
+        var BGM_BPM = 112;
+        var BGM_STEP = 60 / BGM_BPM / 2; /* 8分音符の長さ（秒） */
+        /* 各バー（8ステップ）のコード： [ベース音, コード構成音×3]（MIDIノート） */
+        var BGM_CHORDS = [
+          { bass: 48, tones: [60, 64, 67] },  /* C  */
+          { bass: 45, tones: [57, 60, 64] },  /* Am */
+          { bass: 41, tones: [53, 57, 60] },  /* F  */
+          { bass: 43, tones: [55, 59, 62] }   /* G  */
+        ];
+        /* メロディ（32ステップ＝4バー、0は休符）。五音音階を中心にした和風の旋律 */
+        var BGM_MELODY = [
+          72, 0, 76, 0, 79, 76, 72, 0,
+          74, 0, 72, 0, 69, 0, 72, 0,
+          72, 0, 76, 0, 81, 0, 76, 0,
+          79, 0, 74, 0, 71, 74, 79, 0
+        ];
+        function mf(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+        function ensureCtx() {
+          if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+          if (actx.state === "suspended") actx.resume();
+          if (!bgmGain) { bgmGain = actx.createGain(); bgmGain.gain.value = 0.55; bgmGain.connect(actx.destination); }
+          if (!noiseBuf) {
+            noiseBuf = actx.createBuffer(1, actx.sampleRate * 0.1, actx.sampleRate);
+            var d = noiseBuf.getChannelData(0);
+            for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+          }
+        }
+        /* 琴風プラック：短く立ち上がってすぐ減衰する爪弾き音 */
+        function pluck(midi, t, vol, dur) {
+          var o = actx.createOscillator(), o2 = actx.createOscillator(), g = actx.createGain();
+          o.type = "triangle"; o.frequency.value = mf(midi);
+          o2.type = "square"; o2.frequency.value = mf(midi) * 2;
+          var g2 = actx.createGain(); g2.gain.value = 0.16;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(vol, t + 0.01);
+          g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          o.connect(g); o2.connect(g2); g2.connect(g);
+          g.connect(bgmGain);
+          o.start(t); o.stop(t + dur + 0.05);
+          o2.start(t); o2.stop(t + dur + 0.05);
+        }
+        function bassNote(midi, t, vol, dur) {
+          var o = actx.createOscillator(), g = actx.createGain();
+          o.type = "sine"; o.frequency.value = mf(midi);
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(vol, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          o.connect(g); g.connect(bgmGain);
+          o.start(t); o.stop(t + dur + 0.05);
+        }
+        /* 和太鼓っぽい低音：周波数が沈み込むサイン波 */
+        function taiko(t, vol) {
+          var o = actx.createOscillator(), g = actx.createGain();
+          o.type = "sine";
+          o.frequency.setValueAtTime(132, t);
+          o.frequency.exponentialRampToValueAtTime(52, t + 0.12);
+          g.gain.setValueAtTime(vol, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+          o.connect(g); g.connect(bgmGain);
+          o.start(t); o.stop(t + 0.18);
+        }
+        /* 拍子木っぽいクリック：帯域を絞った短いノイズ */
+        function clickClack(t, vol) {
+          var src = actx.createBufferSource(); src.buffer = noiseBuf;
+          var f = actx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1900; f.Q.value = 6;
+          var g = actx.createGain();
+          g.gain.setValueAtTime(vol, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+          src.connect(f); f.connect(g); g.connect(bgmGain);
+          src.start(t); src.stop(t + 0.05);
+        }
+        function shaker(t, vol) {
+          var src = actx.createBufferSource(); src.buffer = noiseBuf;
+          var f = actx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 6500;
+          var g = actx.createGain();
+          g.gain.setValueAtTime(vol, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+          src.connect(f); f.connect(g); g.connect(bgmGain);
+          src.start(t); src.stop(t + 0.09);
+        }
+        function scheduleStep(step, t) {
+          var bar = Math.floor(step / 8) % 4;
+          var s = step % 8;
+          var ch = BGM_CHORDS[bar];
+          /* 琴のアルペジオ（爪弾きの分散和音） */
+          var arp = [0, 1, 2, 1, 0, 2, 1, 2][s];
+          pluck(ch.tones[arp], t, 0.05, 0.3);
+          if (s === 0) pluck(ch.tones[0] + 12, t, 0.028, 0.24);
+          /* ベースはバーの頭と真ん中 */
+          if (s === 0) bassNote(ch.bass, t, 0.11, 0.5);
+          if (s === 4) bassNote(ch.bass + 7, t, 0.07, 0.35);
+          /* 太鼓は頭、拍子木は2・6拍目、シェイカーは裏拍 */
+          if (s === 0) taiko(t, 0.15);
+          if (s === 4) taiko(t, 0.09);
+          if (s === 2 || s === 6) clickClack(t, 0.055);
+          if (s % 2 === 1) shaker(t, 0.013);
+          /* メロディ */
+          var mel = BGM_MELODY[step % 32];
+          if (mel) pluck(mel, t, 0.105, 0.44);
+        }
+        function bgmTick() {
+          if (!actx) return;
+          while (bgmNextT < actx.currentTime + 0.25) {
+            scheduleStep(bgmStep, bgmNextT);
+            bgmNextT += BGM_STEP;
+            bgmStep++;
+          }
+        }
+        function startBGM() {
+          if (!bgmOn || bgmTimer) return;
+          try {
+            ensureCtx();
+            bgmStep = 0;
+            bgmNextT = actx.currentTime + 0.06;
+            bgmTimer = setInterval(bgmTick, 90);
+          } catch (e) { /* 音が出なくてもゲームは続行 */ }
+        }
+        function stopBGM() {
+          if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+        }
+        el("bgmBtn").addEventListener("click", function () {
+          bgmOn = !bgmOn;
+          el("bgmBtn").textContent = bgmOn ? "🔊 BGM オン" : "🔇 BGM オフ";
+          if (bgmOn) startBGM(); else stopBGM();
+        });
+
         /* ---------- 開始 ---------- */
         function newRun() {
           order = shuffle(CHARACTERS);
@@ -1322,14 +1464,17 @@
           screenStart.classList.add("hidden");
           screenEnd.classList.add("hidden");
           screenGame.classList.remove("hidden");
+          startBGM();
           newRun();
         });
         el("btn-again").addEventListener("click", function () {
           screenEnd.classList.add("hidden");
           screenGame.classList.remove("hidden");
+          startBGM();
           newRun();
         });
         el("btn-menu").addEventListener("click", function () {
+          stopBGM();
           screenEnd.classList.add("hidden");
           screenGame.classList.add("hidden");
           screenStart.classList.remove("hidden");
