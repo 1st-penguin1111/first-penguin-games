@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="data:," />
     <title>雪だるまローリング</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -116,6 +116,25 @@
       .howto h2 { margin: 0 0 8px; font-size: 1.15rem; color: var(--accent-deep); }
       .howto ol { margin: 0; padding-left: 1.3em; line-height: 1.75; font-size: .95rem; font-weight: 700; }
       .howto .warn { color: var(--stop-deep); }
+
+      /* ---------- カテゴリ＋記録 ---------- */
+      .category-row { display: flex; justify-content: center; margin: 2px 0 10px; }
+      .cat-chip {
+        display: inline-block; padding: 5px 18px;
+        font-size: .92rem; font-weight: 800; color: var(--accent-deep);
+        background: var(--card); border: 3px solid var(--card-line); border-radius: 999px;
+        box-shadow: var(--shadow);
+      }
+      .record-card { margin-bottom: 16px; padding: 12px 18px; }
+      .record-title { font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .record-cleared-badge {
+        display: inline-block; padding: 2px 12px;
+        font-size: .8rem; font-weight: 800; color: #fff; background: #22a06b;
+        border-radius: 999px;
+      }
+      .record-cleared-badge.hidden { display: none; }
+      .record-body { margin-top: 4px; font-size: .95rem; font-weight: 700; color: var(--ink-soft); line-height: 1.7; }
+      .record-body b { color: var(--ink); }
 
       /* ---------- オープニング ---------- */
       .op-stage {
@@ -367,6 +386,11 @@
           <h1 class="title">雪だるま<br /><span class="t-blue">ローリング</span></h1>
           <p class="subtitle">目標の大きさを おぼえて、雪玉を転がそう！</p>
         </div>
+        <div class="category-row"><span class="cat-chip">カテゴリ：スコアアタック</span></div>
+        <div class="card record-card">
+          <div class="record-title">あなたの記録 <span class="record-cleared-badge hidden" id="record-cleared-start">クリア済み ✓</span></div>
+          <div class="record-body" id="record-body-start">まだ記録はないよ。あそんで記録を作ろう！</div>
+        </div>
         <button class="btn-primary" id="btn-start">▶ スタート</button>
         <div class="card howto">
           <h2>あそびかた</h2>
@@ -613,9 +637,57 @@
       function show(name) {
         for (var i = 0; i < screens.length; i++)
           document.getElementById("scr-" + screens[i]).classList.toggle("active", screens[i] === name);
+        if (name === "menu") renderRecordDisplay();
         window.scrollTo(0, 0);
       }
       function $(id) { return document.getElementById(id); }
+
+      /* ================= 記録保存（全ゲーム共通：fpg_records_v1 / yukidarumarolling） ================= */
+      var RECORD_KEY = "fpg_records_v1";
+      var GAME_ID = "yukidarumarolling";
+      function loadAllRecords() {
+        try {
+          var raw = localStorage.getItem(RECORD_KEY);
+          if (!raw) return {};
+          var parsed = JSON.parse(raw);
+          return (parsed && typeof parsed === "object") ? parsed : {};
+        } catch (e) { return {}; }
+      }
+      function renderRecordDisplay(entry) {
+        var body = $("record-body-start");
+        var badge = $("record-cleared-start");
+        if (!body) return;
+        var rec = entry || loadAllRecords()[GAME_ID] || null;
+        if (!rec || typeof rec.plays !== "number" || rec.plays < 1) {
+          body.textContent = "まだ記録はないよ。あそんで記録を作ろう！";
+          if (badge) badge.classList.add("hidden");
+          return;
+        }
+        var bestText = rec.best || (typeof rec.bestVal === "number" ? "誤差" + fmt(rec.bestVal) + "cm" : "—");
+        body.innerHTML = "ベスト：<b>" + bestText + "</b>　／　プレイ回数：<b>" + (rec.plays || 0) + "回</b>";
+        if (badge) badge.classList.toggle("hidden", !rec.cleared);
+      }
+      function saveGameRecord(myErr, isCleared) {
+        try {
+          var all = loadAllRecords();
+          var prev = all[GAME_ID] || {};
+          var prevBestVal = (typeof prev.bestVal === "number") ? prev.bestVal : null;
+          var prevPlays = (typeof prev.plays === "number") ? prev.plays : 0;
+          var isNewBest = (prevBestVal === null || myErr < prevBestVal);
+          var newBestVal = isNewBest ? myErr : prevBestVal;
+          var newBest = isNewBest ? ("誤差" + fmt(myErr) + "cm") : (prev.best || ("誤差" + fmt(newBestVal) + "cm"));
+          var entry = {
+            cleared: !!(prev.cleared || isCleared),
+            best: newBest,
+            bestVal: newBestVal,
+            plays: prevPlays + 1
+          };
+          all[GAME_ID] = entry;
+          try { localStorage.setItem(RECORD_KEY, JSON.stringify(all)); } catch (e2) {}
+          renderRecordDisplay(entry);
+          return entry;
+        } catch (e) { return null; }
+      }
 
       /* ================= オープニング ================= */
       var opIndex = 0, opTimer = null;
@@ -1103,6 +1175,9 @@
         if (shareX) shareX.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
         if (shareLine) shareLine.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
 
+        /* 記録保存：誤差が小さいほどベスト、1位でクリア */
+        saveGameRecord(myErr, myRank === 1);
+
         /* 勝者パネル */
         var slot = $("winner-slot");
         slot.innerHTML = "";
@@ -1189,6 +1264,7 @@
         if (!BGM.muted) sndPop();
         updateBgmBtn();
       });
+      renderRecordDisplay();
     </script>
   </body>
 </html>
