@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
+<meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="data:," />
 <title>ファスペン風船ダーツ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -379,6 +379,28 @@ min-height: 48px; touch-action: manipulation; text-align: center;
 .share-x { background: #000000; }
 .share-line { background: #06C755; }
 
+/* ---------- category + record ---------- */
+.category-row { display: flex; justify-content: center; margin: 10px 0 8px; }
+.category-chip {
+display: inline-block; background: rgba(56,189,248,.16); color: var(--ink);
+border: 2px solid var(--accent2); border-radius: 999px;
+padding: 4px 16px; font-weight: 800; font-size: 14px;
+}
+.record-box {
+background: var(--card); border: 2px solid var(--line); border-radius: 18px;
+padding: 12px 16px; margin: 10px 0 14px; box-shadow: var(--shadow); text-align: left;
+}
+.record-box-title { font-weight: 800; font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 2px; }
+.record-cleared-badge {
+display: inline-block; background: #22c55e; color: #fff; font-weight: 800; font-size: 13px;
+border-radius: 999px; padding: 2px 12px;
+}
+.record-box-body { font-size: 14px; font-weight: 700; color: var(--ink-soft); line-height: 1.7; }
+.record-box-body b { color: var(--ink); }
+.record-box-end { margin: 14px 0 0; }
+.end-record-note { font-size: 14px; font-weight: 700; color: var(--ink-soft); margin: 10px 0 0; line-height: 1.7; text-align: center; }
+.end-record-note:empty { display: none; }
+
 /* ---------- BGM toggle ---------- */
 .bgm-btn {
 position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 80;
@@ -407,6 +429,12 @@ box-shadow: var(--shadow); opacity: .92; touch-action: manipulation;
 <div class="balloon-dots" aria-hidden="true">
 <span style="background:#ffcf3f"></span><span style="background:#7bc96f"></span><span style="background:#ff8fab"></span><span style="background:#b388ff"></span><span style="background:#ef4444"></span><span style="background:#ff8c42"></span><span style="background:#8d6e63"></span><span style="background:#38bdf8"></span>
 </div>
+</div>
+
+<div class="category-row"><span class="category-chip">カテゴリ：スコアアタック</span></div>
+<div class="record-box" id="record-box-start">
+<div class="record-box-title">あなたの記録 <span class="record-cleared-badge hidden" id="record-cleared-start">クリア済み ✓</span></div>
+<div class="record-box-body" id="record-body-start">まだ記録はないよ。5投投げて記録を作ろう！</div>
 </div>
 
 <button class="big-btn" id="startBtn">▶ スタート</button>
@@ -595,6 +623,12 @@ box-shadow: var(--shadow); opacity: .92; touch-action: manipulation;
 </div>
 <div class="rank-title"><span class="crown">👑</span> <span id="rankTitle"></span></div>
 <div class="best-line">ベストスコア（このセッション）：<span id="bestScore">0</span>点<span id="newBestTag"></span></div>
+<p class="end-record-note" id="result-record-note"></p>
+</div>
+
+<div class="record-box record-box-end" id="record-box-end">
+<div class="record-box-title">あなたの記録 <span class="record-cleared-badge hidden" id="record-cleared-end">クリア済み ✓</span></div>
+<div class="record-box-body" id="record-body-end">—</div>
 </div>
 
 <div class="card">
@@ -1271,8 +1305,71 @@ if (score >= 500) return "かけだしペンギン";
 if (score >= 1) return "ひよこペンギン";
 return "ペンギンの たまご";
 }
+/* ================= records (shared: fpg_records_v1 / game: fuusendarts) ================= */
+var RECORD_KEY = "fpg_records_v1";
+var GAME_ID = "fuusendarts";
+function loadAllRecords() {
+try {
+var raw = localStorage.getItem(RECORD_KEY);
+if (!raw) return {};
+var parsed = JSON.parse(raw);
+return (parsed && typeof parsed === "object") ? parsed : {};
+} catch (e) { return {}; }
+}
+function escapeHtml(s) {
+return String(s).replace(/[&<>"']/g, function (c) {
+return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+});
+}
+function renderRecordDisplay(entry) {
+var rec = entry || loadAllRecords()[GAME_ID] || null;
+var targets = [
+{ body: $("record-body-start"), badge: $("record-cleared-start") },
+{ body: $("record-body-end"), badge: $("record-cleared-end") }
+];
+for (var i = 0; i < targets.length; i++) {
+var t = targets[i];
+if (!t.body) continue;
+if (!rec || typeof rec.plays !== "number" || rec.plays < 1) {
+t.body.textContent = "まだ記録はないよ。5投投げて記録を作ろう！";
+if (t.badge) t.badge.classList.add("hidden");
+continue;
+}
+var bestText = rec.best || (typeof rec.bestVal === "number" && rec.bestVal > 0 ? rec.bestVal + "点（" + rankFor(rec.bestVal) + "）" : "—");
+t.body.innerHTML = "ベスト：<b>" + escapeHtml(bestText) + "</b>　／　プレイ回数：<b>" + (rec.plays || 0) + "回</b>" + (rec.cleared ? "<br />最高ランク「でんせつの風船ダーツ王ペンギン」達成済み！" : "");
+if (t.badge) t.badge.classList.toggle("hidden", !rec.cleared);
+}
+}
+function saveGameRecord(score, rankText) {
+try {
+var all = loadAllRecords();
+var prev = all[GAME_ID] || {};
+var prevBestVal = (typeof prev.bestVal === "number") ? prev.bestVal : 0;
+var prevPlays = (typeof prev.plays === "number") ? prev.plays : 0;
+var isTopRank = score >= 4000;
+var entry = {
+cleared: !!(prev.cleared || isTopRank),
+best: (typeof prev.best === "string" && prev.best) ? prev.best : (prevBestVal > 0 ? prevBestVal + "点（" + rankFor(prevBestVal) + "）" : ""),
+bestVal: prevBestVal,
+plays: prevPlays + 1
+};
+var isNewBest = false;
+if (score > prevBestVal || !entry.best) {
+entry.bestVal = score;
+entry.best = score + "点（" + rankText + "）";
+isNewBest = score > prevBestVal && prevPlays > 0;
+if (prevPlays === 0 && score > 0) isNewBest = true;
+if (score === 0 && prevPlays === 0) isNewBest = false;
+}
+all[GAME_ID] = entry;
+localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+entry._isNewBest = isNewBest;
+return entry;
+} catch (e) { return null; }
+}
 function showResult() {
 phase = "idle";
+var savedRec = saveGameRecord(totalScore, rankFor(totalScore));
 var isBest = totalScore > sessionBest;
 if (isBest) sessionBest = totalScore;
 $("finalTotal").textContent = totalScore;
@@ -1286,6 +1383,19 @@ if (lineEl) lineEl.href = "https://line.me/R/msg/text/?" + encodeURIComponent(sh
 })();
 $("bestScore").textContent = sessionBest;
 $("newBestTag").innerHTML = isBest && totalScore > 0? "<span class='newbest'>NEW!</span>": "";
+(function () {
+var noteEl = $("result-record-note");
+if (noteEl) {
+if (savedRec) {
+noteEl.textContent = savedRec._isNewBest
+? "🏆 ベスト記録更新！ " + savedRec.best + "（プレイ " + savedRec.plays + "回目・記録を保存したよ）"
+: "記録を保存したよ（プレイ " + savedRec.plays + "回目" + (savedRec.best ? " ／ ベスト " + savedRec.best : "") + "）";
+} else {
+noteEl.textContent = "";
+}
+}
+renderRecordDisplay(savedRec);
+})();
 var ul = $("breakdownList");
 ul.innerHTML = "";
 for (var i = 0; i < records.length; i++) {
@@ -1381,7 +1491,8 @@ $("startBtn").addEventListener("click", showOpening);
 $("retryBtn").addEventListener("click", showOpening);
 $("openingScene").addEventListener("click", advanceOpening);
 $("openingSkip").addEventListener("click", function (e) { e.stopPropagation(); skipOpening();});
-$("menuBtn").addEventListener("click", function () { phase = "idle"; stopBGM(); showScreen("start");});
+$("menuBtn").addEventListener("click", function () { phase = "idle"; stopBGM(); renderRecordDisplay(); showScreen("start");});
+renderRecordDisplay();
 $("bgmBtn").addEventListener("click", function () {
 bgmOn = !bgmOn;
 updateBgmBtn();

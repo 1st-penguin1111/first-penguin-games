@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
     <title>半分の重さに切り分けるゲーム</title>
@@ -115,6 +115,21 @@
         margin-top: 12px;
       }
       .rule-note strong { color: var(--accent-dark); }
+      .meta-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+      .cat-chip {
+        display: inline-flex; align-items: center; min-height: 32px;
+        padding: 5px 14px; border-radius: 999px;
+        background: var(--teal); color: #fff;
+        font-weight: 800; font-size: 0.85rem; letter-spacing: 0.02em;
+      }
+      .record-card {
+        background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow);
+        padding: 14px 18px; margin: 14px 0 0; text-align: center;
+      }
+      .record-title { font-size: 0.82rem; font-weight: 800; color: var(--ink-soft); letter-spacing: 0.08em; margin-bottom: 6px; }
+      .record-body { font-size: 0.98rem; font-weight: 700; line-height: 1.7; }
+      .record-body .rec-clear { color: var(--good); font-weight: 800; }
+      .record-body .rec-none { color: var(--ink-soft); font-weight: 500; font-size: 0.92rem; }
       @media (prefers-color-scheme: dark) { .rule-note strong { color: var(--gold); } }
       .btn {
         appearance: none; border: 0; cursor: pointer;
@@ -358,10 +373,18 @@
           </svg>
           <h1>半分の重さに<br />切り分けるゲーム</h1>
           <p class="lead">食べものを「重さが半分」になるところで切れるかな？<br />形が左右対称なものは真ん中が半分。でも形が偏ったものは、半分の位置もずれているよ！</p>
+          <div class="meta-row">
+            <span class="cat-chip">カテゴリ：スコアアタック</span>
+          </div>
         </div>
 
         <div class="center" style="margin: 14px 0 2px;">
           <button class="btn btn-primary" id="btn-start" type="button">ゲームスタート</button>
+        </div>
+
+        <div class="record-card">
+          <div class="record-title">あなたの記録</div>
+          <div class="record-body" id="my-record"><span class="rec-none">まだ記録がありません。遊ぶとここに記録が残ります。</span></div>
         </div>
 
         <div class="card">
@@ -908,7 +931,47 @@
         screens.opening.classList.toggle("active", name === "opening");
         screens.game.classList.toggle("active", name === "game");
         screens.result.classList.toggle("active", name === "result");
+        if (name === "start") renderMyRecord();
         window.scrollTo(0, 0);
+      }
+
+      /* ================= 記録保存 (全ゲーム共通: fpg_records_v1) ================= */
+      var RECORD_KEY = "fpg_records_v1", RECORD_ID = "hanbun";
+      function loadAllRecords() {
+        try {
+          var raw = localStorage.getItem(RECORD_KEY);
+          if (raw) { var obj = JSON.parse(raw); if (obj && typeof obj === "object") return obj; }
+        } catch (e) {}
+        return {};
+      }
+      function saveMyRecord() {
+        try {
+          var all = loadAllRecords();
+          var prev = all[RECORD_ID] || {};
+          var plays = (typeof prev.plays === "number" ? prev.plays : 0) + 1;
+          var cleared = !!prev.cleared || state.clears >= TOTAL_STAGES;
+          var bestVal = prev.bestVal, best = prev.best;
+          if (typeof bestVal !== "number" || state.clears > bestVal) {
+            bestVal = state.clears;
+            best = state.clears + "/5ステージクリア";
+          }
+          all[RECORD_ID] = { cleared: cleared, best: best, bestVal: bestVal, plays: plays };
+          localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+        } catch (e) {}
+      }
+      function renderMyRecord() {
+        var el = $("my-record");
+        if (!el) return;
+        var rec = loadAllRecords()[RECORD_ID];
+        if (!rec || !rec.plays) {
+          el.innerHTML = '<span class="rec-none">まだ記録がありません。遊ぶとここに記録が残ります。</span>';
+          return;
+        }
+        var parts = [];
+        if (rec.cleared) parts.push('<span class="rec-clear">✓ クリア済み</span>');
+        if (rec.best) parts.push("ベスト：" + rec.best);
+        parts.push("プレイ回数：" + rec.plays + "回");
+        el.innerHTML = parts.join("　／　");
       }
 
       function shufflePick() {
@@ -1277,6 +1340,7 @@
         { min: 0, rank: "目分量は修行中", msg: "まずは対称なアイテムで真ん中を狙う練習から。太い方・重い方を意識すると変わるよ！" }
       ];
       function showResult() {
+        saveMyRecord();
         showScreen("result");
         $("final-clears").textContent = state.clears;
         var r = RANKS.filter(function (x) { return state.clears >= x.min; })[0];
@@ -1304,6 +1368,7 @@
         if (bgm.on) { ac(); startBgm(); } else { stopBgm(); }
       });
       updateBgmBtn();
+      renderMyRecord();
       $("btn-start").addEventListener("click", function () { ac(); startBgm(); startOpening("game"); });
       $("btn-opening-replay").addEventListener("click", function () { ac(); startBgm(); startOpening("start"); });
       $("btn-opening-replay2").addEventListener("click", function () { ac(); startBgm(); startOpening("start"); });
