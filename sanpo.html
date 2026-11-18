@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
     <title>ペンギン線引きさんぽ</title>
@@ -213,6 +213,19 @@
       @keyframes bob { 0%,100% { transform: translateY(0) rotate(-2deg);} 50% { transform: translateY(-7px) rotate(2deg);} }
       @media (prefers-reduced-motion: reduce) { .title-penguin { animation: none; } .cutin-card, #cpBanner { animation: none; } }
       .tagline { font-weight: 900; color: var(--ink-soft); margin: 6px 0 12px; font-size: 15px; }
+      .meta-chips { display: flex; justify-content: center; margin: 0 0 8px; }
+      .cat-chip {
+        background: var(--panel); color: #17648c;
+        border: 2px solid var(--line); border-radius: 999px;
+        padding: 4px 14px; font-weight: 900; font-size: 13.5px;
+      }
+      @media (prefers-color-scheme: dark) { .cat-chip { color: #aee3fa; } }
+      .record-box {
+        max-width: 520px; margin: 0 auto 14px;
+        background: var(--panel); border: 2px solid var(--line); border-radius: 14px;
+        padding: 8px 14px; font-weight: 900; font-size: 14px;
+      }
+      .record-box .rec-label { color: var(--ink-soft); font-size: 12.5px; display: block; margin-bottom: 2px; }
       .big-btn {
         display: inline-block;
         border: none; border-radius: 999px;
@@ -364,6 +377,8 @@
           <img class="title-penguin" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAsCAYAAAAXb/p7AAACaklEQVR4nM2Zv27CMBDGD8RDZGBADIi1b5CBNTwDS9m6kacIWze6ZEfq0K4MvEGHMKAOFQND3iKdLjXOnX1n86efFAmCz/npO9/ZAECAkmTYhMSFqC8dmCTD5p5gqJ42QANZ12f1/LZUE3BwaTrr3Nvvd+3rGFBRoMs1Cs5ULKg3QANXlpvOmMViCQB/oFpI5+BYOFOLxTIIkh1owvnS6INDIaQGkGwzGjiNynIDaTpTdQJnH7wmHArdlkIO7BsYaMLZKcSFH6o0nV1Ut0venYRaXxLg0WjcXlS8NNUkILrnWvzSwjidfkTjOLEOSgFQXNopB13z456P7ooPC5KHxKxNhCqKNeCVJMOmUyScTCfstL29fF1AluVGnFp0qijW5OdiQA4uVhwYSp1ibk0BADy/Pmmn80rtoK2y3FysPWlxjUZjr3sACkBXarUVrxGZ4v1+F71buCR1D4AAvMYx/Zpii+RWLmrcAxCcB6/dVrbbd9G4PF9BXZ97rIOYaldb0aqqDuoYZx80IWNAq+oAVXWA4/G781mer8h7+Gxnm7G3Idd2Z8LYosA4mXAAzBo0z2ncgp5OJ+R9DYwJhbK7SAcQTxT3lu0cqk2x71ThEuemrRB3BwBxrknhcKwLMkmGje1i1IFVA+eL4Qzq+9yj2sA91Q+FCHEvJHaAOc/zVXCR3FJtFdugAP8DtrOTmFVkwj5Kor34kYr+ThKq6XQCWTZv339+fpDjRID2ZL5JfcK5zDWeZXMyY+LfqO2CwdakhcyyOVl83r1YK3xIls3FkBycSyLAuj73XO2HSr9UmAmuIKP/yNFWujb+F6RUO77fcugFAAAAAElFTkSuQmCC" alt="ドット絵のペンギン" />
           <h1 class="game-title pop">ペンギン<span class="t2">線引き</span>さんぽ</h1>
           <p class="tagline">線を引いて橋をかけて、落とし穴からペンギンを守ろう！<br />1000mのゴールを目指してさんぽだよ</p>
+          <div class="meta-chips"><span class="cat-chip">カテゴリ：のんびり</span></div>
+          <div class="record-box"><span class="rec-label">あなたの記録</span><span id="recText">ベスト ― ／ 0回プレイ</span></div>
           <button class="big-btn" id="startBtn">▶ スタート</button>
           <div class="rules">
             <h2>あそびかた</h2>
@@ -1535,6 +1550,57 @@
     var _now = 0;
     function tsNow() { return _now; }
 
+    /* ================= records (shared across all games) ================= */
+    var REC_KEY = "fpg_records_v1";
+    function loadAllRecords() {
+      try {
+        var raw = localStorage.getItem(REC_KEY);
+        if (!raw) return {};
+        var o = JSON.parse(raw);
+        return (o && typeof o === "object") ? o : {};
+      } catch (e) { return {}; }
+    }
+    function myRecord() {
+      var all = loadAllRecords();
+      var r = all["sanpo"];
+      if (!r || typeof r !== "object") return { cleared: false, best: "―", bestVal: 0, plays: 0 };
+      return {
+        cleared: !!r.cleared,
+        best: (typeof r.best === "string" && r.best) ? r.best : "―",
+        bestVal: (typeof r.bestVal === "number") ? r.bestVal : 0,
+        plays: (typeof r.plays === "number") ? r.plays : 0
+      };
+    }
+    function updateRecordUI() {
+      var el = document.getElementById("recText");
+      if (!el) return;
+      var r = myRecord();
+      var bestTxt = r.bestVal > 0 ? (r.bestVal + "m") : "―";
+      var txt = "ベスト " + bestTxt + " ／ " + r.plays + "回プレイ";
+      if (r.cleared) txt += " ／ ✓ クリア済み";
+      el.textContent = txt;
+    }
+    // called once per result (clear or game over): plays +1, best/cleared updated
+    function saveRecord(dist, didClear) {
+      var prev = myRecord();
+      var isBest = dist > prev.bestVal;
+      var newBestVal = isBest ? dist : prev.bestVal;
+      var rec = {
+        cleared: prev.cleared || !!didClear,
+        best: isBest ? (dist + "m") : (prev.bestVal > 0 ? (prev.best !== "―" ? prev.best : (prev.bestVal + "m")) : (dist + "m")),
+        bestVal: newBestVal,
+        plays: prev.plays + 1
+      };
+      try {
+        var all = loadAllRecords();
+        all["sanpo"] = rec;
+        localStorage.setItem(REC_KEY, JSON.stringify(all));
+      } catch (e) { /* storage unavailable: keep in-memory best only */ }
+      best = rec.bestVal;
+      updateRecordUI();
+      return isBest;
+    }
+
     /* ================= share (X / LINE) ================= */
     var SHARE_URL = "https://1st-penguin1111.github.io/first-penguin-games/sanpo.html";
     function setShareLinks(xId, lineId, resultText) {
@@ -1549,8 +1615,7 @@
       state = "clear";
       setShareLinks("clrShareX", "clrShareLine", "1000mクリア！称号：伝説のさんぽ王！");
       var d = GOAL_M;
-      var isBest = d > best;
-      if (isBest) best = d;
+      var isBest = saveRecord(d, true);
       document.getElementById("clrMembers").textContent = stats.members;
       document.getElementById("clrCp").textContent = stats.cps;
       document.getElementById("clrBest").textContent = best;
@@ -1566,8 +1631,7 @@
     function gameOver() {
       state = "over";
       var d = distM();
-      var isBest = d > best;
-      if (isBest) best = d;
+      var isBest = saveRecord(d, false);
       document.getElementById("resDist").textContent = d;
       document.getElementById("resMembers").textContent = stats.members;
       document.getElementById("resCp").textContent = stats.cps;
@@ -1910,6 +1974,8 @@
       resize(); resetGame();
     });
 
+    best = myRecord().bestVal;
+    updateRecordUI();
     resize();
     resetGame();
     requestAnimationFrame(frame);

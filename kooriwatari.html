@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="data:," />
     <title>ペンギン氷渡り</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -78,6 +78,30 @@
       .tagline {
         margin: 0 0 4px;
         font-size: 1rem;
+        font-weight: 700;
+        color: var(--ink-soft);
+      }
+      .meta-row {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+      }
+      .cat-chip {
+        display: inline-block;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: var(--sea-deep);
+        background: var(--card);
+        border: 2px solid var(--card-line);
+        border-radius: 999px;
+        padding: 4px 14px;
+        box-shadow: var(--shadow);
+      }
+      @media (prefers-color-scheme: dark) { .cat-chip { color: #7fd4f7; } }
+      .record-line {
+        text-align: center;
+        margin: 8px 0 0;
+        font-size: 0.9rem;
         font-weight: 700;
         color: var(--ink-soft);
       }
@@ -563,6 +587,11 @@
           <p class="tagline">流れてくる氷を ぴょんぴょん渡っていこう！</p>
         </div>
 
+        <div class="meta-row">
+          <span class="cat-chip">カテゴリ：スコアアタック</span>
+        </div>
+        <p class="record-line" id="record-line">あなたの記録：まだありません</p>
+
         <button id="btn-start" class="big-btn" type="button">▶ スタート</button>
 
         <div class="card howto">
@@ -684,6 +713,50 @@
         if (dist >= 150) return "ぴょんぴょん氷ペンギン";
         if (dist >= 50)  return "かけだし氷わたりペンギン";
         return "よちよちペンギン";
+      }
+
+      /* ================= 記録保存（全ゲーム共通 fpg_records_v1） ================= */
+      var REC_KEY = "fpg_records_v1";
+      var REC_ID = "kooriwatari";
+      function loadRecords() {
+        try {
+          var raw = localStorage.getItem(REC_KEY);
+          if (!raw) return {};
+          var obj = JSON.parse(raw);
+          return (obj && typeof obj === "object") ? obj : {};
+        } catch (e) { return {}; }
+      }
+      function saveRecord(finalDist) {
+        try {
+          var all = loadRecords();
+          var prev = all[REC_ID] || {};
+          var entry = {
+            cleared: !!prev.cleared,
+            best: typeof prev.best === "string" ? prev.best : "",
+            bestVal: typeof prev.bestVal === "number" ? prev.bestVal : 0,
+            plays: (typeof prev.plays === "number" ? prev.plays : 0) + 1
+          };
+          if (finalDist > entry.bestVal) {
+            entry.bestVal = finalDist;
+            entry.best = finalDist.toFixed(1) + "m（" + titleFor(finalDist) + "）";
+          }
+          if (finalDist >= 800) entry.cleared = true;   // 最高称号でクリア
+          all[REC_ID] = entry;
+          localStorage.setItem(REC_KEY, JSON.stringify(all));
+        } catch (e) { /* 保存できなくてもゲームは続行 */ }
+        renderRecordLine();
+      }
+      function renderRecordLine() {
+        var el = document.getElementById("record-line");
+        if (!el) return;
+        var rec = loadRecords()[REC_ID];
+        if (!rec || !rec.plays) {
+          el.textContent = "あなたの記録：まだありません";
+          return;
+        }
+        var txt = "あなたの記録：ベスト " + (rec.best || "―") + " ／ プレイ " + rec.plays + "回";
+        if (rec.cleared) txt += " ／ ✓ クリア済み";
+        el.textContent = txt;
       }
 
       /* ================= 画面切り替え ================= */
@@ -1284,6 +1357,7 @@
       function finishGame() {
         state = "idle";
         var finalDist = Math.round(dist * 10) / 10;
+        saveRecord(finalDist);
         var isNew = finalDist > best.dist;
         if (isNew) { best.dist = finalDist; best.count = count; }
         document.getElementById("result-reason").textContent =
@@ -1657,6 +1731,7 @@
         stopBGM();
         showScreen("start");
       });
+      renderRecordLine();
     </script>
   </body>
 </html>

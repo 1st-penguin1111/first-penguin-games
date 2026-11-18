@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light" />
+<meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="data:," />
 <title>ジャンケンRPG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2704,6 +2704,31 @@ var shareText = "『ジャンケンRPG』で遊んだよ！（結果：" + share
 var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/ziyankenrpg.html";
 $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
 $("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
+/* ---- shared clear-record (fpg_records_v1): read whole object, update only this game, save back ---- */
+try {
+var recAll = {};
+try { recAll = JSON.parse(localStorage.getItem("fpg_records_v1") || "{}") || {}; } catch (e1) { recAll = {}; }
+if (typeof recAll !== "object" || recAll === null || Array.isArray(recAll)) recAll = {};
+var recPrev = (recAll["ziyankenrpg"] && typeof recAll["ziyankenrpg"] === "object") ? recAll["ziyankenrpg"] : null;
+var recBeaten = bossMode ? (clear ? 9 : 0) : beatenCount();
+var recEntry = {
+cleared: recPrev ? !!recPrev.cleared : false,
+best: recPrev && typeof recPrev.best === "string" ? recPrev.best : "",
+bestVal: recPrev && typeof recPrev.bestVal === "number" ? recPrev.bestVal : -1,
+plays: recPrev && typeof recPrev.plays === "number" ? recPrev.plays : 0
+};
+recEntry.plays += 1;
+if (clear) recEntry.cleared = true;
+if (clear) {
+if (recBeaten >= recEntry.bestVal) { recEntry.bestVal = recBeaten; recEntry.best = "ラスボス撃破！"; }
+} else if (recBeaten > recEntry.bestVal) {
+recEntry.bestVal = recBeaten;
+recEntry.best = recBeaten + "人たおした";
+}
+if (recEntry.bestVal < 0) recEntry.bestVal = 0;
+recAll["ziyankenrpg"] = recEntry;
+localStorage.setItem("fpg_records_v1", JSON.stringify(recAll));
+} catch (e2) { /* storage unavailable (private mode etc.): game continues without saving */ }
 }
 
 /* ---------- BGM (Web Audio, original loops) ----------
