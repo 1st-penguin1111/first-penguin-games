@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
     <title>ファスペン落ちものキャッチ</title>
@@ -65,6 +65,30 @@
       }
       h1.title .catch { color: var(--accent-deep); }
       .subtitle { text-align: center; color: var(--ink-soft); font-weight: 700; margin: 0 0 14px; font-size: 15px; }
+
+      /* category + record chips (shared across all games) */
+      .info-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+      .cat-chip, .record-chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 13px; font-weight: 800; line-height: 1.3;
+        padding: 6px 12px; border-radius: 999px;
+        background: var(--card); color: var(--ink);
+        border: 2px solid rgba(255,255,255,.7);
+        box-shadow: 0 2px 0 rgba(35,64,94,.15);
+      }
+      .cat-chip { background: #ffe9d6; border-color: #ffb27a; color: #8a3c00; }
+      @media (prefers-color-scheme: dark) {
+        .cat-chip { background: #4a2c14; border-color: #9a5a24; color: #ffd9ae; }
+      }
+      .record-chip .clear-badge {
+        background: #f59e0b; color: #fff; font-size: 11px; font-weight: 800;
+        padding: 2px 7px; border-radius: 999px; letter-spacing: .02em; white-space: nowrap;
+      }
+      .end-record {
+        text-align: center; font-size: 13.5px; font-weight: 700;
+        color: var(--ink-soft); line-height: 1.6; margin: 8px 0 0;
+      }
+      .end-record b { color: var(--ink); }
 
       .card {
         background: var(--card);
@@ -397,6 +421,11 @@
         <h1 class="title">ファスペン<br />落ちもの<span class="catch">キャッチ</span></h1>
         <p class="subtitle">カゴを持ったペンギンと走ってキャッチ！60秒スコア勝負🐧</p>
 
+        <div class="info-bar" aria-label="カテゴリと記録">
+          <span class="cat-chip">カテゴリ：スコアアタック</span>
+          <span class="record-chip" id="record-start-text">記録：まだプレイなし</span>
+        </div>
+
         <button class="btn" id="btn-start">▶ スタート！</button>
 
         <div class="card">
@@ -519,6 +548,7 @@
           <p class="result-title" id="res-title"></p>
           <p class="best-line">ベストスコア：<span id="res-best">0</span>点</p>
           <span class="newbest" id="res-newbest" style="display:none;">🎉 ベスト更新！</span>
+          <p class="end-record" id="record-end-text"></p>
         </div>
 
         <div class="card">
@@ -882,6 +912,68 @@
       /* ---------- game state ---------- */
       var S = null;
       var best = 0;
+
+      /* ---------- 記録保存（全ゲーム共通 fpg_records_v1） ---------- */
+      var RECORD_KEY = "fpg_records_v1";
+      var RECORD_ID = "ochimono";
+      var CLEAR_SCORE = 2500; // 最高称号「キャッチの神さま！！」のライン
+      function loadAllRecords() {
+        try {
+          var raw = localStorage.getItem(RECORD_KEY);
+          if (!raw) return {};
+          var obj = JSON.parse(raw);
+          return (obj && typeof obj === "object") ? obj : {};
+        } catch (e) { return {}; }
+      }
+      function getMyRecord() {
+        var all = loadAllRecords();
+        return all[RECORD_ID] || null;
+      }
+      function formatRecordText(rec) {
+        if (!rec || typeof rec.plays !== "number" || rec.plays <= 0) return "記録：まだプレイなし";
+        var bestText = rec.best || ((typeof rec.bestVal === "number" && rec.bestVal >= 0) ? rec.bestVal + "点" : "―");
+        return "記録：ベスト " + bestText + " ／ プレイ " + rec.plays + "回";
+      }
+      function refreshRecordDisplay() {
+        var rec = getMyRecord();
+        var startEl = $("record-start-text");
+        if (startEl) {
+          if (rec && rec.cleared) {
+            startEl.innerHTML = "";
+            var t = document.createTextNode(formatRecordText(rec) + " ");
+            var b = document.createElement("span");
+            b.className = "clear-badge"; b.textContent = "クリア済み ✓";
+            startEl.appendChild(t); startEl.appendChild(b);
+          } else {
+            startEl.textContent = formatRecordText(rec);
+          }
+        }
+      }
+      function saveGameRecord(score) {
+        try {
+          var all = loadAllRecords();
+          var prev = all[RECORD_ID] || { cleared: false, best: "", bestVal: -1, plays: 0 };
+          var plays = (typeof prev.plays === "number" ? prev.plays : 0) + 1;
+          var cleared = !!prev.cleared || score >= CLEAR_SCORE;
+          var bestVal = (typeof prev.bestVal === "number") ? prev.bestVal : -1;
+          var bestText = prev.best || "";
+          if (score > bestVal) {
+            bestVal = score;
+            bestText = score + "点（" + titleFor(score) + "）";
+          }
+          if (!bestText) bestText = score + "点（" + titleFor(score) + "）";
+          var entry = { cleared: cleared, best: bestText, bestVal: bestVal, plays: plays };
+          all[RECORD_ID] = entry;
+          localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+          return entry;
+        } catch (e) { return null; }
+      }
+      // restore the persistent best score so the result screen keeps it across visits
+      (function initRecord() {
+        var rec = getMyRecord();
+        if (rec && typeof rec.bestVal === "number" && rec.bestVal > 0) best = rec.bestVal;
+        refreshRecordDisplay();
+      })();
 
       function newState() {
         return {
@@ -1319,6 +1411,21 @@
         S.items = [];
         var isNewBest = S.score > best;
         if (isNewBest) best = S.score;
+        /* 記録保存：結果画面表示のタイミングで1回だけ保存（plays+1／ベスト・クリア更新） */
+        var savedRecord = saveGameRecord(S.score);
+        if (savedRecord && typeof savedRecord.bestVal === "number" && savedRecord.bestVal > best) best = savedRecord.bestVal;
+        var endRecEl = $("record-end-text");
+        if (endRecEl) {
+          if (savedRecord) {
+            endRecEl.innerHTML = "これまでの記録：ベスト <b></b> ／ プレイ <b></b>" + (savedRecord.cleared ? " ／ <b>クリア済み ✓</b>" : "");
+            var bs = endRecEl.querySelectorAll("b");
+            if (bs[0]) bs[0].textContent = savedRecord.best;
+            if (bs[1]) bs[1].textContent = savedRecord.plays + "回";
+          } else {
+            endRecEl.textContent = "";
+          }
+        }
+        refreshRecordDisplay();
         $("res-msg").textContent = "⏰ タイムアップ！";
         $("res-score").textContent = S.score;
         $("res-title").textContent = titleFor(S.score);

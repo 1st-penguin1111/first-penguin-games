@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
 <meta name="color-scheme" content="light dark" />
 <link rel="icon" href="data:," />
 <title>ファスペン順番あて</title>
@@ -75,6 +75,21 @@
   }
   h1.title .small{display:block;font-size:22px;text-shadow:0 2px 0 #38b6ff,0 5px 0 #1e8fd1,0 8px 14px rgba(0,0,0,.15)}
   .subtitle{text-align:center;font-weight:700;color:var(--muted);margin:6px 0 0;font-size:15px}
+  .cat-chip{
+    width:fit-content;margin:12px auto 0;padding:6px 14px;border-radius:999px;
+    background:var(--card);border:2px solid #9fd8ff;box-shadow:var(--shadow);
+    font-size:13px;font-weight:800;color:var(--muted);text-align:center;
+  }
+  .cat-chip b{color:#1e8fd1}
+  @media (prefers-color-scheme: dark){ .cat-chip b{color:#6fc3f7} }
+
+  /* ---------- record panel (start screen) ---------- */
+  .record-rows{display:grid;gap:7px;font-size:14.5px;font-weight:700}
+  .record-rows .r-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .record-rows .r-label{color:var(--muted);font-size:13px;font-weight:900;white-space:nowrap}
+  .record-rows .r-value{text-align:right}
+  .record-rows .r-value .clear-yes{color:var(--pink-dark)}
+  .record-empty{font-size:14px;font-weight:700;color:var(--muted);margin:0;line-height:1.7}
 
   /* ---------- roster preview ---------- */
   .roster{display:flex;justify-content:center;gap:6px;margin:16px 0 4px;flex-wrap:wrap}
@@ -269,11 +284,19 @@
       <span class="title-badge">ファーストペンギン ゲーム</span>
       <h1 class="title"><span class="small">ファスペン</span>順番あて</h1>
       <p class="subtitle">光った順番をおぼえて、下のボタンで枠をうめよう！</p>
+      <p class="cat-chip">🧩 カテゴリ：<b>パズル・おぼえる</b></p>
     </div>
 
     <div class="roster" id="roster"></div>
 
     <button class="big-btn" id="btn-start">▶ スタート！</button>
+
+    <div class="card record-panel">
+      <h2>🏆 あなたの記録</h2>
+      <div id="record-body">
+        <p class="record-empty">読み込み中…</p>
+      </div>
+    </div>
 
     <div class="card">
       <h2>あそびかた</h2>
@@ -736,6 +759,8 @@
     setStatus("ハートが 0 になっちゃった…💦");
 
     later(function(){
+      /* result screen is about to show: save this play to the shared records */
+      saveRecord(round);
       $("result-rounds").textContent = cleared;
       $("result-rank").textContent = rankFor(cleared);
       $("result-record").innerHTML = isRecord && cleared > 0
@@ -754,15 +779,79 @@
     }, 900);
   }
 
+  /* ================= records (shared across all games) =================
+     Saved under one shared key so the game-list page can read every
+     game's record: fpg_records_v1 = { "<gameId>": {cleared, best,
+     bestVal, plays}, ... }. This game's entry is "junbanate".
+     - plays: +1 every time the result screen is shown
+     - cleared: true once round 10 is reached (never goes back)
+     - best / bestVal: bestVal is the highest round reached; best is
+       its display text 「第○ラウンド到達」, updated only when beaten. */
+  var RECORD_KEY = "fpg_records_v1";
+  var RECORD_ID = "junbanate";
+  function loadAllRecords(){
+    try {
+      var raw = localStorage.getItem(RECORD_KEY);
+      var obj = raw ? JSON.parse(raw) : {};
+      return (obj && typeof obj === "object" && !Array.isArray(obj)) ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function myRecord(){
+    var e = loadAllRecords()[RECORD_ID];
+    return (e && typeof e === "object") ? e : null;
+  }
+  /* called when the result screen is shown; reached = round reached */
+  function saveRecord(reached){
+    try {
+      var all = loadAllRecords();
+      var prev = all[RECORD_ID] || {};
+      var prevBestVal = typeof prev.bestVal === "number" ? prev.bestVal : 0;
+      var entry = {
+        cleared: !!prev.cleared || reached >= 10,
+        best: typeof prev.best === "string" ? prev.best : "",
+        bestVal: prevBestVal,
+        plays: (typeof prev.plays === "number" ? prev.plays : 0) + 1
+      };
+      if (reached > prevBestVal){
+        entry.bestVal = reached;
+        entry.best = "第" + reached + "ラウンド到達";
+      }
+      if (!entry.best && entry.bestVal > 0) entry.best = "第" + entry.bestVal + "ラウンド到達";
+      all[RECORD_ID] = entry;
+      localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+      renderRecordPanel();
+      return entry;
+    } catch (e) { return null; }
+  }
+  function renderRecordPanel(){
+    var body = $("record-body");
+    if (!body) return;
+    var e = myRecord();
+    if (!e || !e.plays){
+      body.innerHTML = '<p class="record-empty">まだ記録がないよ。遊ぶとここにクリア状況やベスト記録が残るよ！</p>';
+      return;
+    }
+    var clearHtml = e.cleared
+      ? '<span class="clear-yes">✓ クリア済み！（第10ラウンド到達）</span>'
+      : "まだ（第10ラウンド到達でクリア！）";
+    var bestHtml = e.best ? e.best : "まだないよ";
+    body.innerHTML =
+      '<div class="record-rows">' +
+      '<div class="r-row"><span class="r-label">クリア</span><span class="r-value">' + clearHtml + "</span></div>" +
+      '<div class="r-row"><span class="r-label">ベスト記録</span><span class="r-value">' + bestHtml + "</span></div>" +
+      '<div class="r-row"><span class="r-label">プレイ回数</span><span class="r-value">' + e.plays + " 回</span></div>" +
+      "</div>";
+  }
+
   /* ---------- buttons ---------- */
   $("btn-start").addEventListener("click", startGame);
   $("btn-retry").addEventListener("click", startGame);
   $("btn-undo").addEventListener("click", onUndo);
   $("btn-menu").addEventListener("click", function(){
-    clearTimers(); stopBGM(); phase = "idle"; show("start");
+    clearTimers(); stopBGM(); phase = "idle"; show("start"); renderRecordPanel();
   });
   $("btn-quit").addEventListener("click", function(){
-    clearTimers(); stopBGM(); phase = "idle"; show("start");
+    clearTimers(); stopBGM(); phase = "idle"; show("start"); renderRecordPanel();
   });
   $("btn-bgm").addEventListener("click", function(){
     bgmOn = !bgmOn;
@@ -775,6 +864,7 @@
   });
 
   updateHud();
+  renderRecordPanel();
 })();
 </script>
 </body>

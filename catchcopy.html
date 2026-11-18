@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="data:," />
     <title>カサゴが決めるキャッチコピー</title>
     <style>
@@ -79,6 +79,27 @@
         cursor: pointer;
         box-shadow: var(--shadow);
       }
+
+      /* ---------- Category / record chips ---------- */
+      .info-bar {
+        display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        margin: 0 0 16px;
+      }
+      .cat-chip, .record-chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.82rem; font-weight: 800; line-height: 1.35;
+        padding: 6px 12px; border-radius: 999px;
+        border: 2px solid var(--line); background: var(--card);
+        color: var(--ink); box-shadow: var(--shadow);
+        max-width: 100%;
+      }
+      .cat-chip { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-deep); flex: none; }
+      .record-chip { overflow-wrap: anywhere; }
+      .end-record {
+        text-align: center; font-size: 0.88rem; font-weight: 700;
+        color: var(--ink-soft); line-height: 1.6; margin: 0 0 14px;
+      }
+      .end-record b { color: var(--ink); }
 
       /* ---------- Start screen ---------- */
       .title-block { text-align: center; padding-top: 26px; }
@@ -393,6 +414,10 @@
           <h1 class="game-title">カサゴが決める<br /><span class="accent">キャッチコピー</span></h1>
           <p class="title-sub">ワードセンス抜群のカサゴが、今日のあなたのキャッチコピーを決めちゃうよ！</p>
         </div>
+        <div class="info-bar" aria-label="カテゴリと記録">
+          <span class="cat-chip">カテゴリ：のんびり</span>
+          <span class="record-chip" id="record-start-text">記録：まだプレイなし</span>
+        </div>
         <button class="big-btn" id="startBtn" type="button">スタート</button>
 
         <div class="howto">
@@ -471,6 +496,7 @@
             </div>
             <p class="final-msg">あなたの今日はこれね！</p>
             <p class="final-sub">スクショしてみんなに教えよう！</p>
+            <p class="end-record" id="record-end-text"></p>
             <div class="share-row">
               <a class="share-btn share-x" id="shareX" href="#" target="_blank" rel="noopener">
                 <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -788,10 +814,58 @@
         }
       });
 
+      /* ================= 記録保存（全ゲーム共通 fpg_records_v1） ================= */
+      var RECORD_KEY = "fpg_records_v1";
+      var RECORD_ID = "catchcopy";
+      function loadAllRecords() {
+        try {
+          var raw = localStorage.getItem(RECORD_KEY);
+          if (!raw) return {};
+          var obj = JSON.parse(raw);
+          return (obj && typeof obj === "object") ? obj : {};
+        } catch (e) { return {}; }
+      }
+      function getMyRecord() {
+        var all = loadAllRecords();
+        return all[RECORD_ID] || null;
+      }
+      function formatRecordText(rec) {
+        if (!rec || typeof rec.plays !== "number" || rec.plays <= 0) return "記録：まだプレイなし";
+        var best = rec.best || "―";
+        return "記録：ベスト " + best + " ／ プレイ " + rec.plays + "回";
+      }
+      function refreshRecordDisplay() {
+        var startEl = $("record-start-text");
+        if (startEl) startEl.textContent = formatRecordText(getMyRecord());
+      }
+      /* このゲームにクリア概念はないので cleared は常に false。best は最後に出たキャッチコピー全文（『…』形）で毎回更新 */
+      function saveGameRecord(copyText) {
+        try {
+          var all = loadAllRecords();
+          var prev = all[RECORD_ID] || { cleared: false, best: "", bestVal: 0, plays: 0 };
+          var plays = (typeof prev.plays === "number" ? prev.plays : 0) + 1;
+          var entry = { cleared: false, best: "『" + copyText + "』", bestVal: 0, plays: plays };
+          all[RECORD_ID] = entry;
+          localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+          return entry;
+        } catch (e) { return null; }
+      }
+
       /* ================= 結果画面 ================= */
       var resultTimers = [];
       function goResult() {
         show("screen-result");
+        /* 記録保存：結果画面表示のタイミングで保存（plays+1／ベスト＝今回のキャッチコピー） */
+        var saved = saveGameRecord(result1 + result2);
+        var endRecEl = $("record-end-text");
+        if (endRecEl) {
+          if (saved) {
+            endRecEl.innerHTML = "これまでの記録：ベスト <b>" + saved.best + "</b> ／ プレイ <b>" + saved.plays + "回</b>";
+          } else {
+            endRecEl.textContent = "";
+          }
+        }
+        refreshRecordDisplay();
         $("resultWord1").textContent = result1;
         $("resultWord2").textContent = result2;
         $("finalCopy").textContent = result1 + result2;
@@ -827,6 +901,7 @@
       });
 
       /* ================= スタート ================= */
+      refreshRecordDisplay();
       $("startBtn").addEventListener("click", function () {
         var c = audio();
         if (c) { ensureBuses(); if (!bgmOn) setBgm(true); }
