@@ -826,6 +826,11 @@
             }
             btn.classList.add("hit");
             playCorrect(btn);
+            if (n === 25) {
+              playClearSfx();
+            } else {
+              playTapSfx(n);
+            }
             next++;
             if (next > 25) {
               finish();
@@ -836,6 +841,7 @@
               nextNumEl.classList.add("pop");
             }
           } else {
+            playMissSfx();
             misses++;
             missEl.textContent = misses;
             missEl.classList.add("miss-bad");
@@ -923,6 +929,97 @@
             card.appendChild(s);
             (function (el) { setTimeout(function () { el.remove(); }, 3800); })(s);
           }
+        }
+
+        /* ==================================================
+           効果音（SFX）— Web Audio生成、BGMとは独立した音源
+           ・正解タップ：数字が進むほど少しずつ高くなるポップ音
+           ・ミスタップ：短く低い「ブッ」という区別できる音
+           ・クリア：ファンファーレ風のアルペジオ＋フィニッシュ和音
+           ================================================== */
+        var sfxCtx = null;
+        var sfxGain = null;
+        function sfxEnsure() {
+          if (!sfxCtx) {
+            var AC2 = window.AudioContext || window.webkitAudioContext;
+            if (!AC2) return false;
+            sfxCtx = new AC2();
+            sfxGain = sfxCtx.createGain();
+            sfxGain.gain.value = 0.55;
+            sfxGain.connect(sfxCtx.destination);
+          }
+          if (sfxCtx.state === "suspended") sfxCtx.resume();
+          return true;
+        }
+        function sfxMidiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+        function sfxTone(midi, time, dur, type, vol, slideToMidi) {
+          if (!sfxCtx) return;
+          var o = sfxCtx.createOscillator();
+          var g = sfxCtx.createGain();
+          o.type = type;
+          o.frequency.setValueAtTime(sfxMidiHz(midi), time);
+          if (slideToMidi) {
+            o.frequency.exponentialRampToValueAtTime(sfxMidiHz(slideToMidi), time + dur);
+          }
+          g.gain.setValueAtTime(0, time);
+          g.gain.linearRampToValueAtTime(vol, time + 0.008);
+          g.gain.exponentialRampToValueAtTime(0.001, time + dur);
+          o.connect(g);
+          g.connect(sfxGain);
+          o.start(time);
+          o.stop(time + dur + 0.05);
+        }
+        // 正解タップ音：ペンタトニックを 1→25 で少しずつ上がっていく気持ちいいポップ
+        function playTapSfx(clearedNum) {
+          if (!sfxEnsure()) return;
+          var t = sfxCtx.currentTime;
+          var scale = [72, 74, 76, 79, 81, 84, 86, 88, 91, 93]; // C D E G A …
+          var step = Math.max(1, Math.min(25, clearedNum)) - 1;
+          var idx = step % scale.length;
+          var oct = Math.floor(step / scale.length);
+          var midi = scale[idx] + oct * 12;
+          // メインのポップ（ピッチが軽く跳ね上がる）
+          sfxTone(midi, t, 0.14, "triangle", 0.55, midi + 5);
+          // キラッとした倍音
+          sfxTone(midi + 12, t, 0.10, "sine", 0.22);
+          // 小さなクリック感のあるアタック
+          sfxTone(midi + 19, t, 0.05, "sine", 0.12);
+        }
+        // ミスタップ音：短く低く、成功音とはっきり区別できる音
+        function playMissSfx() {
+          if (!sfxEnsure()) return;
+          var t = sfxCtx.currentTime;
+          sfxTone(45, t, 0.16, "sawtooth", 0.18, 38); // A2→下降
+          sfxTone(33, t, 0.14, "square", 0.10, 30);
+        }
+        // クリアファンファーレ：C→E→G→C の上昇アルペジオ＋タメてフィニッシュ和音
+        function playClearSfx() {
+          if (!sfxEnsure()) return;
+          var t = sfxCtx.currentTime + 0.02;
+          var seq = [
+            { m: 72, at: 0.00, d: 0.16 }, // C5
+            { m: 76, at: 0.11, d: 0.16 }, // E5
+            { m: 79, at: 0.22, d: 0.16 }, // G5
+            { m: 84, at: 0.33, d: 0.22 }, // C6
+            { m: 79, at: 0.52, d: 0.14 }, // G5
+            { m: 84, at: 0.64, d: 0.20 }  // C6
+          ];
+          for (var i = 0; i < seq.length; i++) {
+            sfxTone(seq[i].m, t + seq[i].at, seq[i].d, "triangle", 0.5);
+            sfxTone(seq[i].m, t + seq[i].at, seq[i].d, "square", 0.10);
+            sfxTone(seq[i].m + 12, t + seq[i].at, seq[i].d * 0.8, "sine", 0.14);
+          }
+          // フィニッシュ：Cメジャーの和音をジャーンと鳴らす
+          var fin = t + 0.88;
+          var chord = [72, 76, 79, 84, 88];
+          for (var j = 0; j < chord.length; j++) {
+            sfxTone(chord[j], fin, 0.85, "triangle", 0.34);
+            sfxTone(chord[j], fin, 0.85, "square", 0.07);
+          }
+          sfxTone(48, fin, 0.85, "sine", 0.30); // 低いCで土台
+          // キラキラの余韻
+          sfxTone(96, fin + 0.12, 0.5, "sine", 0.12);
+          sfxTone(91, fin + 0.24, 0.45, "sine", 0.10);
         }
 
         /* ==================================================

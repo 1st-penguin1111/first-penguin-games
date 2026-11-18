@@ -603,6 +603,7 @@
       }
 
       function startGame(m) {
+        sfxEnsure();
         mode = m;
         scores = { you: 0, cpu: 0 };
         gotBy = { you: [], cpu: [] };
@@ -644,6 +645,7 @@
         var c = deck[i];
         c.state = "up";
         c.el.classList.add("flipped");
+        sfxFlip();
         if (!(i in cpuMemory) && Math.random() < 0.85) cpuMemory[i] = c.memberId;
       }
       function flipDown(i) {
@@ -681,6 +683,7 @@
          Positions (memberIds) are permuted; matched pairs stay put.
          Memory — the player's and the CPU's — no longer matches the board. */
       function doShuffleRemaining(done) {
+        sfxShuffle();
         var downIdx = [];
         deck.forEach(function (c, i) { if (c.state === "down") downIdx.push(i); });
         if (downIdx.length < 2) { done(); return; }
@@ -755,6 +758,7 @@
               setTimeout(function () { c.el.classList.remove("just-matched"); }, 550);
             });
             matchedCount++;
+            sfxMatch();
             if (mode === "vs") { scores[who] += pointsForPair(ca.memberId); gotBy[who].push(ca.memberId); }
             delete cpuMemory[a]; delete cpuMemory[b];
 
@@ -763,12 +767,14 @@
             var specialText = "";
             var returnedName = "";
             if (kind === "star") {
+              setTimeout(sfxStar, 380);
               starFoundBy = mode === "vs" ? who : "solo";
               specialText = mode === "vs"
                 ? "⭐ このペアがスターカードだった！ 3ptゲット！（通常は1pt）"
                 : "⭐ このペアがスターカードだった！";
             } else if (kind === "back" && mode === "vs") {
               returnedName = doReturnOpponentPair(who);
+              if (returnedName) setTimeout(sfxReturn, 380);
               specialText = returnedName
                 ? "↩️ もどすマーク発動！　相手の「" + returnedName + "」が場にもどった！"
                 : "↩️ もどすマークのペアだった！（相手はまだ何も取ってないので効果なし）";
@@ -804,6 +810,7 @@
           }, 480);
         } else {
           setTimeout(function () {
+            sfxMiss();
             flipDown(a); flipDown(b);
             var afterMiss = function () {
               busy = false;
@@ -942,6 +949,94 @@
           }
           show("end");
         }, 900);
+      }
+
+      /* ================= SFX (Web Audio, original) =================
+         Short synthesized effects on their own context/gain so they
+         coexist with the BGM: flip, match (bright arpeggio), miss
+         (low descending — clearly different from a match), and one
+         distinct sound per special effect (shuffle / star / return). */
+      var sfxCtx = null, sfxGain = null;
+      function sfxEnsure() {
+        if (!sfxCtx) {
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return false;
+          sfxCtx = new AC();
+          sfxGain = sfxCtx.createGain();
+          sfxGain.gain.value = 0.55;
+          sfxGain.connect(sfxCtx.destination);
+        }
+        if (sfxCtx.state === "suspended") sfxCtx.resume();
+        return true;
+      }
+      /* one tone; glideTo (Hz) optional for sweeps, delay in seconds */
+      function sfxTone(freq, delay, dur, type, vol, glideTo) {
+        if (!sfxEnsure()) return;
+        var t = sfxCtx.currentTime + (delay || 0);
+        var o = sfxCtx.createOscillator(); o.type = type || "sine";
+        o.frequency.setValueAtTime(freq, t);
+        if (glideTo) o.frequency.exponentialRampToValueAtTime(Math.max(30, glideTo), t + dur);
+        var g = sfxCtx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol || 0.15, t + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+        o.connect(g); g.connect(sfxGain);
+        o.start(t); o.stop(t + dur + 0.05);
+      }
+      /* short filtered-noise burst (paper / whoosh textures) */
+      function sfxNoise(delay, dur, freqFrom, freqTo, vol) {
+        if (!sfxEnsure()) return;
+        var t = sfxCtx.currentTime + (delay || 0);
+        var len = Math.max(1, Math.floor(sfxCtx.sampleRate * dur));
+        var buf = sfxCtx.createBuffer(1, len, sfxCtx.sampleRate);
+        var d = buf.getChannelData(0);
+        for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        var src = sfxCtx.createBufferSource(); src.buffer = buf;
+        var f = sfxCtx.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 0.9;
+        f.frequency.setValueAtTime(freqFrom, t);
+        f.frequency.exponentialRampToValueAtTime(Math.max(60, freqTo), t + dur);
+        var g = sfxCtx.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol || 0.12, t + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+        src.connect(f); f.connect(g); g.connect(sfxGain);
+        src.start(t); src.stop(t + dur + 0.02);
+      }
+      /* card flip: paper swish + quick rising blip */
+      function sfxFlip() {
+        sfxNoise(0, 0.13, 900, 2600, 0.16);
+        sfxTone(520, 0, 0.09, "triangle", 0.10, 940);
+      }
+      /* pair matched: bright happy C-E-G-C arpeggio */
+      function sfxMatch() {
+        var notes = [523.25, 659.25, 783.99, 1046.5];
+        for (var i = 0; i < notes.length; i++) sfxTone(notes[i], i * 0.07, 0.22, "triangle", 0.16);
+        sfxTone(1318.5, 0.28, 0.3, "sine", 0.08);
+      }
+      /* no match: low dull descent, unmistakably different from sfxMatch */
+      function sfxMiss() {
+        sfxTone(196, 0, 0.18, "sawtooth", 0.07);
+        sfxTone(146.83, 0.14, 0.26, "sawtooth", 0.07);
+      }
+      /* ⭐ star revealed: high sparkly cascade */
+      function sfxStar() {
+        var notes = [1318.5, 1567.98, 2093, 2637.02, 2093, 2637.02];
+        for (var i = 0; i < notes.length; i++) sfxTone(notes[i], i * 0.06, 0.2, "sine", 0.12);
+        sfxNoise(0.05, 0.35, 5000, 7000, 0.04);
+      }
+      /* 🔀 shuffle fires: swirling rush of alternating swishes + tones */
+      function sfxShuffle() {
+        for (var i = 0; i < 6; i++) {
+          sfxNoise(i * 0.09, 0.11, i % 2 ? 2400 : 800, i % 2 ? 700 : 2600, 0.13);
+          sfxTone(i % 2 ? 880 : 587.33, i * 0.09, 0.1, "triangle", 0.07);
+        }
+        sfxTone(440, 0.56, 0.18, "triangle", 0.09, 880);
+      }
+      /* ↩️ return fires: reverse swoop down, then a soft bounce back */
+      function sfxReturn() {
+        sfxTone(840, 0, 0.38, "sine", 0.15, 190);
+        sfxNoise(0, 0.3, 2000, 500, 0.08);
+        sfxTone(392, 0.4, 0.14, "triangle", 0.1, 523.25);
       }
 
       /* ================= BGM (Web Audio, original) =================
