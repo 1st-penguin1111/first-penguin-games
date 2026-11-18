@@ -372,6 +372,20 @@
       .totals .tbox { flex: 1; text-align: center; background: rgba(127,180,220,.14); border-radius: 12px; padding: 8px 4px; }
       .totals .tbox .n { font-family: "Mochiy Pop One", sans-serif; font-size: 20px; }
       .totals .tbox .l { font-size: 11.5px; font-weight: 800; color: var(--ink-soft); }
+
+      /* result share buttons (X / LINE) */
+      .share-row { display: flex; gap: 10px; margin: 0 0 14px; }
+      .share-btn {
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+        font-family: "Mochiy Pop One", sans-serif; font-size: 15px;
+        text-decoration: none; text-align: center;
+        border-radius: 999px; padding: 12px 10px; min-height: 48px;
+        box-shadow: 0 4px 0 rgba(35,64,94,.25);
+      }
+      .share-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(35,64,94,.25); }
+      .share-btn svg { width: 18px; height: 18px; flex: 0 0 18px; }
+      .share-x { background: #000; color: #fff; }
+      .share-line { background: #06C755; color: #fff; }
     </style>
   </head>
   <body>
@@ -519,6 +533,11 @@
         <div class="card">
           <h2>📸 メンバーをキャッチした数</h2>
           <div class="stat-grid" id="res-members"></div>
+        </div>
+
+        <div class="share-row">
+          <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>Xでシェア</a>
+          <a class="share-btn share-line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
         </div>
 
         <div class="bgm-row" style="margin:0 0 10px;"><button class="bgm-btn" id="btn-bgm-result" type="button">🔊 BGM オン</button></div>
@@ -1308,6 +1327,12 @@
         $("res-combo").textContent = S.maxCombo;
         $("res-present").textContent = S.presents;
         $("res-peng").textContent = S.penguins;
+        /* share buttons: post text carries this run's result */
+        var SHARE_URL = "https://1st-penguin1111.github.io/first-penguin-games/ochimono.html";
+        var shareText = "『ファスペン落ちものキャッチ』で遊んだよ！結果：" + S.score + "点だった！（" + titleFor(S.score) + "） #ファーストペンギン #落ちものキャッチ";
+        var shareX = $("share-x"), shareLine = $("share-line");
+        if (shareX) shareX.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(SHARE_URL);
+        if (shareLine) shareLine.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + SHARE_URL);
         var grid = $("res-members");
         grid.innerHTML = "";
         MEMBERS.forEach(function (m, i) {

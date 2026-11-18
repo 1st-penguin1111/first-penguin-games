@@ -487,6 +487,18 @@
       .summary-row .sres.lose { color: var(--ink-soft); }
       .summary-row .sres.yet { color: var(--ink-soft); font-size: 13px; }
 
+      /* ---------- share buttons (result screen) ---------- */
+      .share-row { display: flex; gap: 10px; margin-top: 14px; }
+      .share-btn {
+        flex: 1 1 0; display: flex; align-items: center; justify-content: center;
+        text-align: center; font-weight: 800; font-size: 15px; line-height: 1.3;
+        color: #fff; text-decoration: none; border-radius: 999px;
+        padding: 12px 8px; min-height: 50px; box-shadow: var(--shadow);
+      }
+      .share-btn:active { transform: translateY(1px); }
+      .share-x { background: #000; border: 3px solid #000; }
+      .share-line { background: #06C755; border: 3px solid #06C755; }
+
       /* ---------- BGM toggle ---------- */
       .bgm-toggle {
         position: fixed; right: 12px; bottom: 12px; z-index: 30;
@@ -601,6 +613,10 @@
         <h2 class="result-title" id="result-title"></h2>
         <p class="result-sub" id="result-sub"></p>
         <div class="summary" id="summary"></div>
+        <div class="share-row">
+          <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener">Xでシェア</a>
+          <a class="share-btn share-line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
+        </div>
         <button class="big-btn" id="btn-again" style="margin-top:16px;">🔁 もういちど</button>
         <button class="sub-btn" id="btn-menu">メニューにもどる</button>
         <a class="yt-banner" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">
@@ -1135,6 +1151,12 @@
           row.appendChild(img); row.appendChild(nm); row.appendChild(mk); row.appendChild(res);
           sum.appendChild(row);
         });
+        // share buttons: post text carries this run's real result
+        var resultPhrase = cleared ? "8人全員に勝ってクリア！" : wins + "人抜き！";
+        var shareText = "『ファスペン指スマ対決』で遊んだよ！結果：" + resultPhrase + " #ファーストペンギン #指スマ";
+        var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/yubisuma.html";
+        $("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+        $("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
         showScreen("screen-result");
       }
 

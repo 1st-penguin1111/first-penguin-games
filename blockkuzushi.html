@@ -113,6 +113,22 @@
       .stat b{ display:block; font-size:20px; }
       .stat span{ font-size:11.5px; color:var(--ink-soft); font-weight:700; }
 
+      /* ---- 結果シェアボタン（X／LINE 横並び） ---- */
+      .share-row{ display:flex; gap:10px; margin:16px 0 4px; }
+      .share-btn{
+        flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:6px;
+        padding:13px 8px; border-radius:999px;
+        font-weight:800; font-size:15px; letter-spacing:.02em;
+        color:#fff; text-decoration:none;
+        box-shadow:0 4px 0 rgba(0,0,0,.22);
+        -webkit-tap-highlight-color:transparent;
+        transition:transform .08s ease, opacity .15s ease, box-shadow .08s ease;
+        min-height:48px;
+      }
+      .share-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,.22); opacity:.92; }
+      .share-btn.x{ background:#000000; }
+      .share-btn.line{ background:#06C755; }
+
       .yt-banner{
         display:block; margin-top:14px; text-decoration:none; color:#fff;
         border-radius:16px; overflow:hidden; position:relative;
@@ -215,6 +231,10 @@
           <div class="stat"><b id="stBlocks">0</b><span>壊したブロック</span></div>
           <div class="stat"><b id="stHits">0</b><span>得点（裏抜け）</span></div>
           <div class="stat"><b id="stItems">0</b><span>取ったアイテム</span></div>
+        </div>
+        <div class="share-row">
+          <a class="share-btn x" id="share-x" href="#" target="_blank" rel="noopener noreferrer">X でシェア</a>
+          <a class="share-btn line" id="share-line" href="#" target="_blank" rel="noopener noreferrer">LINEで送る</a>
         </div>
         <div class="btn-row">
           <button class="btn" id="againBtn">もう一度たたかう！</button>
@@ -934,6 +954,15 @@
         $("stBlocks").textContent=G.statBlocks+" 個";
         $("stHits").textContent=G.statHits+" 回";
         $("stItems").textContent=G.statItems+" 個";
+        // シェアボタン（結果に応じた文面）
+        var shareUrl="https://1st-penguin1111.github.io/first-penguin-games/blockkuzushi.html";
+        var resultText= win
+          ? G.youScore+"-"+G.cpuScore+"で"+G.cpu.name+"に勝ち！"
+          : G.youScore+"-"+G.cpuScore+"で"+G.cpu.name+"に負けちゃった…";
+        var shareText="『ブロック崩し対戦』で遊んだよ！（結果："+resultText+"） #ファーストペンギン #ブロック崩し対戦";
+        var shareX=$("share-x"), shareLine=$("share-line");
+        if(shareX) shareX.href="https://twitter.com/intent/tweet?text="+encodeURIComponent(shareText)+"&url="+encodeURIComponent(shareUrl);
+        if(shareLine) shareLine.href="https://line.me/R/msg/text/?"+encodeURIComponent(shareText+"\n"+shareUrl);
         window.scrollTo(0,0);
       }
 

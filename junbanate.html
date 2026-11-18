@@ -204,6 +204,18 @@
   .ans-cell .mark.ok{background:#2fbf4f}
   .ans-cell .mark.ng{background:#e53935}
   .new-record{display:inline-block;background:var(--yellow);color:#7a5200;font-weight:900;font-size:13px;padding:4px 12px;border-radius:999px;margin-top:8px;box-shadow:0 3px 0 #e0aa00}
+  .share-row{display:flex;gap:10px;margin-top:14px}
+  .share-btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:13px 8px;min-height:50px;border-radius:999px;text-decoration:none;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;color:#fff;
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .share-btn:active{transform:translateY(3px)}
+  .share-btn.x{background:#000;box-shadow:0 4px 0 #333}
+  .share-btn.x:active{box-shadow:0 1px 0 #333}
+  .share-btn.line{background:#06C755;box-shadow:0 4px 0 #049c43}
+  .share-btn.line:active{box-shadow:0 1px 0 #049c43}
 
   /* ---------- youtube / list ---------- */
   .yt-banner{display:block;margin-top:18px;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);position:relative;text-decoration:none;background:#000}
@@ -318,6 +330,11 @@
       <div id="result-record"></div>
       <div class="result-best" id="result-best"></div>
       <div class="result-miss" id="result-miss"></div>
+    </div>
+
+    <div class="share-row">
+      <a class="share-btn x" id="share-x" href="#" target="_blank" rel="noopener">𝕏 でシェア</a>
+      <a class="share-btn line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
     </div>
 
     <button class="big-btn" id="btn-retry">🔁 もう一度あそぶ</button>
@@ -727,6 +744,11 @@
         '<div style="text-align:center">さいごのラウンドで ハートが 0 になったよ</div>' +
         '<div class="ans-label">せいかいの順番</div>' + ansRowHtml(sequence, false) +
         '<div class="ans-label">あなたの答え</div>' + ansRowHtml(answer, true);
+      var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/junbanate.html";
+      var shareText = "『ファスペン順番あて』で遊んだよ！" + cleared + "ラウンドクリアしたよ！ #ファーストペンギン #順番あて";
+      var sx = $("share-x"), sl = $("share-line");
+      if (sx) sx.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+      if (sl) sl.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + " " + shareUrl);
       show("result");
     }, 900);
   }

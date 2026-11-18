@@ -292,6 +292,23 @@
         touch-action:manipulation; user-select:none;
       }
       .menu-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(23,58,94,.25); }
+
+      /* result share buttons (X / LINE) */
+      .share-row{
+        display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+        margin:0 auto 14px; max-width:620px; padding:0 2px;
+      }
+      .share-btn{
+        flex:1 1 160px; max-width:290px;
+        font-weight:800; font-size:16px; text-decoration:none; text-align:center;
+        border:3px solid var(--ink); border-radius:999px;
+        padding:11px 16px;
+        box-shadow:0 4px 0 rgba(23,58,94,.25);
+        touch-action:manipulation; user-select:none;
+      }
+      .share-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(23,58,94,.25); }
+      .share-x{ background:#000; color:#fff; }
+      .share-line{ background:#06C755; color:#fff; }
       /* BGM toggle: fixed bottom-right, above everything */
       #bgmBtn{
         position:fixed; right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:60;
@@ -421,6 +438,10 @@
           <span class="hud-chip">ベスト <b id="resBest">0m</b></span>
         </div>
         <p class="got-list" id="resItems"></p>
+      </div>
+      <div class="share-row">
+        <a id="shareX" class="share-btn share-x" href="#" target="_blank" rel="noopener">Xでシェア</a>
+        <a id="shareLine" class="share-btn share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
       </div>
       <button id="retryBtn" class="big-btn pop" type="button">🔁 もう一回 とぶ！</button>
       <button id="menuBtn" class="menu-btn" type="button">🏠 メニューにもどる</button>
@@ -1538,6 +1559,13 @@ function showResult(){
   $("resItems").innerHTML = sunkNote + (G.gotLog.length
     ? "もらったアイテム：<br />" + G.gotLog.map(function(s){ return escapeHtml(s); }).join(" ／ ")
     : "アイテムは もらえなかった… メンバーに あたってみよう！");
+  /* share buttons: post text carries this run's result */
+  var GAME_URL="https://1st-penguin1111.github.io/first-penguin-games/sukaijanpu.html";
+  var shareText = G.sunk
+    ? "『ファスペン スカイジャンプ』で遊んだよ！結果：" + fmtDist(d) + "で海にドボン…🌊 #ファーストペンギン #スカイジャンプ"
+    : "『ファスペン スカイジャンプ』で遊んだよ！結果：" + fmtDist(d) + "飛んだ！（" + rankTitle(d) + "） #ファーストペンギン #スカイジャンプ";
+  $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(GAME_URL);
+  $("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + GAME_URL);
   stage.classList.add("hidden");
   deck.classList.add("hidden");
   resultScreen.classList.remove("hidden");

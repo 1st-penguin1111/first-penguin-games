@@ -284,6 +284,16 @@
   .member-results .ct{font-family:"Mochiy Pop One",sans-serif;font-size:15px;color:#e84e84}
   .member-results figure.zero{opacity:.38;filter:grayscale(.7)}
   .screenshot-note{text-align:center;font-weight:900;font-size:14px;color:#1e8fd1;margin-top:14px}
+  .share-row{display:flex;gap:10px;margin-top:12px}
+  .share-btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+    min-height:52px;border-radius:14px;color:#fff;font-size:16px;
+    font-family:"Mochiy Pop One",sans-serif;text-decoration:none;letter-spacing:.04em;
+  }
+  .share-btn:active{transform:translateY(2px)}
+  .share-btn svg{width:19px;height:19px;flex:none}
+  .share-x{background:#000;box-shadow:0 4px 0 #333}
+  .share-line{background:#06c755;box-shadow:0 4px 0 #04913d}
 
   /* ---------- effects bar ---------- */
   .fx-bar{display:none;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
@@ -472,6 +482,17 @@
     </div>
 
     <p class="screenshot-note">📸 この画面をスクショしてシェアしてね！</p>
+
+    <div class="share-row">
+      <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Xでシェア
+      </a>
+      <a class="share-btn share-line" id="share-line" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 3C6.48 3 2 6.64 2 11.13c0 4.02 3.55 7.39 8.35 8.03.33.07.77.22.88.5.1.26.07.66.03.93l-.14.84c-.04.26-.21 1.02.92.55 1.13-.46 6.1-3.59 8.32-6.13 1.51-1.65 2.27-3.32 2.27-5.3C22 6.64 17.52 3 12 3z"/></svg>
+        LINEで送る
+      </a>
+    </div>
 
     <button class="btn btn-again" id="btn-again" type="button">🔁 もう一度あそぶ（同じモード）</button>
     <button class="btn btn-menu" id="btn-home" type="button">🏠 メニューにもどる</button>
@@ -1286,6 +1307,19 @@
     $("stat-gold").textContent = goldHits;
 
     $("member-results").innerHTML = chartHTML();
+
+    /* share buttons: the post text carries this run's actual result */
+    var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/moguratataki.html";
+    var titleName = rank.replace("称号：", "");
+    var shareText;
+    if(isRace()){
+      shareText = "『ファスペンもぐらたたき』で遊んだよ！2000点タイムアタックを" + fmtTime(clearTime) + "秒でクリア、称号「" + titleName + "」だったよ！ #ファーストペンギン #もぐらたたき";
+    } else {
+      shareText = "『ファスペンもぐらたたき』で遊んだよ！30秒スコアアタックで" + score + "点、称号「" + titleName + "」だったよ！ #ファーストペンギン #もぐらたたき";
+    }
+    $("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+    $("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
+
     setTimeout(function(){ show("result"); }, 450);
   }
 

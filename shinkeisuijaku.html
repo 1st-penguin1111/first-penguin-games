@@ -215,6 +215,17 @@
       .special-panel li:last-child { margin-bottom: 0; }
       .tag .sp { color: #b8860b; font-weight: 800; }
 
+      .share-row { display: flex; gap: 10px; margin: 16px 0 4px; }
+      .share-btn {
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 13px 10px; border-radius: 999px; text-decoration: none;
+        font-weight: 800; font-size: 15px; box-shadow: var(--shadow);
+        transition: transform 0.12s ease;
+      }
+      .share-btn:active { transform: scale(0.97); }
+      .share-btn.share-x { background: #000; color: #fff; }
+      .share-btn.share-line { background: #06C755; color: #fff; }
+
       .game-actions { display: flex; gap: 10px; margin-top: 16px; }
       .game-actions.end-actions { flex-direction: column; }
       .btn {
@@ -430,6 +441,11 @@
             <p class="stat-line">全8ペア コンプリート！🎉</p>
             <p class="stat-line" id="end-ta-star" style="font-size:14px"></p>
           </div>
+        </div>
+
+        <div class="share-row">
+          <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener">Xでシェア</a>
+          <a class="share-btn share-line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
         </div>
 
         <div class="game-actions end-actions">
@@ -888,6 +904,15 @@
         return pool[Math.floor(Math.random() * pool.length)];
       }
 
+      /* ================= share ================= */
+      var SHARE_URL = "https://1st-penguin1111.github.io/first-penguin-games/shinkeisuijaku.html";
+      function setShareLinks(shareText) {
+        var xEl = $("share-x");
+        var lineEl = $("share-line");
+        if (xEl) xEl.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(SHARE_URL);
+        if (lineEl) lineEl.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + " " + SHARE_URL);
+      }
+
       /* ================= finish ================= */
       function finishGame() {
         stopTimer();
@@ -917,6 +942,12 @@
               title.className = "result-title pop draw";
               $("result-sub").textContent = "互角の勝負だったね！";
             }
+            var vsResult = scores.you > scores.cpu
+              ? "対戦モードで" + scores.you + "点で勝ち！（CPU " + scores.cpu + "点）"
+              : (scores.you < scores.cpu
+                ? "対戦モードで" + scores.you + "点で負けちゃった…（CPU " + scores.cpu + "点）"
+                : "対戦モードで" + scores.you + "点で引き分け！");
+            setShareLinks("『ファスペン神経衰弱』で遊んだよ！（結果：" + vsResult + "） #ファーストペンギン #神経衰弱");
             var html = "";
             [["あなた", gotBy.you], ["CPU", gotBy.cpu]].forEach(function (side) {
               html += '<div class="side-head">' + side[0] + 'がゲット</div>';
@@ -946,6 +977,8 @@
             $("end-ta-time").textContent = fmtTime(elapsed);
             $("end-ta-flips").textContent = flips;
             $("end-ta-star").innerHTML = "⭐ スターカードは「" + memberById[special.star].name + "」だったよ！<br />🔀 シャッフルカードは「" + memberById[special.shuffle].name + "」だったよ";
+            var taSeconds = Math.floor(elapsed / 1000);
+            setShareLinks("『ファスペン神経衰弱』で遊んだよ！（結果：タイムアタック " + fmtTime(elapsed) + "（" + taSeconds + "秒）で全8ペアクリア！ めくり" + flips + "回） #ファーストペンギン #神経衰弱");
           }
           show("end");
         }, 900);
@@ -1137,6 +1170,8 @@
         }
         bgmUpdateBtn();
       });
+
+      setShareLinks("『ファスペン神経衰弱』で遊んだよ！ #ファーストペンギン #神経衰弱");
 
       /* ================= wiring ================= */
       $("btn-vs").addEventListener("click", function () { bgmStart(); startGame("vs"); });

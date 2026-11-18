@@ -361,6 +361,11 @@ img{display:block;}
 .rank-row.is-out{opacity:.55;}
 .btn-again{font-family:"Mochiy Pop One",sans-serif;font-size:20px;background:linear-gradient(180deg,#4ade80,#16a34a);color:#fff;border:none;border-radius:999px;padding:14px 36px;box-shadow:0 6px 0 #14532d, var(--shadow);}
 .btn-again:active{transform:translateY(4px);box-shadow:0 2px 0 #14532d;}
+.share-row{display:flex;gap:10px;justify-content:center;margin:16px auto 4px;max-width:560px;}
+.share-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;text-align:center;font-size:15px;font-weight:900;padding:13px 8px;border-radius:999px;box-shadow:var(--shadow);line-height:1.2;}
+.share-btn:active{transform:translateY(2px);}
+.share-x{background:#000;color:#fff;border:2.5px solid #000;}
+.share-line{background:#06C755;color:#fff;border:2.5px solid #06C755;}
 .btn-menu{font-family:"Mochiy Pop One",sans-serif;font-size:16px;background:var(--card);color:var(--accent);border:3px solid var(--accent);border-radius:999px;padding:11px 30px;box-shadow:var(--shadow);margin-top:12px;}
 .btn-menu:active{transform:translateY(2px);}
 
@@ -533,7 +538,10 @@ img{display:block;}
       <p class="result-sub" id="result-sub"></p>
       <div class="rank-table" id="rank-table"></div>
       <button class="btn-again" id="btn-again">▶ もういちど あそぶ</button>
-      <br>
+      <div class="share-row">
+        <a class="share-btn share-x" id="shareX" href="#" target="_blank" rel="noopener">Xでシェア</a>
+        <a class="share-btn share-line" id="shareLine" href="#" target="_blank" rel="noopener">LINEで送る</a>
+      </div>
       <button class="btn-menu" id="btn-menu">メニューにもどる</button>
       <br>
       <a class="yt-banner" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">
@@ -1195,6 +1203,20 @@ function showResult(winRacer){
     li.textContent="アウトになった人："+outLog.join("、");
     tbl.appendChild(li);
   }
+  var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/koronda.html";
+  var resultText;
+  if(winRacer && winRacer.d.isPlayer) resultText = "優勝したよ！";
+  else if(winRacer){
+    var myRank = 0;
+    for(var si=0; si<sorted.length; si++){ if(sorted[si].d.isPlayer){ myRank = si+1; break; } }
+    resultText = myRank ? (myRank + "位だったよ！") : "がんばったよ！";
+  } else {
+    resultText = "アウトになっちゃった…";
+  }
+  var shareText = "『ペンギンさんがころんだ』で遊んだよ！結果：" + resultText + " #ファーストペンギン #ペンギンさんがころんだ";
+  var shareX = $("shareX"), shareLine = $("shareLine");
+  if(shareX) shareX.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+  if(shareLine) shareLine.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
 }
 
 /* ================= events ================= */

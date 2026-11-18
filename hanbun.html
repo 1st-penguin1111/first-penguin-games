@@ -327,6 +327,16 @@
       .result-list .rname { font-weight: 800; }
       .result-list .rdetail { color: var(--ink-soft); font-size: 0.85rem; line-height: 1.5; }
       .result-list .rerr { margin-left: auto; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .share-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px; }
+      .share-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        min-height: 48px; padding: 12px 22px; border-radius: 999px;
+        font-weight: 800; font-size: 0.98rem; text-decoration: none; color: #fff;
+        box-shadow: var(--shadow);
+      }
+      .share-btn:active { transform: scale(0.97); }
+      .share-x { background: #000; }
+      .share-line { background: #06c755; }
       @media (prefers-reduced-motion: reduce) {
         .piece { transition: none; }
         .btn { transition: none; }
@@ -482,6 +492,10 @@
         <ul class="result-list" id="result-list"></ul>
         <div class="center">
           <button class="btn btn-primary" id="btn-again" type="button">もう一度あそぶ</button>
+        </div>
+        <div class="share-row">
+          <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener">Xでシェア</a>
+          <a class="share-btn share-line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
         </div>
         <div class="center" style="margin-top: 12px;">
           <button class="btn btn-ghost" id="btn-opening-replay2" type="button">オープニングをみる</button>
@@ -1277,6 +1291,10 @@
           ul.appendChild(li);
         });
         if (state.clears >= 4) sndPerfect(); else if (state.clears >= 2) sndGood();
+        var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/hanbun.html";
+        var shareText = "『半分の重さに切り分けるゲーム』で遊んだよ！5ステージ中" + state.clears + "ステージクリア！ランクは「" + r.rank + "」だったよ！ #ファーストペンギン #半分切り分け";
+        $("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+        $("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
       }
 
       $("btn-bgm").addEventListener("click", function () {

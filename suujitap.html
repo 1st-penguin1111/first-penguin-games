@@ -469,7 +469,26 @@
       @media (prefers-color-scheme: dark) {
         .new-best { background: #4d3f10; color: #ffd43b; }
       }
-      .result-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+      .share-row { display: flex; gap: 10px; margin-top: 16px; }
+      .share-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        border-radius: 99px;
+        color: #fff;
+        font-weight: 800;
+        font-size: 1rem;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        padding: 10px 8px;
+        box-shadow: 0 4px 0 rgba(0,0,0,0.22);
+      }
+      .share-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.22); }
+      .share-btn-x { background: #000000; }
+      .share-btn-line { background: #06C755; }
+      .result-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
       .ghost-btn {
         display: block;
         width: 100%;
@@ -631,6 +650,11 @@
             <div class="result-row"><span class="k">セッションベスト</span><span id="result-best">—</span></div>
           </div>
           <span class="new-best" id="new-best" style="display:none">★ ベスト更新！ ★</span>
+        </div>
+
+        <div class="share-row">
+          <a class="share-btn share-btn-x" id="share-x" href="#" target="_blank" rel="noopener">𝕏 でシェア</a>
+          <a class="share-btn share-btn-line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
         </div>
 
         <div class="result-btns">
@@ -880,6 +904,12 @@
           document.getElementById("result-best").textContent = fmt(sessionBest) + " 秒";
           document.getElementById("new-best").style.display = isBest ? "inline-block" : "none";
           document.getElementById("start-best").textContent = "セッションベスト: " + fmt(sessionBest) + " 秒";
+
+          // シェアボタン（結果を入れた投稿文を動的にセット）
+          var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/suujitap.html";
+          var shareText = "『ファスペン数字タップ』で遊んだよ！" + fmt(total) + "秒でクリア！称号「" + rankFor(total) + "」！ミス" + misses + "回だったよ #ファーストペンギン #数字タップ";
+          document.getElementById("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+          document.getElementById("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
 
           // クリア演出：パネルを消して背景イラストを全面表示し、
           // 「ゲームクリア！」を約3秒見せてから結果画面へ

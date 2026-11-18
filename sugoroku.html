@@ -353,6 +353,15 @@ h1.game-title .pen{color:var(--teal);}
 .result-stats .rs{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:10px;}
 .result-stats .rs .v{font-size:21px;font-weight:900;}
 .result-stats .rs .k{font-size:12px;font-weight:800;color:var(--ink2);}
+.share-row{display:flex;gap:10px;margin:14px 0 4px;}
+.share-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:13px 8px;border-radius:999px;text-decoration:none;color:#fff;
+  font-weight:900;font-size:15.5px;line-height:1.2;box-shadow:var(--shadow);min-height:48px;
+}
+.share-btn:active{transform:translateY(2px);}
+.share-x{background:#000;}
+.share-line{background:#06C755;}
 .hidden{display:none !important;}
 .small-note{font-size:12.5px;color:var(--ink2);font-weight:600;text-align:center;margin-top:8px;line-height:1.6;}
 </style>
@@ -462,6 +471,10 @@ h1.game-title .pen{color:var(--teal);}
         <div class="rs"><div class="v" id="rsLaps">-</div><div class="k">日本をまわった周</div></div>
       </div>
       <p id="rsSpecial" style="font-weight:900;color:var(--accent-d);"></p>
+      <div class="share-row">
+        <a class="share-btn share-x" id="shareX" href="#" target="_blank" rel="noopener">𝕏 Xでシェア</a>
+        <a class="share-btn share-line" id="shareLine" href="#" target="_blank" rel="noopener">LINEで送る</a>
+      </div>
       <button class="big-start" id="againBtn">🔁 もう一度あそぶ</button>
       <div style="margin-top:10px;"><button class="bgm-btn" id="bgmBtnResult" type="button">🔊 BGM オン</button></div>
     </div>
@@ -1363,6 +1376,11 @@ function showResult(){
   if(state.specialDone) rsParts.push("👑 47コンプリートボーナス（＋10万人）も達成！");
   if(areaCount>0) rsParts.push("🗺️ エリア制覇 "+areaCount+" / 6（各＋5万人）達成！");
   $("rsSpecial").textContent = rsParts.join(" ");
+  /* share buttons: post text carries this run's actual result */
+  var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/sugoroku.html";
+  var shareText = "『ファスペンすごろく』で遊んだよ！登録者100万人達成！（最終登録者" + fmt(state.subs) + "人／制覇 " + state.visitedCount + " / 47都道府県／サイコロ " + state.turns + "回／" + state.lap + "周） #ファーストペンギン #ファスペンすごろく";
+  $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+  $("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
   $("gameScreen").classList.add("hidden");
   $("resultScreen").classList.remove("hidden");
   window.scrollTo({top:0,behavior:"smooth"});

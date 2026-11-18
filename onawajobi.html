@@ -260,6 +260,19 @@
       .end-card h2 { font-family: "Mochiy Pop One", sans-serif; margin: 0 0 6px; font-size: 26px; color: var(--accent-dark); }
       .end-card p { margin: 4px 0; font-weight: 700; line-height: 1.6; }
       .end-card .big-num { font-size: 40px; font-family: "Mochiy Pop One", sans-serif; color: var(--sky-btn); }
+      /* Share buttons (result screen) */
+      .share-row { display: flex; gap: 10px; margin-top: 14px; }
+      .btn-share {
+        flex: 1; display: block;
+        font-family: "Mochiy Pop One", sans-serif;
+        font-size: 16px; padding: 12px 6px;
+        border-radius: 999px;
+        color: #fff; text-align: center; text-decoration: none;
+      }
+      .btn-share-x { background: #000; box-shadow: 0 5px 0 #333; }
+      .btn-share-x:active { transform: translateY(3px); box-shadow: 0 2px 0 #333; }
+      .btn-share-line { background: #06C755; box-shadow: 0 5px 0 #049a41; }
+      .btn-share-line:active { transform: translateY(3px); box-shadow: 0 2px 0 #049a41; }
       .hidden { display: none !important; }
       .mini-note { text-align: center; font-size: 12.5px; color: var(--ink-soft); font-weight: 700; margin-top: 10px; }
       .bgm-toggle {
@@ -338,6 +351,10 @@
         <h2 id="end-title">ゲームオーバー</h2>
         <p id="end-main"></p>
         <p id="end-sub"></p>
+        <div class="share-row">
+          <a class="btn-share btn-share-x" id="share-x" href="#" target="_blank" rel="noopener">𝕏 Xでシェア</a>
+          <a class="btn-share btn-share-line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
+        </div>
         <button class="btn btn-retry" id="btn-retry">もう一度あそぶ</button>
         <button class="btn btn-menu" id="btn-menu">メニューにもどる</button>
         <div class="yt-banner">
@@ -1001,6 +1018,16 @@
         document.getElementById("end-sub").textContent = clear
           ? "成功ゾーンが一番狭いところまで乗り切った！すごい！"
           : (state.inCount === 0 ? "まずは1人目、線が真ん中に来た瞬間を狙ってみて。" : "あと少し！ " + (state.inCount + 1) + "人目の " + MEMBERS[state.order[state.current]].name + " で引っかかっちゃった。");
+        /* share links carry this run's actual result */
+        var shareText = clear
+          ? "『ファスペン大縄跳び』で遊んだよ！（結果：8人全員クリア！）"
+          : "『ファスペン大縄跳び』で遊んだよ！（結果：" + state.inCount + "人まで跳べた！）";
+        shareText += " #ファーストペンギン #大縄跳び";
+        var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/onawajobi.html";
+        document.getElementById("share-x").href =
+          "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+        document.getElementById("share-line").href =
+          "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
         ov.classList.add("show");
       }
 

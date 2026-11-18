@@ -546,6 +546,16 @@ padding:20px;
 .result-title{font-family:"Mochiy Pop One",sans-serif;text-align:center;font-size:34px;color:#fff;margin:16px 0 4px;text-shadow:0 3px 0 #0b5cad,0 8px 20px rgba(0,40,90,.4);}
 .result-title.lose{text-shadow:0 3px 0 #4a2b7a,0 8px 20px rgba(30,0,60,.4);}
 .result-sub{text-align:center;color:#eaf7ff;font-weight:700;font-size:14px;text-shadow:0 1px 3px rgba(8,58,110,.55);margin:0 0 6px;}
+.share-row{display:flex;gap:10px;margin-top:14px;}
+.share-btn{
+flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+min-height:54px;border-radius:14px;color:#fff;font-size:16px;font-weight:900;
+text-decoration:none;letter-spacing:.04em;font-family:inherit;
+}
+.share-btn:active{transform:translateY(2px);}
+.share-btn svg{width:20px;height:20px;flex:none;}
+.share-x{background:#000;box-shadow:0 4px 0 #333;}
+.share-line{background:#06c755;box-shadow:0 4px 0 #04913d;}
 .celebrate{position:relative;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(0,50,110,.35);border:3px solid #fff;margin-top:12px;}
 .celebrate img{width:100%;display:block;aspect-ratio:16/10;object-fit:cover;}
 .celebrate.cong{
@@ -1266,6 +1276,17 @@ padding:8px 14px;box-shadow:0 4px 12px rgba(0,20,50,.4);backdrop-filter:blur(3px
 <h2>📜 バトル結果</h2>
 <div class="summary" id="summary"></div>
 <p id="result-stats" style="font-weight:900;color:var(--blue-dark);margin:12px 0 2px;font-size:14px;"></p>
+</div>
+
+<div class="share-row">
+<a class="share-btn share-x" id="shareX" href="#" target="_blank" rel="noopener">
+<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+Xでシェア
+</a>
+<a class="share-btn share-line" id="shareLine" href="#" target="_blank" rel="noopener">
+<svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 3C6.48 3 2 6.64 2 11.13c0 4.02 3.55 7.39 8.35 8.03.33.07.77.22.88.5.1.26.07.66.03.93l-.14.84c-.04.26-.21 1.02.92.55 1.13-.46 6.1-3.59 8.32-6.13 1.51-1.65 2.27-3.32 2.27-5.3C22 6.64 17.52 3 12 3z"/></svg>
+LINEで送る
+</a>
 </div>
 
 <a class="yt-banner" href="https://youtube.com/@1st-penguin1111?si=Bm9aeerJJKuCQP9f" target="_blank" rel="noopener">
@@ -2673,6 +2694,15 @@ sum.appendChild(row);
 });
 var wins = bossMode? (foes[foes.length-1].beaten? 1: 0): beatenCount();
 $("result-stats").textContent = "🏆 " + wins + "勝 ／ 合計 " + turns + "ターン ／ 与えたダメージ " + totalDealt + " ／ 残りHP " + Math.max(0,playerHP);
+var shareResult;
+if (clear) shareResult = "邪悪なペンギンを倒してクリア！";
+else if (bossMode) shareResult = "ラスボス戦モードで邪悪なペンギンに挑戦したよ！";
+else if (beatenCount() > 0) shareResult = beatenCount() + "人たおしたよ！";
+else shareResult = "バトルに挑戦したよ！";
+var shareText = "『ジャンケンRPG』で遊んだよ！（結果：" + shareResult + "） #ファーストペンギン #ジャンケンRPG";
+var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/ziyankenrpg.html";
+$("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+$("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
 }
 
 /* ---------- BGM (Web Audio, original loops) ----------

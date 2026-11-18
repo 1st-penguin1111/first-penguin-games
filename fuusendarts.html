@@ -367,6 +367,16 @@ border-radius: 999px; padding: 2px 8px;
 .breakdown .dot { flex: 0 0 auto; width: 11px; height: 11px; border-radius: 50%; align-self: center; }
 .breakdown .pts { margin-left: auto; font-family: "Zen Kaku Gothic New", sans-serif; font-weight: 900; font-size: 17px; white-space: nowrap; }
 .breakdown .bull-tag { color: #eab308; font-weight: 800; font-size: 12px; }
+.share-row { display: flex; gap: 10px; margin: 14px 0 4px; }
+.share-btn {
+flex: 1 1 0; display: flex; align-items: center; justify-content: center;
+font-weight: 800; font-size: 15px; text-decoration: none; color: #fff;
+padding: 13px 8px; border-radius: 999px; box-shadow: 0 4px 0 rgba(0,0,0,.18);
+min-height: 48px; touch-action: manipulation; text-align: center;
+}
+.share-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.18); }
+.share-x { background: #000000; }
+.share-line { background: #06C755; }
 
 /* ---------- BGM toggle ---------- */
 .bgm-btn {
@@ -589,6 +599,11 @@ box-shadow: var(--shadow); opacity: .92; touch-action: manipulation;
 <div class="card">
 <h2>🎯 投げごとの内訳</h2>
 <ul class="breakdown" id="breakdownList"></ul>
+</div>
+
+<div class="share-row">
+<a class="share-btn share-x" id="shareX" href="#" target="_blank" rel="noopener">𝕏 でシェア</a>
+<a class="share-btn share-line" id="shareLine" href="#" target="_blank" rel="noopener">LINEで送る</a>
 </div>
 
 <button class="big-btn" id="retryBtn">🔁 もういちど</button>
@@ -1261,6 +1276,13 @@ var isBest = totalScore > sessionBest;
 if (isBest) sessionBest = totalScore;
 $("finalTotal").textContent = totalScore;
 $("rankTitle").textContent = rankFor(totalScore);
+(function () {
+var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/fuusendarts.html";
+var shareText = "『ファスペン風船ダーツ』で遊んだよ！合計" + totalScore + "点だった！称号は「" + rankFor(totalScore) + "」！ #ファーストペンギン #風船ダーツ";
+var xEl = $("shareX"), lineEl = $("shareLine");
+if (xEl) xEl.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+if (lineEl) lineEl.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + " " + shareUrl);
+})();
 $("bestScore").textContent = sessionBest;
 $("newBestTag").innerHTML = isBest && totalScore > 0? "<span class='newbest'>NEW!</span>": "";
 var ul = $("breakdownList");

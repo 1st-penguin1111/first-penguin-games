@@ -518,6 +518,34 @@
         .sub-btn { border-color: #9fd8ef; box-shadow: 0 0 0 3px rgba(255,255,255,0.25), 0 4px 0 rgba(0,0,0,0.5); }
       }
       .sub-btn:active { transform: translateY(2px); }
+      .share-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 14px;
+      }
+      .share-btn {
+        flex: 1 1 0;
+        max-width: 240px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35em;
+        padding: 11px 8px;
+        font-size: 0.98rem;
+        font-weight: 800;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 999px;
+        border: 3px solid #17384d;
+        box-shadow: 0 0 0 3px #ffffff, 0 4px 0 #17384d;
+      }
+      .share-btn:active { transform: translateY(2px); }
+      .share-x { background: #000000; border-color: #000000; }
+      .share-line { background: #06C755; border-color: #049a40; }
+      @media (prefers-color-scheme: dark) {
+        .share-btn { box-shadow: 0 0 0 3px rgba(255,255,255,0.25), 0 4px 0 rgba(0,0,0,0.5); }
+      }
       @media (prefers-reduced-motion: reduce) {
         .title-penguin, #tap-hint, #power-max, .met-slot.pop { animation: none; }
       }
@@ -609,6 +637,10 @@
         <div class="result-btns">
           <button id="btn-again" class="big-btn" type="button">もういちど</button>
           <button id="btn-menu" class="sub-btn" type="button">メニューにもどる</button>
+        </div>
+        <div class="share-row">
+          <a id="share-x" class="share-btn share-x" href="#" target="_blank" rel="noopener">𝕏 Xでシェア</a>
+          <a id="share-line" class="share-btn share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
         </div>
         <div class="bgm-row">
           <button id="btn-bgm2" class="bgm-toggle" type="button">🔊 BGM オン</button>
@@ -1275,6 +1307,12 @@
           list.appendChild(chip);
         });
         document.getElementById("met-none").classList.toggle("hidden", metList.length > 0);
+        var gameUrl = "https://1st-penguin1111.github.io/first-penguin-games/kooriwatari.html";
+        var shareText = "『ペンギン氷渡り』で遊んだよ！" + finalDist.toFixed(1) + "m進んだ！称号「" + titleFor(finalDist) + "」！渡った氷は" + count + "枚！ #ファーストペンギン #氷渡り";
+        var shareX = document.getElementById("share-x");
+        if (shareX) shareX.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(gameUrl);
+        var shareLine = document.getElementById("share-line");
+        if (shareLine) shareLine.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + gameUrl);
         updateHud();
         showScreen("result");
       }

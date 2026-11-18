@@ -311,6 +311,17 @@
       .rank-err { flex: none; text-align: right; font-weight: 800; font-size: .95rem; }
       .rank-err small { display: block; font-size: .7rem; color: var(--ink-soft); }
       .result-btns { display: flex; flex-direction: column; gap: 10px; }
+      .share-row { display: flex; gap: 10px; margin-bottom: 14px; }
+      .share-btn {
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+        min-height: 52px; padding: 12px 8px; border-radius: 999px;
+        font-size: 1.02rem; font-weight: 800; line-height: 1.2; text-align: center;
+        text-decoration: none; box-shadow: var(--shadow);
+      }
+      .share-btn:active { transform: translateY(2px); }
+      .share-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+      .share-x { background: #000; color: #fff; border: 2.5px solid #000; }
+      .share-line { background: #06C755; color: #fff; border: 2.5px solid #06C755; }
 
       /* ---------- カットイン ---------- */
       .cutin {
@@ -423,6 +434,10 @@
           <div class="rcard"><span class="rc-label">あなたの雪玉</span><span class="rc-value" id="res-mine"></span><span class="rc-err" id="res-myerr"></span></div>
         </div>
         <ol class="ranking" id="ranking"></ol>
+        <div class="share-row">
+          <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener">Xでシェア</a>
+          <a class="share-btn share-line" id="share-line" href="#" target="_blank" rel="noopener">LINEで送る</a>
+        </div>
         <div class="result-btns">
           <button class="btn-primary" id="btn-again">もういちど</button>
           <button class="btn-sub" id="btn-menu">メニューにもどる</button>
@@ -1074,6 +1089,18 @@
         $("res-mine").textContent = fmt(mySize) + " cm";
         var myErr = Math.abs(mySize - targetSize);
         $("res-myerr").textContent = "誤差 " + fmt(myErr) + " cm";
+
+        /* シェア文（その回の結果に合わせる） */
+        var myRank = 1;
+        for (var ri = 0; ri < entries.length; ri++) { if (entries[ri].me) { myRank = ri + 1; break; } }
+        var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/yukidarumarolling.html";
+        var resultText = myRank === 1
+          ? "1位！誤差" + fmt(myErr) + "cmで優勝だった！"
+          : myRank + "位！誤差" + fmt(myErr) + "cmだった！";
+        var shareText = "『雪だるまローリング』で遊んだよ！" + resultText + " #ファーストペンギン #雪だるまローリング";
+        var shareX = $("share-x"), shareLine = $("share-line");
+        if (shareX) shareX.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
+        if (shareLine) shareLine.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
 
         /* 勝者パネル */
         var slot = $("winner-slot");
