@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="data:," />
     <title>ブロック崩し対戦</title>
@@ -35,6 +35,26 @@
       .wrap{ max-width:480px; margin:0 auto; padding:14px 12px 40px; }
       h1{ font-size:26px; font-weight:800; text-align:center; margin:6px 0 2px; letter-spacing:.02em; }
       .sub{ text-align:center; color:var(--ink-soft); font-size:13px; font-weight:700; margin:0 0 12px; }
+      .category-row{ text-align:center; margin:0 0 10px; }
+      .category-chip{
+        display:inline-flex; align-items:center; gap:6px;
+        background:var(--accent); color:var(--accent-ink);
+        font-size:12.5px; font-weight:800; letter-spacing:.04em;
+        border-radius:999px; padding:5px 12px;
+      }
+      .record-box{
+        margin-top:12px; border:2px dashed var(--line); border-radius:16px;
+        padding:12px 14px; background:var(--panel); box-shadow:var(--shadow); text-align:left;
+      }
+      .record-box-title{ font-weight:800; font-size:14px; letter-spacing:.03em; margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+      .record-cleared-badge{
+        font-size:11px; font-weight:800; letter-spacing:.04em;
+        background:#e9a13b; color:#4a2f00; border-radius:999px; padding:3px 9px;
+      }
+      .record-cleared-badge.hidden{ display:none; }
+      .record-box-body{ font-size:14px; font-weight:700; line-height:1.65; color:var(--ink-soft); }
+      .record-box-body b{ color:var(--ink); }
+      .record-box-end{ margin-top:14px; }
 
       .btn{
         display:block; width:100%; border:none; cursor:pointer;
@@ -157,8 +177,14 @@
       <section id="startScreen">
         <h1>ブロック崩し対戦</h1>
         <p class="sub">エアホッケー × ブロック崩し！ 相手ブロックの裏を抜けば得点！</p>
+        <div class="category-row"><span class="category-chip">カテゴリ：たいけつ</span></div>
 
         <button class="btn" id="startBtn">ゲームスタート！</button>
+
+        <div class="record-box" id="record-box-start">
+          <div class="record-box-title">あなたの記録 <span class="record-cleared-badge hidden" id="record-cleared-start">クリア済み ✓</span></div>
+          <div class="record-box-body" id="record-body-start">まだ記録はないよ。5点先取で勝ってクリアを目指そう！</div>
+        </div>
 
         <div class="card">
           <h2>あそびかた</h2>
@@ -232,6 +258,10 @@
           <div class="stat"><b id="stBlocks">0</b><span>壊したブロック</span></div>
           <div class="stat"><b id="stHits">0</b><span>得点（裏抜け）</span></div>
           <div class="stat"><b id="stItems">0</b><span>取ったアイテム</span></div>
+        </div>
+        <div class="record-box record-box-end" id="record-box-end">
+          <div class="record-box-title">あなたの記録 <span class="record-cleared-badge hidden" id="record-cleared-end">クリア済み ✓</span></div>
+          <div class="record-box-body" id="record-body-end">—</div>
         </div>
         <div class="share-row">
           <a class="share-btn x" id="share-x" href="#" target="_blank" rel="noopener noreferrer">X でシェア</a>
@@ -421,6 +451,55 @@
         bgm.muted=!bgm.muted;
         if(bgm.muted) stopBGM(); else startBGM();
         updateBgmBtns();
+      }
+
+      // ---------- 記録保存（全ゲーム共通：fpg_records_v1） ----------
+      var RECORD_KEY = "fpg_records_v1";
+      var GAME_ID = "blockkuzushi";
+      function loadAllRecords(){
+        try{
+          var raw = localStorage.getItem(RECORD_KEY);
+          if(!raw) return {};
+          var parsed = JSON.parse(raw);
+          return (parsed && typeof parsed === "object") ? parsed : {};
+        }catch(e){ return {}; }
+      }
+      function saveGameRecord(){
+        try{
+          var all = loadAllRecords();
+          var prev = all[GAME_ID] || {};
+          var prevBestVal = (typeof prev.bestVal === "number") ? prev.bestVal : 0;
+          var prevPlays = (typeof prev.plays === "number") ? prev.plays : 0;
+          var isWin = !!(G && G.winner === "you");
+          var newBestVal = prevBestVal + (isWin ? 1 : 0);
+          var entry = {
+            cleared: !!(prev.cleared || isWin),
+            best: newBestVal + "勝",
+            bestVal: newBestVal,
+            plays: prevPlays + 1
+          };
+          all[GAME_ID] = entry;
+          localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+          return entry;
+        }catch(e){ return null; }
+      }
+      function renderRecordDisplay(entry){
+        var rec = entry || loadAllRecords()[GAME_ID] || null;
+        var targets = [
+          { body: $("record-body-start"), badge: $("record-cleared-start") },
+          { body: $("record-body-end"), badge: $("record-cleared-end") }
+        ];
+        targets.forEach(function(t){
+          if(!t.body) return;
+          if(!rec){
+            // スタート画面は初期文言、結果画面は「—」のままにするため、既存文言を保持する
+            if(t.badge) t.badge.classList.add("hidden");
+            return;
+          }
+          var bestText = rec.best || ((rec.bestVal || 0) + "勝");
+          t.body.innerHTML = "ベスト：<b>" + bestText + "</b>　／　プレイ回数：<b>" + (rec.plays || 0) + "回</b>" + (rec.cleared ? "<br>クリア達成済み！" : "");
+          if(t.badge) t.badge.classList.toggle("hidden", !rec.cleared);
+        });
       }
 
       // ---------- 選択 ----------
@@ -943,6 +1022,8 @@
         gameScreen.style.display="none";
         resultScreen.style.display="block";
         var win=G.winner==="you";
+        var savedEntry=saveGameRecord();
+        renderRecordDisplay(savedEntry);
         $("resultTitle").textContent= win? "🎉 WIN！ 勝ち！" : "負けちゃった…";
         $("resultTitle").style.color= win? "#f97316" : "#64748b";
         $("resultSub").textContent= win
@@ -1029,6 +1110,7 @@
       });
       $("bgmBtn").addEventListener("click", function(){ acEnsure(); toggleBGM(); });
       $("bgmBtnResult").addEventListener("click", function(){ acEnsure(); toggleBGM(); });
+      renderRecordDisplay();
     })();
     </script>
   </body>

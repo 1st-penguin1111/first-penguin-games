@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
+<meta name="robots" content="noindex, nofollow" />
 <link rel="icon" href="data:," />
 <title>ファスペンもぐらたたき</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -363,6 +363,24 @@
     .mole,.mole img{width:68px;height:68px}
     .mole{margin-left:-34px}
   }
+  /* ---------- category + records ---------- */
+  .category-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .cat-badge{display:inline-flex;align-items:center;gap:6px;background:#253247;color:#fff;font-weight:900;font-size:12.5px;padding:6px 14px;border-radius:999px;letter-spacing:.04em;box-shadow:0 4px 10px rgba(37,50,71,.22)}
+  .cat-badge b{color:#ffd93d}
+  .record-card{border:3px solid #ffe3ee}
+  .record-card h2{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .cat-badge-inline{display:inline-block;background:#fff3f8;color:#e84e84;border:2px solid #ffd0e0;font-size:11px;font-weight:900;padding:3px 10px;border-radius:999px;letter-spacing:.03em}
+  .record-grid{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:8px;margin-top:4px}
+  .record-item{background:var(--bg2);border-radius:14px;padding:10px 6px;text-align:center}
+  @media (prefers-color-scheme: dark){ .record-item{background:rgba(255,255,255,.08)} }
+  .record-item .record-v{font-family:"Mochiy Pop One",sans-serif;font-size:17px;line-height:1.25;color:var(--ink)}
+  .record-item .record-v.pink{color:#e84e84}
+  .record-item .record-v.green{color:#2f9e2f}
+  .record-item .record-l{font-size:10.5px;font-weight:900;color:var(--muted);margin-top:3px;letter-spacing:.04em}
+  .record-best-text{margin:10px 2px 0;font-size:13px;font-weight:700;line-height:1.6;color:var(--muted);text-align:center}
+  .record-update-note{text-align:center;font-weight:900;font-size:14px;line-height:1.6;color:#1e8fd1;background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:10px 12px;margin-top:12px}
+  .record-update-note:empty{display:none}
+
   .bgm-btn{
     position:fixed;right:12px;bottom:12px;z-index:120;display:none;
     border:3px solid #ffb3cd;background:#fff;color:#e84e84;
@@ -386,12 +404,23 @@
       <span class="title-badge">ファーストペンギン ゲーム</span>
       <h1 class="title"><span class="small">ファスペン</span>もぐらたたき</h1>
       <p class="lead">穴からピョコッと顔を出すメンバーをタップ！<br><b>30秒スコアアタック</b>と <b>2000点タイムアタック</b>、<br>好きなモードであそんでね！</p>
+      <div class="category-row"><span class="cat-badge">🏷️ カテゴリ：<b>スコアアタック</b></span></div>
     </div>
 
     <div class="roster" id="roster"></div>
 
     <button class="btn btn-start" id="btn-start" type="button">▶ 30秒 スコアアタック<span class="sub">30秒で何点とれるかな？</span></button>
     <button class="btn btn-race" id="btn-start-race" type="button">⏱️ 2000点 タイムアタック<span class="sub">2000点まで何秒かかるか競おう！</span></button>
+
+    <div class="card record-card" id="record-card">
+      <h2>🏆 あなたの記録 <span class="cat-badge-inline">カテゴリ：スコアアタック</span></h2>
+      <div class="record-grid">
+        <div class="record-item"><div class="record-v" id="rec-plays">0回</div><div class="record-l">プレイ回数</div></div>
+        <div class="record-item"><div class="record-v pink" id="rec-best">—</div><div class="record-l">30秒ベスト</div></div>
+        <div class="record-item"><div class="record-v green" id="rec-cleared">未クリア</div><div class="record-l">2000点レース</div></div>
+      </div>
+      <p class="record-best-text" id="rec-best-text">まだ記録がありません。あそんで記録を作ろう！</p>
+    </div>
 
     <div class="card">
       <h2>📖 あそびかた</h2>
@@ -476,6 +505,8 @@
       <div class="stat"><div class="v" id="stat-target">2000点</div><div class="l">目標スコア</div></div>
       <div class="stat"><div class="v" id="stat-mode">タイム</div><div class="l">モード</div></div>
     </div>
+
+    <p class="record-update-note" id="result-record-note"></p>
 
     <div class="card">
       <h2 class="blue">📊 メンバー別 たたいた数</h2>
@@ -581,7 +612,34 @@
   function show(name){
     Object.keys(screens).forEach(function(k){ screens[k].classList.toggle("active", k===name); });
     document.body.classList.toggle("picnic", name === "game");
+    if(name === "start") renderRecords();
     window.scrollTo(0,0);
+  }
+
+  /* ---------- records (shared key: fpg_records_v1 / game key: moguratataki) ---------- */
+  function loadAllRecords(){
+    try {
+      var parsed = JSON.parse(localStorage.getItem("fpg_records_v1") || "{}");
+      return (parsed && typeof parsed === "object") ? parsed : {};
+    } catch(e){ return {}; }
+  }
+  function renderRecords(){
+    var rec = {cleared:false, best:"", bestVal:0, plays:0};
+    var all = loadAllRecords();
+    if(all["moguratataki"]) rec = all["moguratataki"];
+    var pEl = $("rec-plays"); if(pEl) pEl.textContent = (rec.plays || 0) + "回";
+    var bEl = $("rec-best"); if(bEl) bEl.textContent = rec.bestVal ? rec.bestVal + "点" : "—";
+    var cEl = $("rec-cleared"); if(cEl) cEl.textContent = rec.cleared ? "✓ クリア済み" : "未クリア";
+    var tEl = $("rec-best-text");
+    if(tEl){
+      if(rec.best){
+        tEl.textContent = "30秒ベスト： " + rec.best + (rec.cleared ? " ／ 2000点レース：クリア済み ✓" : " ／ 2000点レース：未クリア");
+      } else if(rec.plays){
+        tEl.textContent = "2000点レース：" + (rec.cleared ? "クリア済み ✓" : "未クリア") + " ／ 30秒モードであそぶとベストが記録されるよ";
+      } else {
+        tEl.textContent = "まだ記録がありません。あそんで記録を作ろう！";
+      }
+    }
   }
 
   /* chibi characters peeking around the field (back layer, non-interactive) */
@@ -1309,9 +1367,46 @@
 
     $("member-results").innerHTML = chartHTML();
 
+    /* ----- records: save to shared localStorage key fpg_records_v1 ----- */
+    var titleName = rank.replace("称号：", "");
+    var recIsNewBest = false;
+    var recEntry = null;
+    try {
+      var allRecords = loadAllRecords();
+      var prevRec = allRecords["moguratataki"] || {cleared:false, best:"", bestVal:0, plays:0};
+      var newCleared = !!prevRec.cleared || (isRace() && score >= TARGET_SCORE);
+      var newBestVal = prevRec.bestVal || 0;
+      var newBest = prevRec.best || "";
+      if(!isRace() && score > newBestVal){
+        newBestVal = score;
+        newBest = score + "点（" + titleName + "）";
+        recIsNewBest = true;
+      }
+      recEntry = {
+        cleared: newCleared,
+        best: newBest,
+        bestVal: newBestVal,
+        plays: (prevRec.plays || 0) + 1
+      };
+      allRecords["moguratataki"] = recEntry;
+      try { localStorage.setItem("fpg_records_v1", JSON.stringify(allRecords)); } catch(e2) {}
+    } catch(e) {}
+    var noteEl = $("result-record-note");
+    if(noteEl && recEntry){
+      if(recIsNewBest){
+        noteEl.textContent = "🎉 ベスト記録更新！ " + recEntry.best + "（プレイ " + recEntry.plays + "回目）";
+      } else if(isRace() && recEntry.cleared){
+        noteEl.textContent = "🏁 クリア記録を保存したよ！（プレイ " + recEntry.plays + "回目" + (recEntry.best ? " ／ 30秒ベスト " + recEntry.best : "") + "）";
+      } else {
+        noteEl.textContent = "記録を保存したよ（プレイ " + recEntry.plays + "回目" + (recEntry.best ? " ／ ベスト " + recEntry.best : "") + "）";
+      }
+    } else if(noteEl){
+      noteEl.textContent = "";
+    }
+    renderRecords();
+
     /* share buttons: the post text carries this run's actual result */
     var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/moguratataki.html";
-    var titleName = rank.replace("称号：", "");
     var shareText;
     if(isRace()){
       shareText = "『ファスペンもぐらたたき』で遊んだよ！2000点タイムアタックを" + fmtTime(clearTime) + "秒でクリア、称号「" + titleName + "」だったよ！ #ファーストペンギン #もぐらたたき";
@@ -1338,6 +1433,7 @@
     show("start");
   }
 
+  renderRecords();
   $("btn-start").addEventListener("click", function(){ startGame("normal"); });
   $("btn-start-race").addEventListener("click", function(){ startGame("race"); });
   $("btn-again").addEventListener("click", function(){ startGame(gameMode); });
