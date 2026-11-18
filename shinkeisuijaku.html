@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="data:," />
     <title>ファスペン神経衰弱</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -87,7 +87,25 @@
       @media (prefers-color-scheme: dark) {
         .game-title { text-shadow: none; color: var(--pink); }
       }
-      .game-sub { text-align: center; color: var(--ink-soft); font-weight: 700; margin: 0 0 18px; font-size: 14px; }
+      .game-sub { text-align: center; color: var(--ink-soft); font-weight: 700; margin: 0 0 12px; font-size: 14px; }
+      .cat-chip {
+        width: fit-content; margin: 0 auto 18px; padding: 6px 14px; border-radius: 999px;
+        background: var(--panel); border: 2px solid var(--line); box-shadow: var(--shadow);
+        font-size: 13px; font-weight: 800; color: var(--ink-soft); text-align: center;
+      }
+      .cat-chip b { color: var(--blue-deep); }
+      @media (prefers-color-scheme: dark) { .cat-chip b { color: #6fc3f7; } }
+
+      /* ---------- record panel (start screen) ---------- */
+      .record-panel h2 { color: #b8860b; }
+      @media (prefers-color-scheme: dark) { .record-panel h2 { color: var(--gold); } }
+      .record-rows { display: grid; gap: 7px; font-size: 14.5px; font-weight: 700; }
+      .record-rows .r-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+      .record-rows .r-label { color: var(--ink-soft); font-size: 13px; font-weight: 800; white-space: nowrap; }
+      .record-rows .r-value { text-align: right; }
+      .record-rows .r-value .clear-yes { color: var(--pink-deep); }
+      @media (prefers-color-scheme: dark) { .record-rows .r-value .clear-yes { color: var(--pink); } }
+      .record-empty { font-size: 14px; font-weight: 700; color: var(--ink-soft); margin: 0; line-height: 1.7; }
       .mode-buttons { display: grid; gap: 12px; margin-bottom: 18px; }
       .mode-btn {
         appearance: none; border: none; cursor: pointer; width: 100%;
@@ -326,6 +344,7 @@
       <section id="screen-start" class="screen active">
         <h1 class="game-title pop">ファスペン神経衰弱</h1>
         <p class="game-sub">ファーストペンギン8人の写真で神経衰弱！<br />同じメンバーのペアをそろえよう 🐧<br />今度は特殊カード入りで難易度アップ！</p>
+        <p class="cat-chip">🧩 カテゴリ：<b>パズル・おぼえる</b></p>
 
         <div class="mode-buttons">
           <button class="mode-btn vs" id="btn-vs" type="button">
@@ -338,6 +357,13 @@
             <span><span class="t pop">タイムアタック</span>
             <span class="d">1人用。シャッフルに負けず全ペアそろえるまでのタイムに挑戦！</span></span>
           </button>
+        </div>
+
+        <div class="panel record-panel">
+          <h2 class="pop">🏆 あなたのきろく</h2>
+          <div id="record-body">
+            <p class="record-empty">読み込み中…</p>
+          </div>
         </div>
 
         <div class="panel">
@@ -412,6 +438,7 @@
       <section id="screen-end" class="screen">
         <h2 class="result-title pop" id="result-title"></h2>
         <p class="result-sub" id="result-sub"></p>
+        <p class="result-sub" id="end-record-note" style="margin-bottom:14px"></p>
 
         <div id="end-vs">
           <div class="score-row">
@@ -905,6 +932,84 @@
         return pool[Math.floor(Math.random() * pool.length)];
       }
 
+      /* ================= records (shared across all games) =================
+         Saved under one shared key so the game-list page can read every
+         game's record: fpg_records_v1 = { "<gameId>": {cleared, best,
+         bestVal, plays}, ... }. This game's entry is "shinkeisuijaku".
+         - plays: +1 every time a result screen is reached
+         - cleared: true once you win versus mode (never goes back)
+         - best / bestVal: the time-attack best time wins priority —
+           bestVal is the clear time in seconds (lower is better) and
+           best is its display text. With no time-attack record yet, a
+           versus win records best as 「対戦で勝利」 (bestVal stays null)
+           until a time-attack time replaces it. */
+      var RECORD_KEY = "fpg_records_v1";
+      var RECORD_ID = "shinkeisuijaku";
+      function loadAllRecords() {
+        try {
+          var raw = localStorage.getItem(RECORD_KEY);
+          var obj = raw ? JSON.parse(raw) : {};
+          return (obj && typeof obj === "object" && !Array.isArray(obj)) ? obj : {};
+        } catch (e) { return {}; }
+      }
+      function myRecord() {
+        var e = loadAllRecords()[RECORD_ID];
+        return (e && typeof e === "object") ? e : null;
+      }
+      /* called when the result screen is shown; returns {entry, isNewBest} */
+      function saveRecord() {
+        var fallback = { cleared: false, best: "", bestVal: null, plays: 0 };
+        try {
+          var all = loadAllRecords();
+          var prev = all[RECORD_ID] || {};
+          var entry = {
+            cleared: !!prev.cleared,
+            best: typeof prev.best === "string" ? prev.best : "",
+            bestVal: typeof prev.bestVal === "number" ? prev.bestVal : null,
+            plays: (typeof prev.plays === "number" ? prev.plays : 0) + 1
+          };
+          var isNewBest = false;
+          if (mode === "vs") {
+            if (scores.you > scores.cpu) {
+              entry.cleared = true;
+              if (entry.bestVal === null) entry.best = "対戦で勝利";
+            }
+          } else {
+            var sec = Math.floor(elapsed / 1000);
+            if (entry.bestVal === null || sec < entry.bestVal) {
+              entry.bestVal = sec;
+              entry.best = "タイムアタック " + sec + "秒";
+              isNewBest = true;
+            }
+          }
+          all[RECORD_ID] = entry;
+          localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+          renderRecordPanel();
+          return { entry: entry, isNewBest: isNewBest };
+        } catch (e) {
+          return { entry: fallback, isNewBest: false };
+        }
+      }
+      function renderRecordPanel() {
+        var body = $("record-body");
+        if (!body) return;
+        var e = myRecord();
+        if (!e || !e.plays) {
+          body.innerHTML = '<p class="record-empty">まだ記録がないよ。遊ぶとここにクリア状況やベスト記録が残るよ！</p>';
+          return;
+        }
+        var clearHtml = e.cleared
+          ? '<span class="clear-yes">✓ クリア済み！（対戦で勝利）</span>'
+          : "まだ（対戦モードで勝つとクリア！）";
+        var bestHtml = e.best ? e.best : "まだないよ";
+        body.innerHTML =
+          '<div class="record-rows">' +
+          '<div class="r-row"><span class="r-label">クリア</span><span class="r-value">' + clearHtml + "</span></div>" +
+          '<div class="r-row"><span class="r-label">ベスト記録</span><span class="r-value">' + bestHtml + "</span></div>" +
+          '<div class="r-row"><span class="r-label">プレイ回数</span><span class="r-value">' + e.plays + " 回</span></div>" +
+          "</div>";
+      }
+
       /* ================= share ================= */
       var SHARE_URL = "https://1st-penguin1111.github.io/first-penguin-games/shinkeisuijaku.html";
       function setShareLinks(shareText) {
@@ -918,6 +1023,16 @@
       function finishGame() {
         stopTimer();
         setTimeout(function () {
+          /* result screen is about to show: save this play to the shared records */
+          var rec = saveRecord();
+          if (rec.isNewBest) {
+            $("end-record-note").textContent = "🏆 新記録！　" + rec.entry.best + "（きろくに保存したよ）";
+          } else if (rec.entry.plays > 0) {
+            $("end-record-note").textContent = "🏆 きろくを保存したよ（プレイ " + rec.entry.plays + " 回目" +
+              (rec.entry.best ? "／ベスト：" + rec.entry.best : "") + "）";
+          } else {
+            $("end-record-note").textContent = "";
+          }
           if (mode === "vs") {
             $("end-vs").style.display = "block";
             $("end-ta").style.display = "none";
@@ -1173,6 +1288,7 @@
       });
 
       setShareLinks("『ファスペン神経衰弱』で遊んだよ！ #ファーストペンギン #神経衰弱");
+      renderRecordPanel();
 
       /* ================= wiring ================= */
       $("btn-vs").addEventListener("click", function () { bgmStart(); startGame("vs"); });
