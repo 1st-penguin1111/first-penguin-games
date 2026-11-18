@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ja">
   <head>
-<meta name="robots" content="noindex, nofollow">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="data:," />
     <title>ファスペン スカイジャンプ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -310,6 +310,31 @@
       .share-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(23,58,94,.25); }
       .share-x{ background:#000; color:#fff; }
       .share-line{ background:#06C755; color:#fff; }
+      /* ---------- category + record ---------- */
+      .category-row{ display:flex; justify-content:center; margin:0 auto 10px; }
+      .category-chip{
+        display:inline-block; background:#e0f4ff; color:var(--ink);
+        border:3px solid var(--ink); border-radius:999px;
+        padding:4px 16px; font-weight:800; font-size:14px;
+        box-shadow:0 3px 0 rgba(23,58,94,.2);
+      }
+      .record-box{
+        background:var(--panel); border:3px solid var(--ink); border-radius:18px;
+        box-shadow:var(--shadow);
+        text-align:left; padding:12px 18px; margin:0 auto 16px; max-width:620px;
+        font-size:15px; line-height:1.7; font-weight:500;
+      }
+      .record-box-title{ font-weight:800; font-size:15px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:2px; }
+      .record-cleared-badge{
+        display:inline-block; background:var(--good); color:#fff; font-weight:800; font-size:13px;
+        border-radius:999px; padding:2px 12px; border:2px solid var(--ink);
+      }
+      .record-box-body{ font-size:14.5px; font-weight:700; color:var(--ink-soft); line-height:1.7; }
+      .record-box-body b{ color:var(--ink); }
+      .record-box-end{ margin-top:0; }
+      .end-record-note{ font-size:14px; font-weight:700; color:var(--ink-soft); margin:10px 0 0; line-height:1.7; }
+      .end-record-note:empty{ display:none; }
+
       /* BGM toggle: fixed bottom-right, above everything */
       #bgmBtn{
         position:fixed; right:12px; bottom:calc(12px + env(safe-area-inset-bottom)); z-index:60;
@@ -329,6 +354,11 @@
     <section id="startScreen" class="screen">
       <h1 class="game-title pop">ファスペン<br /><span class="sky">スカイジャンプ</span></h1>
       <p class="tagline">ペンギンを そら高く とばして、どこまで いけるか きょうそう！</p>
+      <div class="category-row"><span class="category-chip">カテゴリ：スコアアタック</span></div>
+      <div class="record-box" id="record-box-start">
+        <div class="record-box-title">あなたの記録 <span class="record-cleared-badge hidden" id="record-cleared-start">クリア済み ✓</span></div>
+        <div class="record-box-body" id="record-body-start">まだ記録はないよ。遠くまで飛んで記録を作ろう！</div>
+      </div>
       <button id="startBtn" class="big-btn pop" type="button">▶ スタート</button>
       <div class="rules" style="margin-top:16px;">
         <h2>🎈 あそびかた</h2>
@@ -439,6 +469,11 @@
           <span class="hud-chip">ベスト <b id="resBest">0m</b></span>
         </div>
         <p class="got-list" id="resItems"></p>
+        <p class="end-record-note" id="result-record-note"></p>
+      </div>
+      <div class="record-box record-box-end" id="record-box-end">
+        <div class="record-box-title">あなたの記録 <span class="record-cleared-badge hidden" id="record-cleared-end">クリア済み ✓</span></div>
+        <div class="record-box-body" id="record-body-end">—</div>
       </div>
       <div class="share-row">
         <a id="shareX" class="share-btn share-x" href="#" target="_blank" rel="noopener">Xでシェア</a>
@@ -1529,6 +1564,72 @@ function drawPenguinSide(sx, sy, s, running){
   ctx.restore();
 }
 
+/* ================= records (shared: fpg_records_v1 / game: sukaijanpu) ================= */
+var RECORD_KEY = "fpg_records_v1";
+var GAME_ID = "sukaijanpu";
+function loadAllRecords(){
+  try{
+    var raw = localStorage.getItem(RECORD_KEY);
+    if(!raw) return {};
+    var parsed = JSON.parse(raw);
+    return (parsed && typeof parsed === "object") ? parsed : {};
+  }catch(e){ return {}; }
+}
+function fmtBestKm(meters){
+  return (meters/1000).toFixed(1) + "km";
+}
+function renderRecordDisplay(entry){
+  var rec = entry || loadAllRecords()[GAME_ID] || null;
+  var targets = [
+    { body: $("record-body-start"), badge: $("record-cleared-start") },
+    { body: $("record-body-end"), badge: $("record-cleared-end") }
+  ];
+  targets.forEach(function(t){
+    if(!t.body) return;
+    if(!rec || typeof rec.plays !== "number" || rec.plays < 1){
+      t.body.textContent = "まだ記録はないよ。遠くまで飛んで記録を作ろう！";
+      if(t.badge) t.badge.classList.add("hidden");
+      return;
+    }
+    var bestText = rec.best || (typeof rec.bestVal === "number" && rec.bestVal > 0 ? fmtBestKm(rec.bestVal) : "—");
+    t.body.innerHTML = "ベスト：<b>" + escapeHtml(bestText) + "</b>　／　プレイ回数：<b>" + (rec.plays || 0) + "回</b>" + (rec.cleared ? "<br />最高称号「でんせつの ファーストペンギン！」達成済み！" : "");
+    if(t.badge) t.badge.classList.toggle("hidden", !rec.cleared);
+  });
+}
+function saveGameRecord(dMeters, isTopTitle){
+  try{
+    var all = loadAllRecords();
+    var prev = all[GAME_ID] || {};
+    var prevBestVal = (typeof prev.bestVal === "number") ? prev.bestVal : 0;
+    var prevPlays = (typeof prev.plays === "number") ? prev.plays : 0;
+    var entry = {
+      cleared: !!(prev.cleared || isTopTitle),
+      best: (typeof prev.best === "string" && prev.best) ? prev.best : (prevBestVal > 0 ? fmtBestKm(prevBestVal) : ""),
+      bestVal: prevBestVal,
+      plays: prevPlays + 1
+    };
+    var isNewBest = false;
+    if(dMeters > prevBestVal){
+      entry.bestVal = dMeters;
+      entry.best = fmtBestKm(dMeters);
+      isNewBest = true;
+    }
+    all[GAME_ID] = entry;
+    localStorage.setItem(RECORD_KEY, JSON.stringify(all));
+    entry._isNewBest = isNewBest;
+    return entry;
+  }catch(e){ return null; }
+}
+/* restore session best from the stored record so the HUD/record stay in sync */
+(function(){
+  try{
+    var stored = loadAllRecords()[GAME_ID];
+    if(stored && typeof stored.bestVal === "number" && stored.bestVal > 0){
+      best = stored.bestVal / DIST_SCALE;
+    }
+  }catch(e){}
+})();
+
 /* ================= result ================= */
 function rankTitle(d){
   if(d>=2200) return "でんせつの ファーストペンギン！";
@@ -1541,10 +1642,12 @@ function rankTitle(d){
 }
 function showResult(){
   var d=Math.max(0, Math.floor(G.x));
-  var isNew = d>best;
-  if(isNew) best=d;
-  hudBest.textContent=fmtDist(best);
   var dMeters=d*DIST_SCALE;
+  var isTopTitle = !G.sunk && d>=2200;
+  var savedRec = saveGameRecord(dMeters, isTopTitle);
+  var isNew = savedRec ? !!savedRec._isNewBest : (d>best);
+  if(d>best) best=d;
+  hudBest.textContent=fmtDist(best);
   if(dMeters>=1000){
     $("resDist").textContent=parseFloat((dMeters/1000).toFixed(2));
     $("resUnit").textContent=" km";
@@ -1560,6 +1663,17 @@ function showResult(){
   $("resItems").innerHTML = sunkNote + (G.gotLog.length
     ? "もらったアイテム：<br />" + G.gotLog.map(function(s){ return escapeHtml(s); }).join(" ／ ")
     : "アイテムは もらえなかった… メンバーに あたってみよう！");
+  var noteEl = $("result-record-note");
+  if(noteEl){
+    if(savedRec){
+      noteEl.textContent = savedRec._isNewBest
+        ? "🏆 ベスト記録更新！ " + savedRec.best + "（プレイ " + savedRec.plays + "回目・記録を保存したよ）"
+        : "記録を保存したよ（プレイ " + savedRec.plays + "回目" + (savedRec.best ? " ／ ベスト " + savedRec.best : "") + "）";
+    }else{
+      noteEl.textContent = "";
+    }
+  }
+  renderRecordDisplay(savedRec);
   /* share buttons: post text carries this run's result */
   var GAME_URL="https://1st-penguin1111.github.io/first-penguin-games/sukaijanpu.html";
   var shareText = G.sunk
@@ -1936,6 +2050,7 @@ function goToMenu(){
   deck.classList.add("hidden");
   startScreen.classList.remove("hidden");
   phase="idle";
+  renderRecordDisplay();
 }
 $("startBtn").addEventListener("click", startGame);
 $("retryBtn").addEventListener("click", startGame);
@@ -1944,6 +2059,8 @@ $("menuBtn").addEventListener("click", goToMenu);
 
 resize();
 newRun();
+renderRecordDisplay();
+if(best>0) hudBest.textContent=fmtDist(best);
 requestAnimationFrame(function(ts){ lastTs=ts; requestAnimationFrame(loop); });
 })();
 </script>
