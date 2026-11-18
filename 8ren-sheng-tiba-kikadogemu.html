@@ -1154,6 +1154,115 @@
         });
         bgmUpdateBtn();
 
+        /* ---------- 効果音（Web Audio生成・BGMとは独立して共存） ----------
+           ①カードをめくる瞬間の「シュッ／パッ」という音
+           ②勝ち＝明るい上昇ジングル、負け＝沈む下降音、引き分け＝中立の2音
+           ③8勝クリア時は少し長いファンファーレ */
+        var sfxCtx = null, sfxMaster = null, sfxNoiseBuf = null;
+        function sfxEnsure() {
+          if (sfxCtx) {
+            if (sfxCtx.state === "suspended") sfxCtx.resume();
+            return true;
+          }
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return false;
+          sfxCtx = new AC();
+          sfxMaster = sfxCtx.createGain();
+          sfxMaster.gain.value = 0.5;
+          sfxMaster.connect(sfxCtx.destination);
+          var len = Math.floor(sfxCtx.sampleRate * 0.5);
+          sfxNoiseBuf = sfxCtx.createBuffer(1, len, sfxCtx.sampleRate);
+          var data = sfxNoiseBuf.getChannelData(0);
+          for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+          return true;
+        }
+        function sfxTone(freq, delay, dur, type, vol, slideTo) {
+          if (!sfxCtx) return;
+          var t = sfxCtx.currentTime + delay;
+          var o = sfxCtx.createOscillator();
+          o.type = type || "triangle";
+          o.frequency.setValueAtTime(freq, t);
+          if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+          var g = sfxCtx.createGain();
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(vol, t + 0.012);
+          g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          o.connect(g); g.connect(sfxMaster);
+          o.start(t); o.stop(t + dur + 0.05);
+        }
+        function sfxSwish(delay, dur, fromFreq, toFreq, vol) {
+          if (!sfxCtx) return;
+          var t = sfxCtx.currentTime + delay;
+          var src = sfxCtx.createBufferSource(); src.buffer = sfxNoiseBuf;
+          src.playbackRate.value = 0.9 + Math.random() * 0.2;
+          var f = sfxCtx.createBiquadFilter();
+          f.type = "bandpass"; f.Q.value = 1.1;
+          f.frequency.setValueAtTime(fromFreq, t);
+          f.frequency.exponentialRampToValueAtTime(toFreq, t + dur);
+          var g = sfxCtx.createGain();
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(vol, t + dur * 0.3);
+          g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          src.connect(f); f.connect(g); g.connect(sfxMaster);
+          src.start(t); src.stop(t + dur + 0.05);
+        }
+        /* カードをめくる音：短い風切り＋めくれた瞬間の軽い「パッ」。
+           最後のスローフリップは長めのスウィッシュ＋中間点でポップ。 */
+        function sfxFlip(slow) {
+          if (!sfxEnsure()) return;
+          if (slow) {
+            sfxSwish(0, 0.85, 500, 2100, 0.5);
+            sfxTone(660, 0.72, 0.14, "sine", 0.35, 990);
+            sfxTone(330, 0.72, 0.1, "triangle", 0.2, 495);
+          } else {
+            sfxSwish(0, 0.16, 800, 2600, 0.45);
+            sfxTone(520, 0.05, 0.09, "sine", 0.28, 780);
+          }
+        }
+        /* 勝ち：C→E→G→C の上昇アルペジオ＋フィニッシュ和音 */
+        function sfxWin() {
+          if (!sfxEnsure()) return;
+          var notes = [523.25, 659.25, 783.99, 1046.5];
+          for (var i = 0; i < notes.length; i++) {
+            sfxTone(notes[i], i * 0.09, 0.22, "triangle", 0.42);
+            sfxTone(notes[i] * 2, i * 0.09, 0.12, "sine", 0.12);
+          }
+          sfxTone(523.25, 0.38, 0.5, "triangle", 0.3);
+          sfxTone(659.25, 0.38, 0.5, "triangle", 0.3);
+          sfxTone(783.99, 0.38, 0.5, "triangle", 0.3);
+          sfxTone(1046.5, 0.38, 0.55, "sine", 0.32);
+        }
+        /* 負け：沈んでいく下降4音（柔らかめの音色で） */
+        function sfxLose() {
+          if (!sfxEnsure()) return;
+          var notes = [392, 329.63, 261.63, 196];
+          for (var i = 0; i < notes.length; i++) {
+            sfxTone(notes[i], i * 0.16, 0.3, "sawtooth", 0.14);
+            sfxTone(notes[i], i * 0.16, 0.32, "triangle", 0.3, notes[i] * 0.97);
+          }
+          sfxTone(130.81, 0.64, 0.55, "sine", 0.3, 98);
+        }
+        /* 引き分け：どちらでもない中立の2音 */
+        function sfxDraw() {
+          if (!sfxEnsure()) return;
+          sfxTone(440, 0, 0.16, "triangle", 0.32);
+          sfxTone(440, 0.18, 0.22, "triangle", 0.32);
+        }
+        /* クリア：勝ちジングルを伸ばしたファンファーレ風 */
+        function sfxClear() {
+          if (!sfxEnsure()) return;
+          var seq = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5, 1318.5];
+          for (var i = 0; i < seq.length; i++) {
+            sfxTone(seq[i], i * 0.11, 0.24, "triangle", 0.42);
+            sfxTone(seq[i] * 2, i * 0.11, 0.12, "sine", 0.1);
+          }
+          var base = seq.length * 0.11;
+          sfxTone(523.25, base, 0.8, "triangle", 0.3);
+          sfxTone(659.25, base, 0.8, "triangle", 0.3);
+          sfxTone(783.99, base, 0.8, "triangle", 0.3);
+          sfxTone(1046.5, base, 0.85, "sine", 0.34);
+        }
+
         var round = 1;        // 現在の回戦 1..8
         var wins = 0;
         var deck = [];        // この対戦で残っているカード
@@ -1418,6 +1527,7 @@
                   if (slots[step.idx]) slots[step.idx].classList.add("slow-flip");
                 }
                 tickDeck();
+                sfxFlip(!!step.slow);
                 flipCard(step.hand, step.idx);
                 setTimeout(function () {
                   shown[step.side] += step.val;
@@ -1462,6 +1572,7 @@
             });
 
             if (result.tie) {
+              sfxDraw();
               showBanner("DRAW", "draw");
               handOpp.classList.remove("winner"); handMe.classList.remove("winner");
               if (deck.length >= 4) {
@@ -1474,6 +1585,7 @@
                 }, true);
               }
             } else if (result.playerWon) {
+              sfxWin();
               handMe.classList.add("winner");
               showBanner("WIN", "win");
               playResultFx("win", opp.marks);
@@ -1487,6 +1599,7 @@
                 setTimeout(goNextBattle, 2600);
               }
             } else {
+              sfxLose();
               handOpp.classList.add("winner");
               showBanner("LOSE", "lose");
               playResultFx("lose");
@@ -1537,6 +1650,7 @@
           buildResults();
         }
         function showClear() {
+          sfxClear();
           // クリアのお祝い：確定演出の集合写真からランダムで1枚＋Congratulations
           el("clear-photo-img").src = KAKUTEI_PHOTOS[Math.floor(Math.random() * KAKUTEI_PHOTOS.length)];
           el("clear-photo").classList.remove("hidden");
@@ -1613,6 +1727,7 @@
         /* スタート／もう一度：まずオープニングを見せてから対戦開始 */
         function beginRun() {
           startBGM();
+          sfxEnsure();
           screenStart.classList.add("hidden");
           screenEnd.classList.add("hidden");
           screenGame.classList.remove("hidden");

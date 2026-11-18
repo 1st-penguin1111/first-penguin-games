@@ -1214,6 +1214,7 @@
         }
 
         function revealDirection(oppDir) {
+          playHoiSfx();
           slideFaceToSlot(oppDir);
           dirBadge.textContent = DIRS[oppDir].arrow;
           dirBadge.className = "dir-badge pos-" + oppDir + " show";
@@ -1236,6 +1237,7 @@
           });
 
           if (playerWon) {
+            playWinSfx();
             showBanner("WIN", "win");
             cheerChibis("win");
             playResultFx("win", opp.marks);
@@ -1251,6 +1253,7 @@
               setTimeout(goNextBattle, 2600);
             }
           } else {
+            playLoseSfx();
             showBanner("LOSE", "lose");
             cheerChibis("lose");
             playResultFx("lose");
@@ -1423,6 +1426,70 @@
           /* メロディ */
           var mel = BGM_MELODY[step % 32];
           if (mel) pluck(mel, t, 0.105, 0.44);
+        }
+        /* ---------- 効果音（BGMと共存・同じAudioContextを共有） ---------- */
+        var sfxGain = null;
+        function ensureSfx() {
+          ensureCtx();
+          if (!sfxGain) { sfxGain = actx.createGain(); sfxGain.gain.value = 0.9; sfxGain.connect(actx.destination); }
+        }
+        function sfxTone(freq, t, dur, vol, type, slideTo) {
+          var o = actx.createOscillator(), g = actx.createGain();
+          o.type = type || "sine";
+          o.frequency.setValueAtTime(freq, t);
+          if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(vol, t + 0.012);
+          g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          o.connect(g); g.connect(sfxGain);
+          o.start(t); o.stop(t + dur + 0.05);
+        }
+        function sfxNoise(t, dur, vol, freq) {
+          if (!noiseBuf) return;
+          var src = actx.createBufferSource(); src.buffer = noiseBuf;
+          var f = actx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq || 1800; f.Q.value = 1.2;
+          var g = actx.createGain();
+          g.gain.setValueAtTime(vol, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          src.connect(f); f.connect(g); g.connect(sfxGain);
+          src.start(t); src.stop(t + dur + 0.05);
+        }
+        /* 「ホイ！」で顔が向きを変える瞬間：勢いのあるスイープ＋ポップ */
+        function playHoiSfx() {
+          try {
+            ensureSfx();
+            var t = actx.currentTime + 0.01;
+            sfxTone(520, t, 0.18, 0.28, "triangle", 1180);
+            sfxTone(1040, t + 0.02, 0.14, 0.16, "sine", 1560);
+            sfxNoise(t, 0.12, 0.18, 2400);
+            sfxTone(880, t + 0.10, 0.10, 0.12, "square");
+          } catch (e) {}
+        }
+        /* 勝ち：明るい上昇アルペジオ＋フィニッシュ和音 */
+        function playWinSfx() {
+          try {
+            ensureSfx();
+            var t = actx.currentTime + 0.01;
+            var notes = [523.25, 659.25, 783.99, 1046.5];
+            for (var i = 0; i < notes.length; i++) {
+              sfxTone(notes[i], t + i * 0.09, 0.28, 0.22, "triangle");
+              sfxTone(notes[i] * 2, t + i * 0.09, 0.18, 0.06, "sine");
+            }
+            var ft = t + notes.length * 0.09;
+            [523.25, 659.25, 783.99, 1046.5].forEach(function (fr) { sfxTone(fr, ft, 0.55, 0.14, "triangle"); });
+            sfxNoise(ft, 0.25, 0.05, 6000);
+          } catch (e) {}
+        }
+        /* 負け：短く下がる残念な音 */
+        function playLoseSfx() {
+          try {
+            ensureSfx();
+            var t = actx.currentTime + 0.01;
+            sfxTone(392, t, 0.22, 0.20, "triangle");
+            sfxTone(329.63, t + 0.16, 0.24, 0.20, "triangle");
+            sfxTone(261.63, t + 0.32, 0.42, 0.22, "triangle", 196);
+            sfxTone(130.81, t + 0.32, 0.42, 0.10, "sine");
+          } catch (e) {}
         }
         function bgmTick() {
           if (!actx) return;
