@@ -129,6 +129,6 @@
   </section>
   <footer><span>ファーストペンギン</span></footer>
 </div>
-<script>(function(){try{var parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric'}).formatToParts(new Date());var m=0,d=0;parts.forEach(function(p){if(p.type==='month')m=+p.value;if(p.type==='day')d=+p.value;});if(m===11&&d===16){var img=document.querySelector('img[src*="top-logo"]');if(img){img.src='birthday-kasago.jpg';img.alt='11.16 うっかりカサゴ Happy Birthday!!';}}}catch(e){}})();</script>
+<script>(function(){try{var parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric'}).formatToParts(new Date());var m=0,d=0;parts.forEach(function(p){if(p.type==='month')m=+p.value;if(p.type==='day')d=+p.value;});var src=null,alt=null;if(m===11&&d===16){src='birthday-kasago.jpg';alt='11.16 うっかりカサゴ Happy Birthday!!';}else if(m===12&&d>=20&&d<=25){src='season-christmas.jpg';alt='Merry Christmas';}else if((m===12&&d>=30)||(m===1&&d<=3)){src='season-newyear.jpg';alt='謹賀新年';}else if(m===3&&d>=20){src='season-graduation.jpg';alt='卒業式';}else if(m===4&&d>=1&&d<=7){src='season-entrance.jpg';alt='祝 入学';}if(src){var img=document.querySelector('img[src*="top-logo"]');if(img){img.src=src;img.alt=alt;}}}catch(e){}})();</script>
 </body>
 </html>
