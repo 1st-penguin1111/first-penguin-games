@@ -76,6 +76,14 @@ footer span{display:inline-block;background:rgba(255,255,255,.92);border-radius:
 .record:empty{display:none}
 .record .record-cleared{color:#16a34a}
 .thumb{font-size:1.75em;line-height:1.15}
+.records-box{margin-top:26px;background:rgba(255,255,255,.94);border-radius:16px;box-shadow:0 4px 14px rgba(70,130,180,.25);padding:16px 14px;text-align:left}
+.records-title{margin:0 0 10px;text-align:center;font-size:1.1em;color:#2f6d96}
+.record-row{display:flex;align-items:baseline;gap:8px;padding:7px 4px;border-top:1px dashed #bfe3f5;font-size:.85em}
+.record-row:first-child{border-top:none}
+.record-row .r-emoji{font-size:1.15em}
+.record-row .r-name{font-weight:900;font-family:"Noto Sans JP",sans-serif;white-space:nowrap}
+.record-row .r-text{color:#2f6d96;font-weight:700}
+.record-row .r-text .record-cleared{color:#16a34a}
 </style>
 </head>
 <body>
@@ -128,6 +136,10 @@ footer span{display:inline-block;background:rgba(255,255,255,.92);border-radius:
 <a class="card card-2" href="atutixiang-itehoi.html" data-cat="taiketsu" data-game="atutixiang-itehoi"><span class="thumb">👀</span><h2>あっち向いてホイ</h2><p>ホイ！のタイミングで方向を当てよう</p><span class="record"></span></a>
 <a class="card card-1" href="8ren-sheng-tiba-kikadogemu.html" data-cat="taiketsu" data-game="8ren-sheng-tiba-kikadogemu"><span class="thumb">🃏</span><h2>ファスペンと対決！</h2><p>8人とカードで勝負！合計が大きい方が勝ち</p><span class="record"></span></a>
 </nav>
+<section class="records-box" id="recordsBox" hidden>
+<h2 class="records-title">🏆 あなたの記録</h2>
+<div id="recordsList"></div>
+</section>
 </section>
 <nav class="section-nav">
 <a href="index.html">トップ</a>
@@ -154,25 +166,44 @@ recordCount++;
 var plays=Number(rec.plays)||0;
 totalPlays+=plays;
 if(rec.cleared)cleared++;
-var area=card.querySelector('.record');
-if(!area)return;
 var parts=[];
 if(rec.cleared)parts.push({text:'✓ クリア済み',cls:'record-cleared'});
 if(rec.best!==undefined&&rec.best!==null&&String(rec.best).trim()!=='')parts.push({text:'ベスト：'+rec.best,cls:''});
 parts.push({text:plays+'回プレイ',cls:''});
+var list=document.getElementById('recordsList');
+if(list){
+var row=document.createElement('div');
+row.className='record-row';
+var em=document.createElement('span');
+em.className='r-emoji';
+var thumb=card.querySelector('.thumb');
+em.textContent=thumb?thumb.textContent:'';
+var nm=document.createElement('span');
+nm.className='r-name';
+var h2=card.querySelector('h2');
+nm.textContent=h2?h2.textContent:'';
+var tx=document.createElement('span');
+tx.className='r-text';
 parts.forEach(function(part,i){
-if(i>0)area.appendChild(document.createTextNode(' ・ '));
+if(i>0)tx.appendChild(document.createTextNode(' ・ '));
 var s=document.createElement('span');
 if(part.cls)s.className=part.cls;
 s.textContent=part.text;
-area.appendChild(s);
+tx.appendChild(s);
 });
+row.appendChild(em);
+row.appendChild(nm);
+row.appendChild(tx);
+list.appendChild(row);
+}
 });
 var summary=document.getElementById('progressSummary');
 if(summary&&recordCount>0){
 summary.textContent='クリア済み '+cleared+'/'+cards.length+'本 ・ 合計 '+totalPlays+'回プレイ';
 summary.hidden=false;
 }
+var recordsBox=document.getElementById('recordsBox');
+if(recordsBox&&recordCount>0){recordsBox.hidden=false;}
 var buttons=Array.prototype.slice.call(document.querySelectorAll('.filter-btn[data-filter]'));
 function setFilter(filter){
 buttons.forEach(function(b){
