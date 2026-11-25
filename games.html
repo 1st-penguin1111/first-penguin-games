@@ -13,164 +13,90 @@
 <meta name="theme-color" content="#4aa8e0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@700&family=M+PLUS+Rounded+1c:wght@500;700;800&family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html{background-color:#d3edfb;scroll-behavior:smooth}
 body{margin:0;min-height:100vh;font-family:"M PLUS Rounded 1c","Zen Maru Gothic",sans-serif;color:#333;background-color:#d3edfb;background-image:linear-gradient(45deg,#d3edfb 25%,transparent 25%,transparent 75%,#d3edfb 75%),linear-gradient(45deg,#d3edfb 25%,transparent 25%,transparent 75%,#d3edfb 75%),url("bg-tile.jpg");background-size:240px 240px,240px 240px,120px 120px;background-position:0 0,120px 120px,0 0}
 .wrap{max-width:560px;margin:0 auto;padding:28px 16px 40px;text-align:center}
-.logo{width:min(100%,460px);height:auto;display:block;margin:0 auto}
-.photo{position:relative;margin:18px 0 18px}
-.photo img{display:block;width:100%;height:auto;border-radius:20px;box-shadow:0 6px 18px rgba(70,130,180,.3)}
-.photo-text{position:absolute;left:0;right:0;bottom:16px;margin:0;text-align:center;font-size:1.7em;font-weight:900;letter-spacing:.06em;color:#fff;text-shadow:2px 0 0 #ff5e8a,-2px 0 0 #ff5e8a,0 2px 0 #ff5e8a,0 -2px 0 #ff5e8a,2px 2px 0 #ff5e8a,-2px -2px 0 #ff5e8a,2px -2px 0 #ff5e8a,-2px 2px 0 #ff5e8a,0 4px 12px rgba(0,0,0,.4)}
-.subtitle{margin:10px 0 2px;font-size:1.05em;font-weight:700;color:#2f6d96}
+.subtitle{margin:14px 0 2px;font-size:1.05em;font-weight:700;color:#2f6d96}
 .section-nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
 .section-nav a{display:inline-block;background:#fff;color:#2f6d96;text-decoration:none;font-weight:700;font-size:.9em;padding:8px 14px;border-radius:999px;box-shadow:0 2px 8px rgba(70,130,180,.25)}
 .section-nav a:active{transform:scale(.97)}
-.section{margin-top:32px;text-align:left}
-.section>h2{margin:0 0 14px;text-align:center;font-size:1.45em;color:#2f6d96;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 4px 14px rgba(70,130,180,.25)}
-.section p{line-height:1.7}
-.section .menu{margin-top:0}
-.menu{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px;text-align:center}
-.card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-decoration:none;color:#333;background:#fff;border-radius:14px;padding:13px 6px 9px;box-shadow:inset 0 0 0 4px #fff,0 3px 10px rgba(70,130,180,.3);border:2px solid #1a1a1a;min-height:106px}
-.card::before{content:"";position:absolute;top:4px;left:4px;right:4px;height:6px;background:var(--accent,#ff8fab);border-radius:10px 10px 0 0;pointer-events:none}
-.card h2{margin:3px 0 0;font-family:"Noto Sans JP",sans-serif;font-weight:900;font-size:.78em;line-height:1.35}
-.card p{display:none}
-.card:active{transform:scale(.98)}
-.card-1{--accent:#ff8fab;background:#ffe0eb}.card-1 h2{color:#e75480}
-.card-2{--accent:#ffb703;background:#fff1c2}.card-2 h2{color:#dd9a00}
-.card-3{--accent:#7bc96f;background:#e2f5dc}.card-3 h2{color:#4c9a3f}
-.card-4{--accent:#5ec8e5;background:#d8f0fa}.card-4 h2{color:#1d8fb5}
-.card-5{--accent:#b388ff;background:#eee7ff}.card-5 h2{color:#7e57c2}
-.card-6{--accent:#ff8c42;background:#ffe9d6}.card-6 h2{color:#e8590c}
-.card-7{--accent:#38bdf8;background:#dcf2fe}.card-7 h2{color:#0284c7}
-.card-8{--accent:#ef4444;background:#ffe1e1}.card-8 h2{color:#dc2626}
-.card-9{--accent:#a855f7;background:#f3e8ff}.card-9 h2{color:#9333ea}
-.card-10{--accent:#22c55e;background:#dcfce7}.card-10 h2{color:#16a34a}
-.card-11{--accent:#6366f1;background:#e0e7ff}.card-11 h2{color:#4f46e5}
-.card-12{--accent:#14b8a6;background:#ccfbf1}.card-12 h2{color:#0d9488}
-.card-13{--accent:#eab308;background:#fef3c7}.card-13 h2{color:#a16207}
-.card-14{--accent:#22d3ee;background:#cffafe}.card-14 h2{color:#0891b2}
-.card-15{--accent:#f472b6;background:#fce7f3}.card-15 h2{color:#db2777}
-.card-16{--accent:#ef4444;background:#ffe4e6}.card-16 h2{color:#dc2626}
-.card-17{--accent:#3b82f6;background:#dbeafe}.card-17 h2{color:#1d4ed8}
-.card-18{--accent:#f97316;background:#ffedd5}.card-18 h2{color:#ea580c}
-.card-19{--accent:#eab308;background:#fef9c3}.card-19 h2{color:#a16207}
-.card-20{--accent:#d946ef;background:#fae8ff}.card-20 h2{color:#a21caf}
-.card-21{--accent:#0284c7;background:#e0f2fe}.card-21 h2{color:#0369a1}
-.card-22{--accent:#65a30d;background:#ecfccb}.card-22 h2{color:#4d7c0f}
-.card-23{--accent:#059669;background:#d1fae5}.card-23 h2{color:#047857}.card-24{--accent:#f59e0b;background:#fefce8}.card-24 h2{color:#b45309}.card-25{--accent:#e11d48;background:#ffe8ee}.card-25 h2{color:#9f1239}.card-26{--accent:#06b6d4;background:#ecfeff}.card-26 h2{color:#0e7490}.card-27{--accent:#8d6e63;background:#f3e5dc}.card-27 h2{color:#5d4037}.card-28{--accent:#d97706;background:#fff3d6}.card-28 h2{color:#b45309}.card-29{--accent:#dc2626;background:#fde8e8}.card-29 h2{color:#b91c1c}.card-30{--accent:#0d9488;background:#e6f7f5}.card-30 h2{color:#0f766e}
-.card-31{--accent:#7c3aed;background:#ede9fe}.card-31 h2{color:#5b21b6}
+.section{margin-top:6px;text-align:left}
 footer{margin-top:28px}
 footer span{display:inline-block;background:rgba(255,255,255,.92);border-radius:999px;padding:6px 16px;font-size:.85em;color:#6b8ca3;box-shadow:0 2px 8px rgba(70,130,180,.25)}
 .back-link{display:inline-block;margin-top:28px;font-weight:700;color:#2f6d96;text-decoration:none;background:#fff;border-radius:999px;padding:10px 18px;box-shadow:0 2px 8px rgba(70,130,180,.25)}
-.filter-bar{position:sticky;top:8px;z-index:10;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px;padding:10px;background:rgba(255,255,255,.94);border-radius:16px;box-shadow:0 4px 14px rgba(70,130,180,.25)}
-.filter-btn{font-family:inherit;font-weight:700;font-size:.9em;color:#2f6d96;background:#eaf6fd;border:2px solid #bfe3f5;border-radius:999px;padding:8px 14px;cursor:pointer}
-.filter-btn:hover{background:#fff}
-.filter-btn.active,.filter-btn[aria-pressed="true"]{background:#2f6d96;color:#fff;border-color:#2f6d96}
-.filter-btn.random-btn{background:#fff1c2;border-color:#ffb703}
-.progress-summary{margin:12px 0 0;font-weight:700;color:#2f6d96;background:#fff;border-radius:999px;padding:8px 14px;box-shadow:0 2px 8px rgba(70,130,180,.25)}
-.card.hidden{display:none}
-.card.spotlight{outline:4px solid #ff5e8a;outline-offset:3px;box-shadow:inset 0 0 0 4px #fff,0 0 24px rgba(255,94,138,.85);animation:spotlight 1s ease-in-out infinite alternate}
-@keyframes spotlight{from{box-shadow:inset 0 0 0 4px #fff,0 0 12px rgba(255,94,138,.6)}to{box-shadow:inset 0 0 0 4px #fff,0 0 28px rgba(255,94,138,.95)}}
-.record{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px;font-size:.6em;font-weight:700;color:#2f6d96;line-height:1.45}
-.record:empty{display:none}
-.record .record-cleared{color:#16a34a}
-.thumb{font-size:1.75em;line-height:1.15}
-.records-box{margin-top:26px;background:rgba(255,255,255,.94);border-radius:16px;box-shadow:0 4px 14px rgba(70,130,180,.25);padding:16px 14px;text-align:left}
-.records-title{margin:0 0 10px;text-align:center;font-size:1.1em;color:#2f6d96}
-.record-row{display:flex;align-items:baseline;gap:8px;padding:7px 4px;border-top:1px dashed #bfe3f5;font-size:.85em}
-.record-row:first-child{border-top:none}
-.record-row .r-emoji{font-size:1.15em}
-.record-row .r-name{font-weight:900;font-family:"Noto Sans JP",sans-serif;white-space:nowrap}
-.record-row .r-text{color:#2f6d96;font-weight:700}
-.record-row .r-text .record-cleared{color:#16a34a}
-.records-link{display:block;margin-top:26px;background:#fff;color:#2f6d96;text-decoration:none;font-weight:900;font-size:1.05em;text-align:center;padding:16px;border-radius:16px;border:3px solid #1a1a1a;box-shadow:inset 0 0 0 4px #fff,0 4px 14px rgba(70,130,180,.3)}
+.progress-summary{margin:12px 0 0;font-weight:700;color:#2f6d96;background:#fff;border-radius:999px;padding:8px 14px;box-shadow:0 2px 8px rgba(70,130,180,.25);text-align:center}
+.records-link{display:block;margin-top:30px;background:#fff;color:#2f6d96;text-decoration:none;font-weight:900;font-size:1.05em;text-align:center;padding:16px;border-radius:16px;border:3px solid #1a1a1a;box-shadow:inset 0 0 0 4px #fff,0 4px 14px rgba(70,130,180,.3)}
 .records-link:active{transform:scale(.98)}
-.card[data-cat="taiketsu"]{--accent:#ef4444;background:#ffe1e1}
-.card[data-cat="taiketsu"] h2{color:#b91c1c}
-.card[data-cat="score"]{--accent:#0284c7;background:#dbeffe}
-.card[data-cat="score"] h2{color:#075985}
-.card[data-cat="puzzle"]{--accent:#8b5cf6;background:#ece4ff}
-.card[data-cat="puzzle"] h2{color:#6d28d9}
-.card[data-cat="nonbiri"]{--accent:#22c55e;background:#def5dc}
-.card[data-cat="nonbiri"] h2{color:#15803d}
 
-/* ===== 2列サムネイル版 上書きスタイル ===== */
-.menu{grid-template-columns:repeat(2,1fr);gap:12px}
-.card{display:block;padding:0;min-height:0;overflow:hidden;text-align:left}
-.card::before{display:none}
+/* ===== ヘッダーバナー ===== */
+.banner{display:block;position:relative;height:168px;border-radius:20px;overflow:hidden;text-decoration:none;box-shadow:0 6px 18px rgba(70,130,180,.3);background:#eaf4fb}
+.banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.banner::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.83)}
+.banner-text{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px 14px;text-align:center}
+.banner-title{font-family:"Kaisei Decol","Noto Sans JP","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;font-weight:700;font-size:1.85em;letter-spacing:.08em;line-height:1.3;color:#175d85;text-shadow:2px 0 0 #fff,-2px 0 0 #fff,0 2px 0 #fff,0 -2px 0 #fff,2px 2px 0 #fff,-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff,0 5px 16px rgba(30,80,120,.35)}
+.banner-sub{font-weight:900;font-size:1.05em;letter-spacing:.06em;color:#ff5e8a;text-shadow:1px 0 0 #fff,-1px 0 0 #fff,0 1px 0 #fff,0 -1px 0 #fff,1px 1px 0 #fff,-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,0 2px 8px rgba(0,0,0,.18)}
+
+/* ===== ジャンプチップ行 ===== */
+.jump-bar{position:sticky;top:8px;z-index:30;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px;padding:10px;background:rgba(255,255,255,.94);border-radius:16px;box-shadow:0 4px 14px rgba(70,130,180,.25)}
+.jump-btn{font-family:inherit;font-weight:700;font-size:.9em;color:#2f6d96;background:#eaf6fd;border:2px solid #bfe3f5;border-radius:999px;padding:8px 14px;cursor:pointer}
+.jump-btn:hover{background:#fff}
+.jump-btn:active{transform:scale(.97)}
+.jump-btn.random-btn{background:#fff1c2;border-color:#ffb703}
+
+/* ===== 横スクロール棚 ===== */
+.shelf{margin-top:26px;scroll-margin-top:92px}
+.shelf-head{display:flex;align-items:baseline;gap:10px;margin:0 2px 8px}
+.shelf-title{margin:0;font-family:"Noto Sans JP",sans-serif;font-weight:900;font-size:1.18em;color:#2f6d96}
+.shelf-count{font-size:.85em;font-weight:700;color:#6b8ca3}
+.rowwrap{position:relative}
+.row{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.rowfade{position:absolute;top:0;right:0;bottom:0;width:54px;background:linear-gradient(to right,rgba(211,237,251,0),rgba(211,237,251,.96));pointer-events:none;z-index:3;transition:opacity .25s}
+.rownext{position:absolute;right:4px;top:42%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:#fff;border:2px solid #2f6d96;color:#2f6d96;font-family:inherit;font-size:1.25em;font-weight:900;line-height:1;padding:0;cursor:pointer;box-shadow:0 2px 8px rgba(70,130,180,.35);z-index:4;transition:opacity .25s}
+.rownext:active{transform:translateY(-50%) scale(.94)}
+.rowwrap.at-end .rowfade,.rowwrap.at-end .rownext{opacity:0;pointer-events:none}
+
+/* ===== タイル（カテゴリ棚=.card / 新着棚=.tile） ===== */
+.card,.tile{flex:0 0 37%;scroll-snap-align:start;position:relative;display:block;text-decoration:none;color:#333;background:#fff;border-radius:14px;padding:0;overflow:hidden;text-align:left;border:2px solid #1a1a1a;box-shadow:inset 0 0 0 4px #fff,0 3px 10px rgba(70,130,180,.3)}
+.card:active,.tile:active{transform:scale(.98)}
 .card .thumb{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.card-img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:#eaf4fb}
-.cat-chip{position:absolute;top:8px;left:8px;z-index:2;font-size:.66em;font-weight:900;letter-spacing:.02em;color:#fff;padding:4px 9px;border-radius:999px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.card[data-cat="taiketsu"] .cat-chip{background:#ef4444}
-.card[data-cat="score"] .cat-chip{background:#0284c7}
-.card[data-cat="puzzle"] .cat-chip{background:#8b5cf6}
-.card[data-cat="nonbiri"] .cat-chip{background:#22c55e}
-.card-band{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:8px 10px;background:#fff;pointer-events:none}
-.card h2,.card[data-cat="taiketsu"] h2,.card[data-cat="score"] h2,.card[data-cat="puzzle"] h2,.card[data-cat="nonbiri"] h2{margin:0;color:#111;font-size:.92em;line-height:1.32}
+.card p{display:none}
 .card .record{display:none}
+.card-img,.tile-img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:#eaf4fb}
+.cat-chip{position:absolute;top:8px;left:8px;z-index:2;font-size:.66em;font-weight:900;letter-spacing:.02em;color:#fff;padding:4px 9px;border-radius:999px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.card[data-cat="taiketsu"] .cat-chip,.tile[data-cat="taiketsu"] .cat-chip{background:#ef4444}
+.card[data-cat="score"] .cat-chip,.tile[data-cat="score"] .cat-chip{background:#0284c7}
+.card[data-cat="puzzle"] .cat-chip,.tile[data-cat="puzzle"] .cat-chip{background:#8b5cf6}
+.card[data-cat="nonbiri"] .cat-chip,.tile[data-cat="nonbiri"] .cat-chip{background:#22c55e}
+.new-badge{position:absolute;top:8px;right:8px;z-index:2;background:#ef4444;color:#fff;font-size:.62em;font-weight:900;letter-spacing:.06em;padding:3px 8px;border-radius:999px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.card-band,.tile-band{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:8px 10px;background:#fff;pointer-events:none}
+.card h2,.tile h2{margin:0;color:#111;font-family:"Noto Sans JP",sans-serif;font-weight:900;font-size:.92em;line-height:1.32}
+.card.spotlight,.tile.spotlight{outline:4px solid #ff5e8a;outline-offset:2px;animation:spotlight 1s ease-in-out infinite alternate}
+@keyframes spotlight{from{box-shadow:inset 0 0 0 4px #fff,0 0 12px rgba(255,94,138,.6)}to{box-shadow:inset 0 0 0 4px #fff,0 0 28px rgba(255,94,138,.95)}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<a href="index.html"><img class="logo" src="logo.png" alt="ファーストペンギン ゲーム集"></a>
+<a class="banner" href="index.html"><img src="members.jpg" alt="ファーストペンギンのメンバー8人の集合写真"><span class="banner-text"><span class="banner-title">ファーストペンギン ゲーム集</span><span class="banner-sub">たくさん遊んでね！</span></span></a>
 <section class="section" id="games">
 <p class="subtitle">あそびたいゲームをえらんでね！</p>
-<figure class="photo">
-<img src="members.jpg" alt="ファーストペンギンのメンバー8人の集合写真">
-<figcaption class="photo-text">たくさん遊んでね</figcaption>
-</figure>
-<div class="filter-bar" role="group" aria-label="ゲームの絞り込み">
-<button type="button" class="filter-btn active" data-filter="all" aria-pressed="true">すべて</button>
-<button type="button" class="filter-btn" data-filter="taiketsu" aria-pressed="false">たいけつ</button>
-<button type="button" class="filter-btn" data-filter="score" aria-pressed="false">スコアアタック</button>
-<button type="button" class="filter-btn" data-filter="puzzle" aria-pressed="false">パズル＆おぼえる</button>
-<button type="button" class="filter-btn" data-filter="nonbiri" aria-pressed="false">暇つぶし</button>
-<button type="button" class="filter-btn random-btn" id="randomBtn">🎲 おまかせ</button>
+<div class="jump-bar" role="group" aria-label="カテゴリへジャンプ">
+<button type="button" class="jump-btn" data-jump="shelf-new">🆕 新着</button>
+<button type="button" class="jump-btn" data-jump="shelf-taiketsu">たいけつ</button>
+<button type="button" class="jump-btn" data-jump="shelf-score">スコアアタック</button>
+<button type="button" class="jump-btn" data-jump="shelf-puzzle">パズル＆おぼえる</button>
+<button type="button" class="jump-btn" data-jump="shelf-nonbiri">暇つぶし</button>
+<button type="button" class="jump-btn random-btn" id="randomBtn">🎲 おまかせ</button>
 </div>
 <p class="progress-summary" id="progressSummary" hidden></p>
-<nav class="menu">
-<a class="card card-39" href="dasshutsu.html" data-cat="puzzle" data-game="dasshutsu"><span class="thumb">🔑</span><img class="card-img" src="thumbs/dasshutsu.jpg" alt="教室からの脱出" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>教室からの脱出</h2></span><p>夜の学校から8人で脱出する本格謎解き</p><span class="record"></span></a>
-<a class="card card-38" href="toiletpaper.html" data-cat="nonbiri" data-game="toiletpaper"><span class="thumb">🧻</span><img class="card-img" src="thumbs/toiletpaper.jpg" alt="ぴよのトイレットペーパー" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ぴよのトイレットペーパー</h2></span><p>フリックで紙を伸ばせ！1回勝負の長さ比べ</p><span class="record"></span></a>
-<a class="card card-37" href="tsuri.html" data-cat="nonbiri" data-game="tsuri"><span class="thumb">🎣</span><img class="card-img" src="thumbs/tsuri.jpg" alt="にゃろんのカサゴ釣り" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>にゃろんのカサゴ釣り</h2></span><p>竿を進化させて61種コンプを目指す釣りゲーム</p><span class="record"></span></a>
-<a class="card card-36" href="codeate.html" data-cat="taiketsu" data-game="codeate"><span class="thumb">🔢</span><img class="card-img" src="thumbs/codeate.jpg" alt="コードあて" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>コードあて</h2></span><p>数字コードを読み合う心理戦！アイテムで逆転</p><span class="record"></span></a>
-<a class="card card-35" href="pompomthrow.html" data-cat="score" data-game="pompomthrow"><span class="thumb">🏀</span><img class="card-img" src="thumbs/pompomthrow.jpg" alt="ぽむぽむスロー" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ぽむぽむスロー</h2></span><p>ゲージを合わせてシュート！5投のスコアアタック</p><span class="record"></span></a>
-<a class="card card-34" href="molkky.html" data-cat="taiketsu" data-game="molkky"><span class="thumb">🎳</span><img class="card-img" src="thumbs/molkky.jpg" alt="やってみよう！モルック対決！" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>やってみよう！モルック対決！</h2></span><p>ドラッグで投げて50点ぴったりを目指す対決</p><span class="record"></span></a>
-<a class="card card-33" href="ramen.html" data-cat="nonbiri" data-game="ramen"><span class="thumb">🍜</span><img class="card-img" src="thumbs/ramen.jpg" alt="うきょのラーメン屋" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>うきょのラーメン屋</h2></span><p>注文に合わせて一杯を作ろう！レベルで具材が増える</p><span class="record"></span></a>
-<a class="card card-32" href="atodashi.html" data-cat="taiketsu" data-game="atodashi"><span class="thumb">✌️</span><img class="card-img" src="thumbs/atodashi.jpg" alt="ぽにーと対戦 あとだしジャンケン！" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>あとだしじゃんけん</h2></span><p>勝て！まけろ！の合図に反応する反射ジャンケン</p><span class="record"></span></a>
-<a class="card card-31" href="kietanodaare.html" data-cat="puzzle" data-game="kietanodaare"><span class="thumb">🫥</span><img class="card-img" src="thumbs/kietanodaare.jpg" alt="ファスペンきえたのだあれ？" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>ファスペンきえたのだあれ？</h2></span><p>消えたのだあれ？4秒で見つける記憶パズル</p><span class="record"></span></a>
-<a class="card card-30" href="kazukazoe.html" data-cat="puzzle" data-game="kazukazoe"><span class="thumb">🔢</span><img class="card-img" src="thumbs/kazukazoe.jpg" alt="ファスペンかずかぞえ" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>ファスペンかずかぞえ</h2></span><p>一瞬見た数を覚えて答えよう！ちびキャラとファンマークを数える勝負</p><span class="record"></span></a>
-<a class="card card-29" href="present.html" data-cat="score" data-game="present"><span class="thumb">🎁</span><img class="card-img" src="thumbs/present.jpg" alt="聖夜のペンギンプレゼント" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>聖夜のペンギンプレゼント</h2></span><p>ソリからプレゼントを落として煙突へ！60秒で何個届けられる？</p><span class="record"></span></a>
-<a class="card card-28" href="omikuji.html" data-cat="nonbiri" data-game="omikuji"><span class="thumb">⛩️</span><img class="card-img" src="thumbs/omikuji.jpg" alt="ファスペンおみくじ" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ファスペンおみくじ</h2></span><p>筒を振って今日の運勢を占おう！ラッキーメンバーつき</p><span class="record"></span></a>
-<a class="card card-27" href="iwake.html" data-cat="nonbiri" data-game="iwake"><span class="thumb">🙇</span><img class="card-img" src="thumbs/iwake.jpg" alt="はいびすかすの言い訳ジェネレーター" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>言い訳ジェネレーター</h2></span><p>遅刻の言い訳をスロットで自動生成！ごめんなさい！信じて！</p><span class="record"></span></a>
-<a class="card card-26" href="soriresu.html" data-cat="score" data-game="soriresu"><span class="thumb">🛷</span><img class="card-img" src="thumbs/soriresu.jpg" alt="ペンギンそりレース" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ペンギンそりレース</h2></span><p>雪の坂を滑りぬけろ！ジャンプ台で障害物を飛び越えよう</p><span class="record"></span></a>
-<a class="card card-25" href="hayaoshi.html" data-cat="taiketsu" data-game="hayaoshi"><span class="thumb">🔴</span><img class="card-img" src="thumbs/hayaoshi.jpg" alt="早押しペンギン" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>早押しペンギン</h2></span><p>フェイントに釣られず『ドンッ！』で一番早くPUSH！</p><span class="record"></span></a>
-<a class="card card-24" href="catchcopy.html" data-cat="nonbiri" data-game="catchcopy"><span class="thumb">💬</span><img class="card-img" src="thumbs/catchcopy.jpg" alt="カサゴが決めるキャッチコピー" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>カサゴが決めるキャッチコピー</h2></span><p>カサゴが決める今日のあなたのキャッチコピー！スロットで決定</p><span class="record"></span></a>
-<a class="card card-23" href="majan.html" data-cat="taiketsu" data-game="majan"><span class="thumb">🀄</span><img class="card-img" src="thumbs/majan.jpg" alt="8枚麻雀" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>8枚麻雀</h2></span><p>8枚で作る簡単麻雀！メンバーと1対1の4番勝負</p><span class="record"></span></a>
-<a class="card card-22" href="sugoroku.html" data-cat="nonbiri" data-game="sugoroku"><span class="thumb">🎲</span><img class="card-img" src="thumbs/sugoroku.jpg" alt="ファスペンすごろく" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ファスペンすごろく</h2></span><p>47都道府県を回って登録者100万人を目指そう！</p><span class="record"></span></a>
-<a class="card card-21" href="blockkuzushi.html" data-cat="taiketsu" data-game="blockkuzushi"><span class="thumb">🧱</span><img class="card-img" src="thumbs/blockkuzushi.jpg" alt="ブロック崩し対戦" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ブロック崩し対戦</h2></span><p>エアホッケー×ブロック崩し！相手の後ろに通して5点先取</p><span class="record"></span></a>
-<a class="card card-20" href="hanbun.html" data-cat="nonbiri" data-game="hanbun"><span class="thumb">⚖️</span><img class="card-img" src="thumbs/hanbun.jpg" alt="半分の重さに切り分けるゲーム" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>半分の重さに切り分けるゲーム</h2></span><p>いろんなものを半分の重さに切り分けよう！±10gでクリア</p><span class="record"></span></a>
-<a class="card card-19" href="oyatsu500.html" data-cat="score" data-game="oyatsu500"><span class="thumb">🍩</span><img class="card-img" src="thumbs/oyatsu500.jpg" alt="おやつは500円！" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>おやつは500円！</h2></span><p>流れるおやつをカゴへ！合計500円ピッタリをねらおう</p><span class="record"></span></a>
-<a class="card card-18" href="chikinresu.html" data-cat="score" data-game="chikinresu"><span class="thumb">🐧</span><img class="card-img" src="thumbs/chikinresu.jpg" alt="ペンギンチキンレース" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ペンギンチキンレース</h2></span><p>崖っぷちギリギリをねらえ！アイテム1個で運命が変わる</p><span class="record"></span></a>
-<a class="card card-17" href="yukidarumarolling.html" data-cat="nonbiri" data-game="yukidarumarolling"><span class="thumb">⛄</span><img class="card-img" src="thumbs/yukidarumarolling.jpg" alt="雪だるまローリング" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>雪だるまローリング</h2></span><p>目標サイズを覚えて雪玉を転がそう！誤差が一番小さい人の勝ち</p><span class="record"></span></a>
-<a class="card card-16" href="fuusendarts.html" data-cat="score" data-game="fuusendarts"><span class="thumb">🎈</span><img class="card-img" src="thumbs/fuusendarts.jpg" alt="ファスペン風船ダーツ" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペン風船ダーツ</h2></span><p>風船の倍率×ダーツの点数！5投で高得点をねらえ</p><span class="record"></span></a>
-<a class="card card-15" href="yubisuma.html" data-cat="taiketsu" data-game="yubisuma"><span class="thumb">👍</span><img class="card-img" src="thumbs/yubisuma.jpg" alt="ファスペン指スマ対決" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ファスペン指スマ対決</h2></span><p>休み時間に指スマ勝負！親指の合計を当てて手を引っ込めよう</p><span class="record"></span></a>
-<a class="card card-14" href="kooriwatari.html" data-cat="score" data-game="kooriwatari"><span class="thumb">🧊</span><img class="card-img" src="thumbs/kooriwatari.jpg" alt="ペンギン氷渡り" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ペンギン氷渡り</h2></span><p>長押しでパワーをためて、流れてくる氷をジャンプで渡ろう</p><span class="record"></span></a>
-<a class="card card-13" href="suujitap.html" data-cat="nonbiri" data-game="suujitap"><span class="thumb">👆</span><img class="card-img" src="thumbs/suujitap.jpg" alt="ファスペン数字タップ" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ファスペン数字タップ</h2></span><p>1から25まで順番にタップ！速さを競うタイムアタック</p><span class="record"></span></a>
-<a class="card card-12" href="ochimono.html" data-cat="score" data-game="ochimono"><span class="thumb">🧺</span><img class="card-img" src="thumbs/ochimono.jpg" alt="ファスペン落ちものキャッチ" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペン落ちものキャッチ</h2></span><p>落ちてくるアイテムをキャッチ！60秒スコアアタック</p><span class="record"></span></a>
-<a class="card card-11" href="junbanate.html" data-cat="puzzle" data-game="junbanate"><span class="thumb">🔁</span><img class="card-img" src="thumbs/junbanate.jpg" alt="ファスペン順番あて" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>ファスペン順番あて</h2></span><p>光る順番をおぼえて当てるメモリーゲーム</p><span class="record"></span></a>
-<a class="card card-10" href="sanpo.html" data-cat="nonbiri" data-game="sanpo"><span class="thumb">✏️</span><img class="card-img" src="thumbs/sanpo.jpg" alt="ペンギン線引きさんぽ" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ペンギン線引きさんぽ</h2></span><p>線を引いて橋を作り、1000m先のゴールをめざそう</p><span class="record"></span></a>
-<a class="card card-9" href="pinboru.html" data-cat="score" data-game="pinboru"><span class="thumb">🕹️</span><img class="card-img" src="thumbs/pinboru.jpg" alt="ファスペンピンボール" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペンピンボール</h2></span><p>プランジャーを引いて発射！メンバーを集めてボスをたおそう</p><span class="record"></span></a>
-<a class="card card-8" href="koronda.html" data-cat="taiketsu" data-game="koronda"><span class="thumb">🚦</span><img class="card-img" src="thumbs/koronda.jpg" alt="ペンギンさんがころんだ" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ペンギンさんがころんだ</h2></span><p>振り向く前に連打で進め！9人対戦のだるまさんがころんだ</p><span class="record"></span></a>
-<a class="card card-7" href="sukaijanpu.html" data-cat="score" data-game="sukaijanpu"><span class="thumb">🪂</span><img class="card-img" src="thumbs/sukaijanpu.jpg" alt="ファスペンスカイジャンプ" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペンスカイジャンプ</h2></span><p>2角・パワー・タイミングで飛ばして、空中のメンバーからアイテムゲット</p><span class="record"></span></a>
-<a class="card card-6" href="moguratataki.html" data-cat="score" data-game="moguratataki"><span class="thumb">🔨</span><img class="card-img" src="thumbs/moguratataki.jpg" alt="ファスペンもぐらたたき" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペンもぐらたたき</h2></span><p>出てきたメンバーをたたけ！30秒勝負と2000点タイムアタック</p><span class="record"></span></a>
-<a class="card card-5" href="onawajobi.html" data-cat="nonbiri" data-game="onawajobi"><span class="thumb">🪢</span><img class="card-img" src="thumbs/onawajobi.jpg" alt="ファスペン大縄跳び" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ファスペン大縄跳び</h2></span><p>タイミングよくタップして全員でとぼう！</p><span class="record"></span></a>
-<a class="card card-4" href="shinkeisuijaku.html" data-cat="puzzle" data-game="shinkeisuijaku"><span class="thumb">🎴</span><img class="card-img" src="thumbs/shinkeisuijaku.jpg" alt="ファスペン神経衰弱" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>ファスペン神経衰弱</h2></span><p>8人のペアをそろえるメモリーゲーム</p><span class="record"></span></a>
-<a class="card card-3" href="ziyankenrpg.html" data-cat="taiketsu" data-game="ziyankenrpg"><span class="thumb">⚔️</span><img class="card-img" src="thumbs/ziyankenrpg.jpg" alt="ジャンケンRPG" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ジャンケンRPG</h2></span><p>ジャンケンで戦う冒険RPG</p><span class="record"></span></a>
-<a class="card card-2" href="atutixiang-itehoi.html" data-cat="taiketsu" data-game="atutixiang-itehoi"><span class="thumb">👀</span><img class="card-img" src="thumbs/atutixiang-itehoi.jpg" alt="あっち向いてホイ" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>あっち向いてホイ</h2></span><p>ホイ！のタイミングで方向を当てよう</p><span class="record"></span></a>
-<a class="card card-1" href="8ren-sheng-tiba-kikadogemu.html" data-cat="taiketsu" data-game="8ren-sheng-tiba-kikadogemu"><span class="thumb">🃏</span><img class="card-img" src="thumbs/8ren-sheng-tiba-kikadogemu.jpg" alt="ファスペンと対決！" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ファスペンと対決！</h2></span><p>8人とカードで勝負！合計が大きい方が勝ち</p><span class="record"></span></a>
-</nav>
+<section class="shelf" id="shelf-new"><div class="shelf-head"><h2 class="shelf-title">🆕 新着</h2><span class="shelf-count">6本</span></div><div class="rowwrap"><div class="row"><a class="tile" href="dasshutsu.html" data-cat="puzzle"><img class="tile-img" src="thumbs/dasshutsu.jpg" alt="教室からの脱出" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="new-badge">NEW</span><span class="tile-band"><h2>教室からの脱出</h2></span></a><a class="tile" href="toiletpaper.html" data-cat="nonbiri"><img class="tile-img" src="thumbs/toiletpaper.jpg" alt="ぴよのトイレットペーパー" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="new-badge">NEW</span><span class="tile-band"><h2>ぴよのトイレットペーパー</h2></span></a><a class="tile" href="tsuri.html" data-cat="nonbiri"><img class="tile-img" src="thumbs/tsuri.jpg" alt="にゃろんのカサゴ釣り" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="new-badge">NEW</span><span class="tile-band"><h2>にゃろんのカサゴ釣り</h2></span></a><a class="tile" href="codeate.html" data-cat="taiketsu"><img class="tile-img" src="thumbs/codeate.jpg" alt="コードあて" loading="lazy"><span class="cat-chip">たいけつ</span><span class="new-badge">NEW</span><span class="tile-band"><h2>コードあて</h2></span></a><a class="tile" href="pompomthrow.html" data-cat="score"><img class="tile-img" src="thumbs/pompomthrow.jpg" alt="ぽむぽむスロー" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="new-badge">NEW</span><span class="tile-band"><h2>ぽむぽむスロー</h2></span></a><a class="tile" href="molkky.html" data-cat="taiketsu"><img class="tile-img" src="thumbs/molkky.jpg" alt="やってみよう！モルック対決！" loading="lazy"><span class="cat-chip">たいけつ</span><span class="new-badge">NEW</span><span class="tile-band"><h2>やってみよう！モルック対決！</h2></span></a></div><div class="rowfade"></div><button type="button" class="rownext" aria-label="横にスクロール">›</button></div></section>
+<section class="shelf" id="shelf-taiketsu"><div class="shelf-head"><h2 class="shelf-title">たいけつ</h2><span class="shelf-count">11本</span></div><div class="rowwrap"><div class="row"><a class="card card-36" href="codeate.html" data-cat="taiketsu" data-game="codeate"><span class="thumb">🔢</span><img class="card-img" src="thumbs/codeate.jpg" alt="コードあて" loading="lazy"><span class="cat-chip">たいけつ</span><span class="new-badge">NEW</span><span class="card-band"><h2>コードあて</h2></span><p>数字コードを読み合う心理戦！アイテムで逆転</p><span class="record"></span></a><a class="card card-34" href="molkky.html" data-cat="taiketsu" data-game="molkky"><span class="thumb">🎳</span><img class="card-img" src="thumbs/molkky.jpg" alt="やってみよう！モルック対決！" loading="lazy"><span class="cat-chip">たいけつ</span><span class="new-badge">NEW</span><span class="card-band"><h2>やってみよう！モルック対決！</h2></span><p>ドラッグで投げて50点ぴったりを目指す対決</p><span class="record"></span></a><a class="card card-32" href="atodashi.html" data-cat="taiketsu" data-game="atodashi"><span class="thumb">✌️</span><img class="card-img" src="thumbs/atodashi.jpg" alt="ぽにーと対戦 あとだしジャンケン！" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>あとだしじゃんけん</h2></span><p>勝て！まけろ！の合図に反応する反射ジャンケン</p><span class="record"></span></a><a class="card card-25" href="hayaoshi.html" data-cat="taiketsu" data-game="hayaoshi"><span class="thumb">🔴</span><img class="card-img" src="thumbs/hayaoshi.jpg" alt="早押しペンギン" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>早押しペンギン</h2></span><p>フェイントに釣られず『ドンッ！』で一番早くPUSH！</p><span class="record"></span></a><a class="card card-23" href="majan.html" data-cat="taiketsu" data-game="majan"><span class="thumb">🀄</span><img class="card-img" src="thumbs/majan.jpg" alt="8枚麻雀" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>8枚麻雀</h2></span><p>8枚で作る簡単麻雀！メンバーと1対1の4番勝負</p><span class="record"></span></a><a class="card card-21" href="blockkuzushi.html" data-cat="taiketsu" data-game="blockkuzushi"><span class="thumb">🧱</span><img class="card-img" src="thumbs/blockkuzushi.jpg" alt="ブロック崩し対戦" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ブロック崩し対戦</h2></span><p>エアホッケー×ブロック崩し！相手の後ろに通して5点先取</p><span class="record"></span></a><a class="card card-15" href="yubisuma.html" data-cat="taiketsu" data-game="yubisuma"><span class="thumb">👍</span><img class="card-img" src="thumbs/yubisuma.jpg" alt="ファスペン指スマ対決" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ファスペン指スマ対決</h2></span><p>休み時間に指スマ勝負！親指の合計を当てて手を引っ込めよう</p><span class="record"></span></a><a class="card card-8" href="koronda.html" data-cat="taiketsu" data-game="koronda"><span class="thumb">🚦</span><img class="card-img" src="thumbs/koronda.jpg" alt="ペンギンさんがころんだ" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ペンギンさんがころんだ</h2></span><p>振り向く前に連打で進め！9人対戦のだるまさんがころんだ</p><span class="record"></span></a><a class="card card-3" href="ziyankenrpg.html" data-cat="taiketsu" data-game="ziyankenrpg"><span class="thumb">⚔️</span><img class="card-img" src="thumbs/ziyankenrpg.jpg" alt="ジャンケンRPG" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ジャンケンRPG</h2></span><p>ジャンケンで戦う冒険RPG</p><span class="record"></span></a><a class="card card-2" href="atutixiang-itehoi.html" data-cat="taiketsu" data-game="atutixiang-itehoi"><span class="thumb">👀</span><img class="card-img" src="thumbs/atutixiang-itehoi.jpg" alt="あっち向いてホイ" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>あっち向いてホイ</h2></span><p>ホイ！のタイミングで方向を当てよう</p><span class="record"></span></a><a class="card card-1" href="8ren-sheng-tiba-kikadogemu.html" data-cat="taiketsu" data-game="8ren-sheng-tiba-kikadogemu"><span class="thumb">🃏</span><img class="card-img" src="thumbs/8ren-sheng-tiba-kikadogemu.jpg" alt="ファスペンと対決！" loading="lazy"><span class="cat-chip">たいけつ</span><span class="card-band"><h2>ファスペンと対決！</h2></span><p>8人とカードで勝負！合計が大きい方が勝ち</p><span class="record"></span></a></div><div class="rowfade"></div><button type="button" class="rownext" aria-label="横にスクロール">›</button></div></section>
+<section class="shelf" id="shelf-score"><div class="shelf-head"><h2 class="shelf-title">スコアアタック</h2><span class="shelf-count">11本</span></div><div class="rowwrap"><div class="row"><a class="card card-35" href="pompomthrow.html" data-cat="score" data-game="pompomthrow"><span class="thumb">🏀</span><img class="card-img" src="thumbs/pompomthrow.jpg" alt="ぽむぽむスロー" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="new-badge">NEW</span><span class="card-band"><h2>ぽむぽむスロー</h2></span><p>ゲージを合わせてシュート！5投のスコアアタック</p><span class="record"></span></a><a class="card card-29" href="present.html" data-cat="score" data-game="present"><span class="thumb">🎁</span><img class="card-img" src="thumbs/present.jpg" alt="聖夜のペンギンプレゼント" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>聖夜のペンギンプレゼント</h2></span><p>ソリからプレゼントを落として煙突へ！60秒で何個届けられる？</p><span class="record"></span></a><a class="card card-26" href="soriresu.html" data-cat="score" data-game="soriresu"><span class="thumb">🛷</span><img class="card-img" src="thumbs/soriresu.jpg" alt="ペンギンそりレース" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ペンギンそりレース</h2></span><p>雪の坂を滑りぬけろ！ジャンプ台で障害物を飛び越えよう</p><span class="record"></span></a><a class="card card-19" href="oyatsu500.html" data-cat="score" data-game="oyatsu500"><span class="thumb">🍩</span><img class="card-img" src="thumbs/oyatsu500.jpg" alt="おやつは500円！" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>おやつは500円！</h2></span><p>流れるおやつをカゴへ！合計500円ピッタリをねらおう</p><span class="record"></span></a><a class="card card-18" href="chikinresu.html" data-cat="score" data-game="chikinresu"><span class="thumb">🐧</span><img class="card-img" src="thumbs/chikinresu.jpg" alt="ペンギンチキンレース" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ペンギンチキンレース</h2></span><p>崖っぷちギリギリをねらえ！アイテム1個で運命が変わる</p><span class="record"></span></a><a class="card card-16" href="fuusendarts.html" data-cat="score" data-game="fuusendarts"><span class="thumb">🎈</span><img class="card-img" src="thumbs/fuusendarts.jpg" alt="ファスペン風船ダーツ" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペン風船ダーツ</h2></span><p>風船の倍率×ダーツの点数！5投で高得点をねらえ</p><span class="record"></span></a><a class="card card-14" href="kooriwatari.html" data-cat="score" data-game="kooriwatari"><span class="thumb">🧊</span><img class="card-img" src="thumbs/kooriwatari.jpg" alt="ペンギン氷渡り" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ペンギン氷渡り</h2></span><p>長押しでパワーをためて、流れてくる氷をジャンプで渡ろう</p><span class="record"></span></a><a class="card card-12" href="ochimono.html" data-cat="score" data-game="ochimono"><span class="thumb">🧺</span><img class="card-img" src="thumbs/ochimono.jpg" alt="ファスペン落ちものキャッチ" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペン落ちものキャッチ</h2></span><p>落ちてくるアイテムをキャッチ！60秒スコアアタック</p><span class="record"></span></a><a class="card card-9" href="pinboru.html" data-cat="score" data-game="pinboru"><span class="thumb">🕹️</span><img class="card-img" src="thumbs/pinboru.jpg" alt="ファスペンピンボール" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペンピンボール</h2></span><p>プランジャーを引いて発射！メンバーを集めてボスをたおそう</p><span class="record"></span></a><a class="card card-7" href="sukaijanpu.html" data-cat="score" data-game="sukaijanpu"><span class="thumb">🪂</span><img class="card-img" src="thumbs/sukaijanpu.jpg" alt="ファスペンスカイジャンプ" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペンスカイジャンプ</h2></span><p>2角・パワー・タイミングで飛ばして、空中のメンバーからアイテムゲット</p><span class="record"></span></a><a class="card card-6" href="moguratataki.html" data-cat="score" data-game="moguratataki"><span class="thumb">🔨</span><img class="card-img" src="thumbs/moguratataki.jpg" alt="ファスペンもぐらたたき" loading="lazy"><span class="cat-chip">スコアアタック</span><span class="card-band"><h2>ファスペンもぐらたたき</h2></span><p>出てきたメンバーをたたけ！30秒勝負と2000点タイムアタック</p><span class="record"></span></a></div><div class="rowfade"></div><button type="button" class="rownext" aria-label="横にスクロール">›</button></div></section>
+<section class="shelf" id="shelf-puzzle"><div class="shelf-head"><h2 class="shelf-title">パズル＆おぼえる</h2><span class="shelf-count">5本</span></div><div class="rowwrap"><div class="row"><a class="card card-39" href="dasshutsu.html" data-cat="puzzle" data-game="dasshutsu"><span class="thumb">🔑</span><img class="card-img" src="thumbs/dasshutsu.jpg" alt="教室からの脱出" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="new-badge">NEW</span><span class="card-band"><h2>教室からの脱出</h2></span><p>夜の学校から8人で脱出する本格謎解き</p><span class="record"></span></a><a class="card card-31" href="kietanodaare.html" data-cat="puzzle" data-game="kietanodaare"><span class="thumb">🫥</span><img class="card-img" src="thumbs/kietanodaare.jpg" alt="ファスペンきえたのだあれ？" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>ファスペンきえたのだあれ？</h2></span><p>消えたのだあれ？4秒で見つける記憶パズル</p><span class="record"></span></a><a class="card card-30" href="kazukazoe.html" data-cat="puzzle" data-game="kazukazoe"><span class="thumb">🔢</span><img class="card-img" src="thumbs/kazukazoe.jpg" alt="ファスペンかずかぞえ" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>ファスペンかずかぞえ</h2></span><p>一瞬見た数を覚えて答えよう！ちびキャラとファンマークを数える勝負</p><span class="record"></span></a><a class="card card-11" href="junbanate.html" data-cat="puzzle" data-game="junbanate"><span class="thumb">🔁</span><img class="card-img" src="thumbs/junbanate.jpg" alt="ファスペン順番あて" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>ファスペン順番あて</h2></span><p>光る順番をおぼえて当てるメモリーゲーム</p><span class="record"></span></a><a class="card card-4" href="shinkeisuijaku.html" data-cat="puzzle" data-game="shinkeisuijaku"><span class="thumb">🎴</span><img class="card-img" src="thumbs/shinkeisuijaku.jpg" alt="ファスペン神経衰弱" loading="lazy"><span class="cat-chip">パズル＆おぼえる</span><span class="card-band"><h2>ファスペン神経衰弱</h2></span><p>8人のペアをそろえるメモリーゲーム</p><span class="record"></span></a></div><div class="rowfade"></div><button type="button" class="rownext" aria-label="横にスクロール">›</button></div></section>
+<section class="shelf" id="shelf-nonbiri"><div class="shelf-head"><h2 class="shelf-title">暇つぶし</h2><span class="shelf-count">12本</span></div><div class="rowwrap"><div class="row"><a class="card card-38" href="toiletpaper.html" data-cat="nonbiri" data-game="toiletpaper"><span class="thumb">🧻</span><img class="card-img" src="thumbs/toiletpaper.jpg" alt="ぴよのトイレットペーパー" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="new-badge">NEW</span><span class="card-band"><h2>ぴよのトイレットペーパー</h2></span><p>フリックで紙を伸ばせ！1回勝負の長さ比べ</p><span class="record"></span></a><a class="card card-37" href="tsuri.html" data-cat="nonbiri" data-game="tsuri"><span class="thumb">🎣</span><img class="card-img" src="thumbs/tsuri.jpg" alt="にゃろんのカサゴ釣り" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="new-badge">NEW</span><span class="card-band"><h2>にゃろんのカサゴ釣り</h2></span><p>竿を進化させて61種コンプを目指す釣りゲーム</p><span class="record"></span></a><a class="card card-33" href="ramen.html" data-cat="nonbiri" data-game="ramen"><span class="thumb">🍜</span><img class="card-img" src="thumbs/ramen.jpg" alt="うきょのラーメン屋" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>うきょのラーメン屋</h2></span><p>注文に合わせて一杯を作ろう！レベルで具材が増える</p><span class="record"></span></a><a class="card card-28" href="omikuji.html" data-cat="nonbiri" data-game="omikuji"><span class="thumb">⛩️</span><img class="card-img" src="thumbs/omikuji.jpg" alt="ファスペンおみくじ" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ファスペンおみくじ</h2></span><p>筒を振って今日の運勢を占おう！ラッキーメンバーつき</p><span class="record"></span></a><a class="card card-27" href="iwake.html" data-cat="nonbiri" data-game="iwake"><span class="thumb">🙇</span><img class="card-img" src="thumbs/iwake.jpg" alt="はいびすかすの言い訳ジェネレーター" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>言い訳ジェネレーター</h2></span><p>遅刻の言い訳をスロットで自動生成！ごめんなさい！信じて！</p><span class="record"></span></a><a class="card card-24" href="catchcopy.html" data-cat="nonbiri" data-game="catchcopy"><span class="thumb">💬</span><img class="card-img" src="thumbs/catchcopy.jpg" alt="カサゴが決めるキャッチコピー" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>カサゴが決めるキャッチコピー</h2></span><p>カサゴが決める今日のあなたのキャッチコピー！スロットで決定</p><span class="record"></span></a><a class="card card-22" href="sugoroku.html" data-cat="nonbiri" data-game="sugoroku"><span class="thumb">🎲</span><img class="card-img" src="thumbs/sugoroku.jpg" alt="ファスペンすごろく" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ファスペンすごろく</h2></span><p>47都道府県を回って登録者100万人を目指そう！</p><span class="record"></span></a><a class="card card-20" href="hanbun.html" data-cat="nonbiri" data-game="hanbun"><span class="thumb">⚖️</span><img class="card-img" src="thumbs/hanbun.jpg" alt="半分の重さに切り分けるゲーム" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>半分の重さに切り分けるゲーム</h2></span><p>いろんなものを半分の重さに切り分けよう！±10gでクリア</p><span class="record"></span></a><a class="card card-17" href="yukidarumarolling.html" data-cat="nonbiri" data-game="yukidarumarolling"><span class="thumb">⛄</span><img class="card-img" src="thumbs/yukidarumarolling.jpg" alt="雪だるまローリング" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>雪だるまローリング</h2></span><p>目標サイズを覚えて雪玉を転がそう！誤差が一番小さい人の勝ち</p><span class="record"></span></a><a class="card card-13" href="suujitap.html" data-cat="nonbiri" data-game="suujitap"><span class="thumb">👆</span><img class="card-img" src="thumbs/suujitap.jpg" alt="ファスペン数字タップ" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ファスペン数字タップ</h2></span><p>1から25まで順番にタップ！速さを競うタイムアタック</p><span class="record"></span></a><a class="card card-10" href="sanpo.html" data-cat="nonbiri" data-game="sanpo"><span class="thumb">✏️</span><img class="card-img" src="thumbs/sanpo.jpg" alt="ペンギン線引きさんぽ" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ペンギン線引きさんぽ</h2></span><p>線を引いて橋を作り、1000m先のゴールをめざそう</p><span class="record"></span></a><a class="card card-5" href="onawajobi.html" data-cat="nonbiri" data-game="onawajobi"><span class="thumb">🪢</span><img class="card-img" src="thumbs/onawajobi.jpg" alt="ファスペン大縄跳び" loading="lazy"><span class="cat-chip">暇つぶし</span><span class="card-band"><h2>ファスペン大縄跳び</h2></span><p>タイミングよくタップして全員でとぼう！</p><span class="record"></span></a></div><div class="rowfade"></div><button type="button" class="rownext" aria-label="横にスクロール">›</button></div></section>
 <a class="records-link" href="records.html">🏆 あなたの記録ページ ▶</a>
 </section>
 <nav class="section-nav">
@@ -204,31 +130,40 @@ if(summary&&recordCount>0){
 summary.textContent='クリア済み '+cleared+'/'+cards.length+'本 ・ 合計 '+totalPlays+'回プレイ';
 summary.hidden=false;
 }
-var buttons=Array.prototype.slice.call(document.querySelectorAll('.filter-btn[data-filter]'));
-function setFilter(filter){
-buttons.forEach(function(b){
-var on=b.getAttribute('data-filter')===filter;
-b.classList.toggle('active',on);
-b.setAttribute('aria-pressed',on?'true':'false');
+Array.prototype.forEach.call(document.querySelectorAll('.jump-btn[data-jump]'),function(b){
+b.addEventListener('click',function(){
+var t=document.getElementById(b.getAttribute('data-jump'));
+if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
 });
-cards.forEach(function(card){
-card.classList.toggle('hidden',filter!=='all'&&card.getAttribute('data-cat')!==filter);
-});
-}
-buttons.forEach(function(b){
-b.addEventListener('click',function(){setFilter(b.getAttribute('data-filter'));});
 });
 var randomBtn=document.getElementById('randomBtn');
 if(randomBtn){
 randomBtn.addEventListener('click',function(){
 if(!cards.length)return;
-setFilter('all');
-cards.forEach(function(c){c.classList.remove('spotlight');});
+Array.prototype.forEach.call(document.querySelectorAll('.spotlight'),function(c){c.classList.remove('spotlight');});
 var card=cards[Math.floor(Math.random()*cards.length)];
 card.classList.add('spotlight');
-card.scrollIntoView({behavior:'smooth',block:'center'});
+card.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
 });
 }
+Array.prototype.forEach.call(document.querySelectorAll('.rowwrap'),function(wrap){
+var row=wrap.querySelector('.row');
+var btn=wrap.querySelector('.rownext');
+if(!row)return;
+function check(){
+var atEnd=row.scrollLeft+row.clientWidth>=row.scrollWidth-8;
+wrap.classList.toggle('at-end',atEnd);
+}
+row.addEventListener('scroll',check,{passive:true});
+window.addEventListener('resize',check);
+window.addEventListener('load',check);
+if(btn){
+btn.addEventListener('click',function(){
+row.scrollBy({left:Math.round(row.clientWidth*0.85),behavior:'smooth'});
+});
+}
+check();
+});
 })();
 </script>
 </body>
