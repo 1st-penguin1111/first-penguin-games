@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ファーストペンギン ゲーム集">
+<meta property="og:title" content="教室からの脱出｜ファーストペンギン">
+<meta property="og:description" content="夜の学校から8人で脱出する本格謎解きゲーム スマホですぐ遊べるブラウザゲーム！">
+<meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/dasshutsu.html">
+<meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/dasshutsu.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="教室からの脱出｜ファーストペンギン">
+<meta name="twitter:description" content="夜の学校から8人で脱出する本格謎解きゲーム スマホですぐ遊べるブラウザゲーム！">
+<meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/dasshutsu.jpg">
 <title>教室からの脱出</title>
 <style>
 :root{
@@ -2170,9 +2180,10 @@ document.getElementById("btn-back-corridor").addEventListener("click", function(
 document.getElementById("btn-to-entrance").addEventListener("click", function(){ sfxTap(); if(state && state.flags && state.flags.finale && state.flags.finale.key1) finaleGate(false); else finaleEntrance(); });
 document.getElementById("btn-hint").addEventListener("click", function(){ sfxTap(); showHint(); });
 ["btn-mute1","btn-mute2","btn-mute3"].forEach(function(id){ document.getElementById(id).addEventListener("click", function(){ toggleMute(); }); });
-var shareText=encodeURIComponent("「教室からの脱出」クリアしたよ！🏫🔑 はっぴぃの夢の中で8人全員脱出成功！ #ファーストペンギン");
-document.getElementById("share-x").href="https://twitter.com/intent/tweet?text="+shareText;
-document.getElementById("share-line").href="https://line.me/R/msg/text/?"+shareText;
+var gameUrl="https://1st-penguin1111.github.io/first-penguin-games/dasshutsu.html";
+var shareText="教室からの脱出｜クリアしたよ！🏫🔑 はっぴぃの夢の中で8人全員脱出成功！\nキミもクリアできる？\n#ファーストペンギン";
+document.getElementById("share-x").href="https://twitter.com/intent/tweet?text="+encodeURIComponent(shareText)+"&url="+encodeURIComponent(gameUrl);
+document.getElementById("share-line").href="https://line.me/R/msg/text/?"+encodeURIComponent(shareText+"\n"+gameUrl);
 updateMuteBtns(); refreshTitle();
 </script>
 </body>
