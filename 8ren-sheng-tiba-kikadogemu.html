@@ -8,9 +8,16 @@
     <title>ファスペンと対決！</title>
     <meta name="robots" content="noindex, nofollow" />
     <meta name="description" content="カードの合計で勝負！ 8人全員に勝ち抜けたらクリアのブラウザゲーム" />
-    <meta property="og:title" content="ファスペンと対決！" />
-    <meta property="og:description" content="カードの合計で勝負！ 8人全員に勝ち抜けたらクリアだよ" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集">
+    <meta property="og:title" content="ファスペンと対決！｜ファーストペンギン">
+    <meta property="og:description" content="8人のメンバーとカードで勝負！全員に勝ち抜け！ スマホですぐ遊べるブラウザゲーム！">
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/8ren-sheng-tiba-kikadogemu.html">
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/8ren-sheng-tiba-kikadogemu.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ファスペンと対決！｜ファーストペンギン">
+    <meta name="twitter:description" content="8人のメンバーとカードで勝負！全員に勝ち抜け！ スマホですぐ遊べるブラウザゲーム！">
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/8ren-sheng-tiba-kikadogemu.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=M+PLUS+Rounded+1c:wght@700;800&family=Noto+Sans+JP:wght@500;700;900&family=Shippori+Mincho:wght@700;800&display=swap" rel="stylesheet" />
@@ -1749,8 +1756,10 @@
         }
         function updateShareButtons() {
           var pageUrl = "https://1st-penguin1111.github.io/first-penguin-games/8ren-sheng-tiba-kikadogemu.html";
-          var resultText = wins >= TOTAL_ROUNDS ? "8人全員に勝ってクリア！" : (wins + "人抜き");
-          var shareText = "『ファスペンと対決！』で遊んだよ！（結果：" + resultText + "） #ファーストペンギン #ファスペンと対決";
+          var isClear = wins >= TOTAL_ROUNDS;
+          var resultText = isClear ? "8人全員に勝ってクリア！" : (wins + "人抜き");
+          var closingText = isClear ? "キミもクリアできる？" : "キミは何人まで勝てる？";
+          var shareText = "ファスペンと対決！｜" + resultText + "\n" + closingText + "\n#ファーストペンギン #ファスペンと対決";
           var xEl = el("share-x"), lineEl = el("share-line");
           if (xEl) xEl.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(pageUrl);
           if (lineEl) lineEl.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + pageUrl);
