@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集">
+    <meta property="og:title" content="ファスペンピンボール｜ファーストペンギン">
+    <meta property="og:description" content="はじけて楽しい、メンバーいっぱいのピンボール スマホですぐ遊べるブラウザゲーム！">
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/pinboru.html">
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/pinboru.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ファスペンピンボール｜ファーストペンギン">
+    <meta name="twitter:description" content="はじけて楽しい、メンバーいっぱいのピンボール スマホですぐ遊べるブラウザゲーム！">
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/pinboru.jpg">
     <link rel="icon" href="data:," />
     <title>ファスペンピンボール</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1960,7 +1970,7 @@
         html += '<figure class="'+(got ? "" : "miss")+'"><img src="'+m.img+'" alt="'+m.name+'" style="border:3px solid '+m.color+'"><figcaption>'+m.name+'<br>'+m.mark+'</figcaption></figure>';
       });
       $("res-grid").innerHTML = html;
-      var shareText = "『ファスペンピンボール』で遊んだよ！スコア" + fmt(G.score) + "点！称号は「" + titleFor(G.score) + "」だったよ #ファーストペンギン #ピンボール";
+      var shareText = "ファスペンピンボール｜スコア" + fmt(G.score) + "点！称号は「" + titleFor(G.score) + "」だったよ\nキミは超えられる？\n#ファーストペンギン #ピンボール";
       var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/pinboru.html";
       $("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
       $("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
