@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <meta name="robots" content="noindex, nofollow" />
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ファーストペンギン ゲーム集">
+<meta property="og:title" content="ファスペン風船ダーツ｜ファーストペンギン">
+<meta property="og:description" content="風船をねらってダーツを投げるスコアアタック スマホですぐ遊べるブラウザゲーム！">
+<meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/fuusendarts.html">
+<meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/fuusendarts.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ファスペン風船ダーツ｜ファーストペンギン">
+<meta name="twitter:description" content="風船をねらってダーツを投げるスコアアタック スマホですぐ遊べるブラウザゲーム！">
+<meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/fuusendarts.jpg">
 <link rel="icon" href="data:," />
 <title>ファスペン風船ダーツ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1376,7 +1386,7 @@ $("finalTotal").textContent = totalScore;
 $("rankTitle").textContent = rankFor(totalScore);
 (function () {
 var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/fuusendarts.html";
-var shareText = "『ファスペン風船ダーツ』で遊んだよ！合計" + totalScore + "点だった！称号は「" + rankFor(totalScore) + "」！ #ファーストペンギン #風船ダーツ";
+var shareText = "ファスペン風船ダーツ｜合計" + totalScore + "点・称号「" + rankFor(totalScore) + "」\nキミは超えられる？\n#ファーストペンギン #風船ダーツ";
 var xEl = $("shareX"), lineEl = $("shareLine");
 if (xEl) xEl.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
 if (lineEl) lineEl.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + " " + shareUrl);

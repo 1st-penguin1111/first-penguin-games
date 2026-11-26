@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex" />
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集">
+    <meta property="og:title" content="ぽむぽむスロー｜ファーストペンギン">
+    <meta property="og:description" content="ねらって投げて高得点を目指すスローゲーム スマホですぐ遊べるブラウザゲーム！">
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/pompomthrow.html">
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/pompomthrow.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ぽむぽむスロー｜ファーストペンギン">
+    <meta name="twitter:description" content="ねらって投げて高得点を目指すスローゲーム スマホですぐ遊べるブラウザゲーム！">
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/pompomthrow.jpg">
     <link rel="icon" href="data:," />
     <title>ぽむぽむスロー</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1173,7 +1183,7 @@ function showResult(){
       : "記録を保存したよ（プレイ " + saved.plays + "回目" + (saved.best ? " ／ ベスト " + saved.best : "") + "）";
   } else note.textContent = "";
   var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/pompomthrow.html";
-  var shareText = "『ぽむぽむスロー』で遊んだよ！スコア" + G.score + "点（ゴール" + G.goals + "/5本）🏀 #ファーストペンギン #ぽむぽむスロー";
+  var shareText = "ぽむぽむスロー｜スコア" + G.score + "点（ゴール" + G.goals + "/5本）🏀\nキミは超えられる？\n#ファーストペンギン #ぽむぽむスロー";
   $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
   $("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
   if (G.score >= 500){ confetti(); sFanfare(); }
