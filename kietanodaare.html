@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集" />
+    <meta property="og:title" content="ファスペンきえたのだあれ？｜ファーストペンギン" />
+    <meta property="og:description" content="消えたメンバーを当てる記憶パズルゲーム スマホですぐ遊べるブラウザゲーム！" />
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/kietanodaare.html" />
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/kietanodaare.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ファスペンきえたのだあれ？｜ファーストペンギン" />
+    <meta name="twitter:description" content="消えたメンバーを当てる記憶パズルゲーム スマホですぐ遊べるブラウザゲーム！" />
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/kietanodaare.jpg" />
     <link rel="icon" href="data:," />
     <title>ファスペンきえたのだあれ？</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -939,11 +949,11 @@
           sp.title = "第" + (i + 1) + "問";
           marks.appendChild(sp);
         });
-        var text = "「ファスペンきえたのだあれ？」で" + score + "点！称号は「" + rank + "」（正解 " + correctCount + "/10）だったよ👀";
+        var resultStr = score + "点！称号は「" + rank + "」（正解 " + correctCount + "/10）だったよ👀";
+        var text = "ファスペンきえたのだあれ？｜" + resultStr + "\nみんなもやってみてね！\n#ファーストペンギン #きえたのだあれ";
         var pageUrl = "https://1st-penguin1111.github.io/first-penguin-games/kietanodaare.html";
-        var full = text + " #ファーストペンギン #きえたのだあれ " + pageUrl;
-        $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(full);
-        $("shareLine").href = "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(pageUrl) + "&text=" + encodeURIComponent(text + " #ファーストペンギン #きえたのだあれ");
+        $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(pageUrl);
+        $("shareLine").href = "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(pageUrl) + "&text=" + encodeURIComponent(text + "\n" + pageUrl);
         showScreen("screen-result");
         sfxFanfare();
       }

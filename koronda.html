@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <meta name="robots" content="noindex, nofollow" />
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ファーストペンギン ゲーム集">
+<meta property="og:title" content="ペンギンさんがころんだ｜ファーストペンギン">
+<meta property="og:description" content="ペンギンの声に合わせて進む、だるまさんがころんだ対決 スマホですぐ遊べるブラウザゲーム！">
+<meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/koronda.html">
+<meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/koronda.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ペンギンさんがころんだ｜ファーストペンギン">
+<meta name="twitter:description" content="ペンギンの声に合わせて進む、だるまさんがころんだ対決 スマホですぐ遊べるブラウザゲーム！">
+<meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/koronda.jpg">
 <link rel="icon" href="data:," />
 <title>ペンギンさんがころんだ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1304,7 +1314,8 @@ function showResult(winRacer){
   } else {
     resultText = "アウトになっちゃった…";
   }
-  var shareText = "『ペンギンさんがころんだ』で遊んだよ！結果：" + resultText + " #ファーストペンギン #ペンギンさんがころんだ";
+  var isClearShare = !!(winRacer && winRacer.d.isPlayer);
+  var shareText = "ペンギンさんがころんだ｜" + resultText + "\n" + (isClearShare ? "キミもクリアできる？" : "みんなもやってみてね！") + "\n#ファーストペンギン #ペンギンさんがころんだ";
   var shareX = $("shareX"), shareLine = $("shareLine");
   if(shareX) shareX.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
   if(shareLine) shareLine.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);

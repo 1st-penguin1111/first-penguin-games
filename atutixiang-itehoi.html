@@ -9,8 +9,15 @@
     <title>あっち向いてホイ</title>
     <meta name="description" content="ファーストペンギンの8人と対決する「あっち向いてホイ」ゲーム。相手が顔を向ける方向を当てて、8人全員に勝ち抜けたらクリア！" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="あっち向いてホイ" />
-    <meta property="og:description" content="ファーストペンギンの8人と対決する「あっち向いてホイ」ゲーム。相手が顔を向ける方向を当てて、8人全員に勝ち抜けたらクリア！" />
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集" />
+    <meta property="og:title" content="あっち向いてホイ｜ファーストペンギン" />
+    <meta property="og:description" content="メンバー8人と勝負するあっち向いてホイ対決 スマホですぐ遊べるブラウザゲーム！" />
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/atutixiang-itehoi.html" />
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/atutixiang-itehoi.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="あっち向いてホイ｜ファーストペンギン" />
+    <meta name="twitter:description" content="メンバー8人と勝負するあっち向いてホイ対決 スマホですぐ遊べるブラウザゲーム！" />
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/atutixiang-itehoi.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=M+PLUS+Rounded+1c:wght@800&family=Noto+Sans+JP:wght@500;700;900&family=Shippori+Mincho:wght@700;800&display=swap" rel="stylesheet" />
@@ -1409,7 +1416,8 @@
         var SHARE_URL = "https://1st-penguin1111.github.io/first-penguin-games/atutixiang-itehoi.html";
         var shareResultText = "";
         function updateShareLinks() {
-          var text = "『あっち向いてホイ』で遊んだよ！" + shareResultText + " #ファーストペンギン #あっち向いてホイ";
+          var closing = (wins >= TOTAL_ROUNDS) ? "キミもクリアできる？" : "キミも勝てる？";
+          var text = "あっち向いてホイ｜" + shareResultText + "\n" + closing + "\n#ファーストペンギン #あっち向いてホイ";
           el("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(SHARE_URL);
           el("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(text + "\n" + SHARE_URL);
         }
