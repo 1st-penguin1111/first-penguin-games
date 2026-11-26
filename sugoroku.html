@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <meta name="robots" content="noindex, nofollow" />
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ファーストペンギン ゲーム集">
+<meta property="og:title" content="ファスペンすごろく｜ファーストペンギン">
+<meta property="og:description" content="47都道府県を回ってチャンネル登録者100万人を目指す、すごろくゲーム！ スマホですぐ遊べるブラウザゲーム！">
+<meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/sugoroku.html">
+<meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/sugoroku.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ファスペンすごろく｜ファーストペンギン">
+<meta name="twitter:description" content="47都道府県を回ってチャンネル登録者100万人を目指す、すごろくゲーム！ スマホですぐ遊べるブラウザゲーム！">
+<meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/sugoroku.jpg">
 <link rel="icon" href="data:," />
 <title>ファスペンすごろく</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1485,7 +1495,13 @@ function showResult(){
   })();
   /* share buttons: post text carries this run's actual result */
   var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/sugoroku.html";
-  var shareText = "『ファスペンすごろく』で遊んだよ！登録者100万人達成！（最終登録者" + fmt(state.subs) + "人／制覇 " + state.visitedCount + " / 47都道府県／サイコロ " + state.turns + "回／" + state.lap + "周） #ファーストペンギン #ファスペンすごろく";
+  var clearedRun = state.subs >= GOAL;
+  var resultPhrase = clearedRun
+    ? "登録者100万人達成！（最終登録者" + fmt(state.subs) + "人／制覇 " + state.visitedCount + " / 47都道府県／サイコロ " + state.turns + "回／" + state.lap + "周）"
+    : "登録者" + fmt(state.subs) + "人までいったよ！（制覇 " + state.visitedCount + " / 47都道府県／サイコロ " + state.turns + "回／" + state.lap + "周）";
+  var shareText = "ファスペンすごろく｜" + resultPhrase + "\n"
+    + (clearedRun ? "キミも100万人めざして遊んでみてね！" : "みんなも47都道府県を回ってみてね！") + "\n"
+    + "#ファーストペンギン #ファスペンすごろく";
   $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
   $("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
   $("gameScreen").classList.add("hidden");
