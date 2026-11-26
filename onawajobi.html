@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集" />
+    <meta property="og:title" content="ファスペン大縄跳び｜ファーストペンギン" />
+    <meta property="og:description" content="タイミングよくタップして、みんなで大縄跳びをとぼう！ スマホですぐ遊べるブラウザゲーム！" />
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/onawajobi.html" />
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/onawajobi.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ファスペン大縄跳び｜ファーストペンギン" />
+    <meta name="twitter:description" content="タイミングよくタップして、みんなで大縄跳びをとぼう！ スマホですぐ遊べるブラウザゲーム！" />
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/onawajobi.jpg" />
     <link rel="icon" href="data:," />
     <title>ファスペン大縄跳び</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1127,8 +1137,9 @@
         }
         /* share links carry this run's actual result */
         var shareText = clear
-          ? "『ファスペン大縄跳び』で遊んだよ！（結果：8人全員クリア！）"
-          : "『ファスペン大縄跳び』で遊んだよ！（結果：" + state.inCount + "人まで跳べた！）";
+          ? "ファスペン大縄跳び｜8人全員クリア！"
+          : "ファスペン大縄跳び｜" + state.inCount + "人まで跳べた！";
+        shareText += "\nキミは何回とべる？やってみてね！";
         shareText += " #ファーストペンギン #大縄跳び";
         var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/onawajobi.html";
         document.getElementById("share-x").href =
