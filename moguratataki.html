@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
 <meta name="robots" content="noindex, nofollow" />
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ファーストペンギン ゲーム集">
+<meta property="og:title" content="ファスペンもぐらたたき｜ファーストペンギン">
+<meta property="og:description" content="出てきたメンバーをたたく30秒のもぐらたたきゲーム スマホですぐ遊べるブラウザゲーム！">
+<meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/moguratataki.html">
+<meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/moguratataki.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ファスペンもぐらたたき｜ファーストペンギン">
+<meta name="twitter:description" content="出てきたメンバーをたたく30秒のもぐらたたきゲーム スマホですぐ遊べるブラウザゲーム！">
+<meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/moguratataki.jpg">
 <link rel="icon" href="data:," />
 <title>ファスペンもぐらたたき</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1428,9 +1438,9 @@
     var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/moguratataki.html";
     var shareText;
     if(isRace()){
-      shareText = "『ファスペンもぐらたたき』で遊んだよ！2000点タイムアタックを" + fmtTime(clearTime) + "秒でクリア、称号「" + titleName + "」だったよ！ #ファーストペンギン #もぐらたたき";
+      shareText = "ファスペンもぐらたたき｜2000点タイムアタックを" + fmtTime(clearTime) + "秒でクリア、称号「" + titleName + "」だったよ！\n記録ぬりかえられる？\n#ファーストペンギン #もぐらたたき";
     } else {
-      shareText = "『ファスペンもぐらたたき』で遊んだよ！30秒スコアアタックで" + score + "点、称号「" + titleName + "」だったよ！ #ファーストペンギン #もぐらたたき";
+      shareText = "ファスペンもぐらたたき｜30秒スコアアタックで" + score + "点、称号「" + titleName + "」だったよ！\n記録ぬりかえられる？\n#ファーストペンギン #もぐらたたき";
     }
     $("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
     $("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
