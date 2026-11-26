@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
     <meta name="robots" content="noindex" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集" />
+    <meta property="og:title" content="コードあて｜ファーストペンギン" />
+    <meta property="og:description" content="かくれた4ケタの数字を推理して当てる頭脳ゲーム スマホですぐ遊べるブラウザゲーム！" />
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/codeate.html" />
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/codeate.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="コードあて｜ファーストペンギン" />
+    <meta name="twitter:description" content="かくれた4ケタの数字を推理して当てる頭脳ゲーム スマホですぐ遊べるブラウザゲーム！" />
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/codeate.jpg" />
     <link rel="icon" href="data:," />
     <title>コードあて</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1291,8 +1301,8 @@
         $("reveal-opp").textContent = G.oppCode.join("");
         var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/codeate.html";
         var shareText = won
-          ? "『コードあて』で " + G.opp.name + " に勝利！ " + G.myTurns + "ターンでコードを当てたよ！ #ファーストペンギン #コードあて"
-          : "『コードあて』で " + G.opp.name + " と対戦したよ！ 次は勝つぞ！ #ファーストペンギン #コードあて";
+          ? "コードあて｜" + G.opp.name + " に勝利！ " + G.myTurns + "ターンでコードを当てたよ！\nキミは当てられる？\n#ファーストペンギン #コードあて"
+          : "コードあて｜" + G.opp.name + " と対戦したよ！ 次は勝つぞ！\nキミは当てられる？\n#ファーストペンギン #コードあて";
         $("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
         $("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
         if (won) seWin(); else seLose();
