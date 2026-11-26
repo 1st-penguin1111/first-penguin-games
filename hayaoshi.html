@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集" />
+    <meta property="og:title" content="早押しペンギン｜ファーストペンギン" />
+    <meta property="og:description" content="お題が出たら一番早くボタンを押す反射神経バトル スマホですぐ遊べるブラウザゲーム！" />
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/hayaoshi.html" />
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/hayaoshi.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="早押しペンギン｜ファーストペンギン" />
+    <meta name="twitter:description" content="お題が出たら一番早くボタンを押す反射神経バトル スマホですぐ遊べるブラウザゲーム！" />
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/hayaoshi.jpg" />
     <link rel="icon" href="data:," />
     <title>早押しペンギン</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -884,10 +894,11 @@
       var PAGE_URL = "https://1st-penguin1111.github.io/first-penguin-games/hayaoshi.html";
       function shareText() {
         var best = S._myBest != null ? "最速反応" + S._myBest + "ms！" : "";
-        var head = S.champion && S.champion.id === "player"
-          ? "「早押しペンギン」で優勝したよ！🏆 "
-          : "「早押しペンギン」で" + S.myRank + "位だったよ！ ";
-        return head + best + "フェイントにだまされずに押せるかな？ #ファーストペンギン #早押しペンギン";
+        var result = S.champion && S.champion.id === "player"
+          ? "優勝したよ！🏆"
+          : S.myRank + "位だったよ！";
+        if (best) result += " " + best;
+        return "早押しペンギン｜" + result + "\n記録ぬりかえられる？\n#ファーストペンギン #早押しペンギン";
       }
       function shareX() {
         var url = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText()) + "&url=" + encodeURIComponent(PAGE_URL);

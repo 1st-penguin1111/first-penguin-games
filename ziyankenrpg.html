@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light" />
 <meta name="robots" content="noindex, nofollow" />
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ファーストペンギン ゲーム集">
+<meta property="og:title" content="ジャンケンRPG｜ファーストペンギン">
+<meta property="og:description" content="ジャンケンの勝ち負けで技が決まるRPGバトル スマホですぐ遊べるブラウザゲーム！">
+<meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/ziyankenrpg.html">
+<meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/ziyankenrpg.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ジャンケンRPG｜ファーストペンギン">
+<meta name="twitter:description" content="ジャンケンの勝ち負けで技が決まるRPGバトル スマホですぐ遊べるブラウザゲーム！">
+<meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/ziyankenrpg.jpg">
 <link rel="icon" href="data:," />
 <title>ジャンケンRPG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2700,7 +2710,7 @@ if (clear) shareResult = "邪悪なペンギンを倒してクリア！";
 else if (bossMode) shareResult = "ラスボス戦モードで邪悪なペンギンに挑戦したよ！";
 else if (beatenCount() > 0) shareResult = beatenCount() + "人たおしたよ！";
 else shareResult = "バトルに挑戦したよ！";
-var shareText = "『ジャンケンRPG』で遊んだよ！（結果：" + shareResult + "） #ファーストペンギン #ジャンケンRPG";
+var shareText = "ジャンケンRPG｜" + shareResult + "\n" + (clear ? "キミもクリアできる？" : "冒険してみてね！") + "\n#ファーストペンギン #ジャンケンRPG";
 var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/ziyankenrpg.html";
 $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
 $("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
