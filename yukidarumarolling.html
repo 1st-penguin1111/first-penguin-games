@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集">
+    <meta property="og:title" content="雪だるまローリング｜ファーストペンギン">
+    <meta property="og:description" content="目標サイズを覚えて雪玉を転がし、ピッタリの雪だるまを作るゲーム！ スマホですぐ遊べるブラウザゲーム！">
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/yukidarumarolling.html">
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/yukidarumarolling.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="雪だるまローリング｜ファーストペンギン">
+    <meta name="twitter:description" content="目標サイズを覚えて雪玉を転がし、ピッタリの雪だるまを作るゲーム！ スマホですぐ遊べるブラウザゲーム！">
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/yukidarumarolling.jpg">
     <link rel="icon" href="data:," />
     <title>雪だるまローリング</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1170,7 +1180,7 @@
         var resultText = myRank === 1
           ? "1位！誤差" + fmt(myErr) + "cmで優勝だった！"
           : myRank + "位！誤差" + fmt(myErr) + "cmだった！";
-        var shareText = "『雪だるまローリング』で遊んだよ！" + resultText + " #ファーストペンギン #雪だるまローリング";
+        var shareText = "雪だるまローリング｜" + resultText + "\nキミは誤差何cmで作れる？やってみてね！\n#ファーストペンギン #雪だるまローリング";
         var shareX = $("share-x"), shareLine = $("share-line");
         if (shareX) shareX.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
         if (shareLine) shareLine.href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
