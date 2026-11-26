@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集" />
+    <meta property="og:title" content="ファスペン神経衰弱｜ファーストペンギン" />
+    <meta property="og:description" content="8人のペアをそろえるメモリーゲーム スマホですぐ遊べるブラウザゲーム！" />
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/shinkeisuijaku.html" />
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/shinkeisuijaku.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ファスペン神経衰弱｜ファーストペンギン" />
+    <meta name="twitter:description" content="8人のペアをそろえるメモリーゲーム スマホですぐ遊べるブラウザゲーム！" />
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/shinkeisuijaku.jpg" />
     <link rel="icon" href="data:," />
     <title>ファスペン神経衰弱</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1063,7 +1073,7 @@
               : (scores.you < scores.cpu
                 ? "対戦モードで" + scores.you + "点で負けちゃった…（CPU " + scores.cpu + "点）"
                 : "対戦モードで" + scores.you + "点で引き分け！");
-            setShareLinks("『ファスペン神経衰弱』で遊んだよ！（結果：" + vsResult + "） #ファーストペンギン #神経衰弱");
+            setShareLinks("ファスペン神経衰弱｜" + vsResult + "\nみんなもやってみてね！\n#ファーストペンギン #神経衰弱");
             var html = "";
             [["あなた", gotBy.you], ["CPU", gotBy.cpu]].forEach(function (side) {
               html += '<div class="side-head">' + side[0] + 'がゲット</div>';
@@ -1094,7 +1104,7 @@
             $("end-ta-flips").textContent = flips;
             $("end-ta-star").innerHTML = "⭐ スターカードは「" + memberById[special.star].name + "」だったよ！<br />🔀 シャッフルカードは「" + memberById[special.shuffle].name + "」だったよ";
             var taSeconds = Math.floor(elapsed / 1000);
-            setShareLinks("『ファスペン神経衰弱』で遊んだよ！（結果：タイムアタック " + fmtTime(elapsed) + "（" + taSeconds + "秒）で全8ペアクリア！ めくり" + flips + "回） #ファーストペンギン #神経衰弱");
+            setShareLinks("ファスペン神経衰弱｜タイムアタック " + fmtTime(elapsed) + "（" + taSeconds + "秒）で全8ペアクリア！ めくり" + flips + "回\nみんなもやってみてね！\n#ファーストペンギン #神経衰弱");
           }
           show("end");
         }, 900);
@@ -1287,7 +1297,7 @@
         bgmUpdateBtn();
       });
 
-      setShareLinks("『ファスペン神経衰弱』で遊んだよ！ #ファーストペンギン #神経衰弱");
+      setShareLinks("ファスペン神経衰弱｜8人のペアをそろえるメモリーゲーム\nみんなもやってみてね！\n#ファーストペンギン #神経衰弱");
       renderRecordPanel();
 
       /* ================= wiring ================= */

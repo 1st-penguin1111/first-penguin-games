@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集">
+    <meta property="og:title" content="おやつは500円！｜ファーストペンギン">
+    <meta property="og:description" content="500円でおやつを選ぶ、ほのぼのお買い物ゲーム スマホですぐ遊べるブラウザゲーム！">
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/oyatsu500.html">
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/oyatsu500.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="おやつは500円！｜ファーストペンギン">
+    <meta name="twitter:description" content="500円でおやつを選ぶ、ほのぼのお買い物ゲーム スマホですぐ遊べるブラウザゲーム！">
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/oyatsu500.jpg">
     <link rel="icon" href="data:," />
     <title>おやつは500円！</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -926,7 +936,7 @@
         else if (out) resultText = "合計" + total + "円でオーバーしちゃった…";
         else if (total === 500) resultText = "合計500円ぴったり！かんぺきだった！";
         else resultText = "合計" + total + "円！500円まであと" + (500 - total) + "円だった！";
-        var shareText = "『おやつは500円！』で遊んだよ！" + resultText + " #ファーストペンギン #おやつは500円";
+        var shareText = "おやつは500円！｜" + resultText + "\nキミも買ってみてね！\n#ファーストペンギン #おやつは500円";
         var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/oyatsu500.html";
         $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
         $("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);

@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集" />
+    <meta property="og:title" content="ファスペンスカイジャンプ｜ファーストペンギン" />
+    <meta property="og:description" content="タイミングよく飛んでアイテムを集めるジャンプゲーム スマホですぐ遊べるブラウザゲーム！" />
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/sukaijanpu.html" />
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/sukaijanpu.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ファスペンスカイジャンプ｜ファーストペンギン" />
+    <meta name="twitter:description" content="タイミングよく飛んでアイテムを集めるジャンプゲーム スマホですぐ遊べるブラウザゲーム！" />
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/sukaijanpu.jpg" />
     <link rel="icon" href="data:," />
     <title>ファスペン スカイジャンプ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1626,9 +1636,10 @@ function showResult(){
   renderRecordDisplay(savedRec);
   /* share buttons: post text carries this run's result */
   var GAME_URL="https://1st-penguin1111.github.io/first-penguin-games/sukaijanpu.html";
-  var shareText = G.sunk
-    ? "『ファスペン スカイジャンプ』で遊んだよ！結果：" + fmtDist(d) + "で海にドボン…🌊 #ファーストペンギン #スカイジャンプ"
-    : "『ファスペン スカイジャンプ』で遊んだよ！結果：" + fmtDist(d) + "飛んだ！（" + rankTitle(d) + "） #ファーストペンギン #スカイジャンプ";
+  var shareText = "ファスペンスカイジャンプ｜" + (G.sunk
+    ? fmtDist(d) + "で海にドボン…🌊"
+    : fmtDist(d) + "飛んだ！（" + rankTitle(d) + "）")
+    + "\n記録ぬりかえられる？\n#ファーストペンギン #スカイジャンプ";
   $("shareX").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(GAME_URL);
   $("shareLine").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + GAME_URL);
   stage.classList.add("hidden");
