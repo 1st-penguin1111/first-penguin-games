@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集">
+    <meta property="og:title" content="ファスペン数字タップ｜ファーストペンギン">
+    <meta property="og:description" content="1から25まで順番にタップ！速さを競うタイムアタックゲーム。 スマホですぐ遊べるブラウザゲーム！">
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/suujitap.html">
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/suujitap.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ファスペン数字タップ｜ファーストペンギン">
+    <meta name="twitter:description" content="1から25まで順番にタップ！速さを競うタイムアタックゲーム。 スマホですぐ遊べるブラウザゲーム！">
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/suujitap.jpg">
     <link rel="icon" href="data:," />
     <title>ファスペン数字タップ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -996,7 +1006,7 @@
 
           // シェアボタン（結果を入れた投稿文を動的にセット）
           var shareUrl = "https://1st-penguin1111.github.io/first-penguin-games/suujitap.html";
-          var shareText = "『ファスペン数字タップ』で遊んだよ！" + fmt(total) + "秒でクリア！称号「" + rankFor(total) + "」！ミス" + misses + "回だったよ #ファーストペンギン #数字タップ";
+          var shareText = "ファスペン数字タップ｜" + fmt(total) + "秒でクリア！称号「" + rankFor(total) + "」！ミス" + misses + "回\nキミは何秒でタップできる？\n#ファーストペンギン #数字タップ";
           document.getElementById("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(shareUrl);
           document.getElementById("share-line").href = "https://line.me/R/msg/text/?" + encodeURIComponent(shareText + "\n" + shareUrl);
 
