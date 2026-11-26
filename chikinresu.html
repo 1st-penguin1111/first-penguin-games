@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集">
+    <meta property="og:title" content="ペンギンチキンレース｜ファーストペンギン">
+    <meta property="og:description" content="120mコースでギリギリを攻めるチキンレース スマホですぐ遊べるブラウザゲーム！">
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/chikinresu.html">
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/chikinresu.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ペンギンチキンレース｜ファーストペンギン">
+    <meta name="twitter:description" content="120mコースでギリギリを攻めるチキンレース スマホですぐ遊べるブラウザゲーム！">
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/chikinresu.jpg">
     <link rel="icon" href="data:," />
     <title>ペンギンチキンレース</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1166,7 +1176,7 @@
         } else {
           shareResult = '崖まであと ' + remain.toFixed(2) + 'm！ ' + rank + '！';
         }
-        var shareText = '『ペンギンチキンレース』で遊んだよ！' + shareResult + ' #ファーストペンギン #チキンレース';
+        var shareText = 'ペンギンチキンレース｜' + shareResult + '\nキミはどこまで攻められる？\n#ファーストペンギン #チキンレース';
         $('shareX').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText) + '&url=' + encodeURIComponent(gameUrl);
         $('shareLine').href = 'https://line.me/R/msg/text/?' + encodeURIComponent(shareText + '\n' + gameUrl);
 
