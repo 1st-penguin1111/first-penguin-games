@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ファーストペンギン ゲーム集">
+    <meta property="og:title" content="ペンギン氷渡り｜ファーストペンギン">
+    <meta property="og:description" content="氷の上を進んでゴールを目指すペンギンの冒険 スマホですぐ遊べるブラウザゲーム！">
+    <meta property="og:url" content="https://1st-penguin1111.github.io/first-penguin-games/kooriwatari.html">
+    <meta property="og:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/kooriwatari.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ペンギン氷渡り｜ファーストペンギン">
+    <meta name="twitter:description" content="氷の上を進んでゴールを目指すペンギンの冒険 スマホですぐ遊べるブラウザゲーム！">
+    <meta name="twitter:image" content="https://1st-penguin1111.github.io/first-penguin-games/thumbs/kooriwatari.jpg">
     <link rel="icon" href="data:," />
     <title>ペンギン氷渡り</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1383,7 +1393,7 @@
         });
         document.getElementById("met-none").classList.toggle("hidden", metList.length > 0);
         var gameUrl = "https://1st-penguin1111.github.io/first-penguin-games/kooriwatari.html";
-        var shareText = "『ペンギン氷渡り』で遊んだよ！" + finalDist.toFixed(1) + "m進んだ！称号「" + titleFor(finalDist) + "」！渡った氷は" + count + "枚！ #ファーストペンギン #氷渡り";
+        var shareText = "ペンギン氷渡り｜" + finalDist.toFixed(1) + "m進んだ！称号「" + titleFor(finalDist) + "」！渡った氷は" + count + "枚！\nキミも渡りきれる？\n#ファーストペンギン #氷渡り";
         var shareX = document.getElementById("share-x");
         if (shareX) shareX.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareText) + "&url=" + encodeURIComponent(gameUrl);
         var shareLine = document.getElementById("share-line");
